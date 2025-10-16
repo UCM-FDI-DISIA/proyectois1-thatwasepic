@@ -1,180 +1,309 @@
 {% extends "base.html" %}
 
 {% block content %}
-<!-- Hero Section Futurista -->
-<section class="hero-section">
+<!-- separador para que el header fijo no tape el contenido -->
+<div class="header-spacer" style="height: 80px;"></div>
+
+<!-- Sección de juegos -->
+<section class="games-section">
     <div class="container">
-        <div class="hero-content">
-            <!-- Logo Principal Animado -->
-            <div class="mb-5 hologram-float">
-                <div class="display-1 mb-4" style="font-size: 6rem;">
-                    <i class="fas fa-gamepad"></i>
-                </div>
-                <h1 class="hero-title">
-                    CASINO<span style="color: var(--neon-cyan)"> EDUCATIVO</span>
-                </h1>
-                <p class="hero-subtitle">
-                    PLATAFORMA DE APRENDIZAJE INTERACTIVO
-                </p>
-            </div>
+        <h2 class="section-title">Nuestros Juegos</h2>
+        <div class="games-grid">
 
-            <!-- Cards de Acción Holográficas -->
-            <div class="row justify-content-center g-5">
-                <div class="col-lg-5 col-md-6">
-                    <div class="card game-card hologram-float">
-                        <div class="card-body d-flex flex-column p-4">
-                            <div class="display-3 text-gradient mb-4">
-                                <i class="fas fa-user-astronaut"></i>
-                            </div>
-                            <h3 class="card-title">INICIAR SESIÓN</h3>
-                            <p class="card-text flex-grow-1">
-                                Accede al sistema con tus credenciales de usuario y sumérgete en la experiencia educativa .
-                            </p>
-                            <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg mt-3">
-                                <i class="fas fa-sign-in-alt me-2"></i>CONECTAR SISTEMA
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-lg-5 col-md-6">
-                    <div class="card game-card hologram-float" style="animation-delay: 0.5s">
-                        <div class="card-body d-flex flex-column p-4">
-                            <div class="display-3 text-gradient mb-4">
-                                <i class="fas fa-user-plus"></i>
-                            </div>
-                            <h3 class="card-title">REGISTRO DE USUARIO</h3>
-                            <p class="card-text flex-grow-1">
-                                Crea tu identidad digital y recibe $1,000 de crédito inicial para explorar el ecosistema educativo.
-                            </p>
-                            <a href="{{ url_for('register') }}" class="btn btn-success btn-lg mt-3">
-                                <i class="fas fa-rocket me-2"></i>ACTIVAR CUENTA
-                            </a>
-                        </div>
-                    </div>
+            <!-- Blackjack -->
+            <div class="game-card" data-game="blackjack">
+                <img src="{{ url_for('static', filename='img/blackjack.jpeg') }}" alt="Blackjack" class="game-image">
+                <div class="game-content">
+                    <h3 class="game-title">Blackjack</h3>
+                    <p class="game-description">
+                        Blackjack: el clásico juego de cartas donde el objetivo es alcanzar 21 sin pasarse. Demuestra tu estrategia y reta al crupier en cada mano. ♠️♦️
+                    </p>
                 </div>
             </div>
 
-            <!-- Información del Sistema -->
-            <div class="row mt-6 pt-5">
-                <div class="col-12">
-                    <div class="card cyber-grid" style="border: 2px solid var(--neon-purple);">
-                        <div class="card-body text-center p-5">
-                            <h3 class="text-gradient mb-4" style="font-family: 'Orbitron', monospace;">
-                                <i class="fas fa-brain me-2"></i>SISTEMA EDUCATIVO 
-                            </h3>
-                            <div class="row align-items-center">
-                                <div class="col-lg-3 col-md-6 mb-4">
-                                    <i class="fas fa-shield-alt text-warning display-4 mb-3"></i>
-                                    <h5 class="text-white">ENTORNO SEGURO</h5>
-                                    <small class="text-muted">Tecnología blockchain educativa</small>
-                                </div>
-                                <div class="col-lg-3 col-md-6 mb-4">
-                                    <i class="fas fa-chart-network text-success display-4 mb-3"></i>
-                                    <h5 class="text-white">ANÁLISIS EN TIEMPO REAL</h5>
-                                    <small class="text-muted">Estadísticas </small>
-                                </div>
-                                <div class="col-lg-3 col-md-6 mb-4">
-                                    <i class="fas fa-vr-cardboard text-info display-4 mb-3"></i>
-                                    <h5 class="text-white">EXPERIENCIA INMERSIVA</h5>
-                                    <small class="text-muted">Interfaz holográfica 3D</small>
-                                </div>
-                                <div class="col-lg-3 col-md-6 mb-4">
-                                    <i class="fas fa-robot text-danger display-4 mb-3"></i>
-                                    <h5 class="text-white">IA EDUCATIVA</h5>
-                                    <small class="text-muted">Algoritmos de aprendizaje</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Coinflip -->
+            <div class="game-card" data-game="coinflip">
+                <img src="{{ url_for('static', filename='img/coinflip.jpeg') }}" alt="Coinflip" class="game-image">
+                <div class="game-content">
+                    <h3 class="game-title">Coinflip</h3>
+                    <p class="game-description">
+                        Coinflip: un juego rápido y emocionante donde apuestas por cara o cruz. Simple pero lleno de adrenalina: elige tu lado, mira girar la moneda y descubre si la suerte está de tu parte. Perfecto para quienes buscan acción instantánea y resultados al momento.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Poker -->
+            <div class="game-card" data-game="poker">
+                <img src="{{ url_for('static', filename='img/poker.jpeg') }}" alt="Poker" class="game-image">
+                <div class="game-content">
+                    <h3 class="game-title">Poker</h3>
+                    <p class="game-description">
+                        Poker: el legendario juego de estrategia, habilidad y nervios de acero. Forma la mejor mano posible, apuesta con inteligencia y lee a tus oponentes para llevarte el bote. Ideal para quienes disfrutan de la táctica y el desafío mental en cada ronda. ♣️♥️
+                    </p>
+                </div>
+            </div>
+
+            <!-- Carreras de Caballos -->
+            <div class="game-card" data-game="horseracing">
+                <img src="{{ url_for('static', filename='img/caballos.jpeg') }}" alt="Carreras de Caballos" class="game-image">
+                <div class="game-content">
+                    <h3 class="game-title">Carreras de Caballos</h3>
+                    <p class="game-description">
+                        Carrera de Caballos: vive la emoción de las pistas apostando por tu corcel favorito. Observa la intensidad de cada tramo, siente la adrenalina en la recta final y celebra la victoria cuando tu caballo cruza la meta. 🏇💨
+                    </p>
+                </div>
+            </div>
+
+            <!-- Tragaperras -->
+            <div class="game-card" data-game="slots">
+                <img src="{{ url_for('static', filename='img/slots.jpeg') }}" alt="Tragaperras" class="game-image">
+                <div class="game-content">
+                    <h3 class="game-title">Tragaperras</h3>
+                    <p class="game-description">
+                        Tragaperras: el clásico de los casinos reinventado. Gira los rodillos, combina símbolos y descubre premios sorprendentes. Colores, sonido y emoción en cada tirada… ¡la suerte podría cambiarte en un segundo! 🎰✨
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Efectos de Partículas -->
-<div class="particles-container">
-    <div class="particle" style="top: 20%; left: 10%; animation-delay: 0s;"></div>
-    <div class="particle" style="top: 60%; left: 80%; animation-delay: 1s;"></div>
-    <div class="particle" style="top: 40%; left: 50%; animation-delay: 2s;"></div>
-    <div class="particle" style="top: 80%; left: 30%; animation-delay: 3s;"></div>
+<!-- Sección de desafío -->
+<section class="challenge-section">
+    <div class="container">
+        <h2 class="challenge-title">¿Desafías al azar?</h2>
+        <p class="challenge-subtitle">
+            Únete a nuestra plataforma y descubre la emoción de nuestros juegos. Regístrate ahora y recibe crédito inicial para comenzar.
+        </p>
+        <a href="{{ url_for('register') }}" class="btn btn-challenge">Registrarse Ahora</a>
+    </div>
+</section>
+
+<!-- Modal para descripción de juegos -->
+<div class="modal" id="gameModal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h3 class="modal-title" id="modalGameTitle">Juego</h3>
+        <p class="modal-description" id="modalGameDescription">Descripción del juego.</p>
+    </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-// Efectos de entrada futuristas
-document.addEventListener('DOMContentLoaded', function() {
-    // Animación de tipo matrix para el título
-    const title = document.querySelector('.hero-title');
-    const originalText = title.textContent;
-    title.textContent = '';
-    
-    let i = 0;
-    const typeWriter = setInterval(() => {
-        if (i < originalText.length) {
-            title.textContent += originalText.charAt(i);
-            i++;
-        } else {
-            clearInterval(typeWriter);
-        }
-    }, 100);
-
-    // Efecto de partículas dinámicas
-    createParticles();
-});
-
-function createParticles() {
-    const container = document.querySelector('.particles-container');
-    const colors = ['var(--neon-cyan)', 'var(--neon-pink)', 'var(--neon-green)', 'var(--neon-orange)'];
-    
-    for (let i = 0; i < 15; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        particle.style.cssText = `
-            position: fixed;
-            width: ${Math.random() * 6 + 2}px;
-            height: ${Math.random() * 6 + 2}px;
-            background: ${colors[Math.floor(Math.random() * colors.length)]};
-            border-radius: 50%;
-            top: ${Math.random() * 100}%;
-            left: ${Math.random() * 100}%;
-            animation: floatParticles ${Math.random() * 20 + 10}s infinite linear;
-            box-shadow: 0 0 10px currentColor;
-            z-index: -1;
-        `;
-        container.appendChild(particle);
-    }
-}
-</script>
 
 <style>
-.particles-container {
+/* ==== SECCIÓN DE JUEGOS CON TUS COLORES EXACTOS ==== */
+.games-section {
+    padding: 40px 0;
+    min-height: 100vh;
+}
+
+.section-title {
+    color: #00f3ff;
+    text-align: center;
+    margin-bottom: 40px;
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px #00f3ff;
+}
+
+.games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+}
+
+.game-card {
+    background: rgba(30, 30, 50, 0.8);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(0, 243, 255, 0.3);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.game-card:hover {
+    transform: translateY(-5px);
+    border-color: #00f3ff;
+    box-shadow: 0 5px 20px rgba(0, 243, 255, 0.3);
+}
+
+.game-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+}
+
+.game-content {
+    padding: 20px;
+}
+
+.game-title {
+    color: #00f3ff;
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.game-description {
+    color: #b0b0ff;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* ==== SECCIÓN DESAFÍO CON TUS COLORES EXACTOS ==== */
+.challenge-section {
+    padding: 60px 0;
+    text-align: center;
+    background: rgba(0, 243, 255, 0.05);
+}
+
+.challenge-title {
+    color: #ff00ff;
+    font-size: 2rem;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px #ff00ff;
+}
+
+.challenge-subtitle {
+    color: #b0b0ff;
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.btn-challenge {
+    background: linear-gradient(45deg, #ff00ff, #8a2be2);
+    color: white;
+    padding: 12px 30px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 600;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-challenge:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+}
+
+/* ==== MODAL CON TUS COLORES EXACTOS ==== */
+.modal {
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    pointer-events: none;
-    z-index: -1;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
 }
 
-.hero-section {
-    background: 
-        radial-gradient(ellipse at 50% 50%, rgba(0, 243, 255, 0.1) 0%, transparent 60%),
-        radial-gradient(ellipse at 80% 20%, rgba(255, 0, 255, 0.1) 0%, transparent 60%);
+.modal-content {
+    background: rgba(30, 30, 50, 0.95);
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 500px;
+    width: 90%;
+    border: 1px solid #00f3ff;
+    box-shadow: 0 0 30px #00f3ff;
+    position: relative;
 }
 
-.mt-6 {
-    margin-top: 5rem !important;
+.close-modal {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 1.5rem;
+    color: #00f3ff;
+    cursor: pointer;
+    transition: color 0.3s ease;
 }
 
-.text-gradient {
-    background: var(--gradient-sunset);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+.close-modal:hover {
+    color: #ff00ff;
+}
+
+.modal-title {
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+    color: #00f3ff;
+}
+
+.modal-description {
+    color: #b0b0ff;
+    line-height: 1.6;
+    font-size: 1rem;
+}
+
+/* ==== RESPONSIVE ==== */
+@media (max-width: 768px) {
+    .games-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .section-title {
+        font-size: 2rem;
+    }
+    
+    .challenge-title {
+        font-size: 1.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .games-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .section-title {
+        font-size: 1.8rem;
+    }
 }
 </style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Modal de descripción - MECÁNICA FUNCIONAL
+    const modal = document.getElementById('gameModal');
+    const modalTitle = document.getElementById('modalGameTitle');
+    const modalDescription = document.getElementById('modalGameDescription');
+    const closeModal = document.querySelector('.close-modal');
+    const gameCards = document.querySelectorAll('.game-card');
+
+    // Descripciones completas para cada juego
+    const gameDescriptions = {
+        'blackjack': 'Blackjack: el clásico juego de cartas donde el objetivo es alcanzar 21 sin pasarse. Demuestra tu estrategia y reta al crupier en cada mano. ♠️♦️',
+        'coinflip': 'Coinflip: un juego rápido y emocionante donde apuestas por cara o cruz. Simple pero lleno de adrenalina: elige tu lado, mira girar la moneda y descubre si la suerte está de tu parte. Perfecto para quienes buscan acción instantánea y resultados al momento.',
+        'poker': 'Poker: el legendario juego de estrategia, habilidad y nervios de acero. Forma la mejor mano posible, apuesta con inteligencia y lee a tus oponentes para llevarte el bote. Ideal para quienes disfrutan de la táctica y el desafío mental en cada ronda. ♣️♥️',
+        'horseracing': 'Carrera de Caballos: vive la emoción de las pistas apostando por tu corcel favorito. Observa la intensidad de cada tramo, siente la adrenalina en la recta final y celebra la victoria cuando tu caballo cruza la meta. 🏇💨',
+        'slots': 'Tragaperras: el clásico de los casinos reinventado. Gira los rodillos, combina símbolos y descubre premios sorprendentes. Colores, sonido y emoción en cada tirada… ¡la suerte podría cambiarte en un segundo! 🎰✨'
+    };
+
+    gameCards.forEach(card => {
+        card.addEventListener('click', () => {
+            const gameName = card.getAttribute('data-game');
+            const gameTitle = card.querySelector('.game-title').textContent;
+            
+            modalTitle.textContent = gameTitle;
+            modalDescription.textContent = gameDescriptions[gameName] || 'Descripción no disponible.';
+            modal.style.display = 'flex';
+        });
+    });
+
+    closeModal.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    window.addEventListener('click', e => {
+        if (e.target === modal) modal.style.display = 'none';
+    });
+</script>
 {% endblock %}
