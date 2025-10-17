@@ -17,7 +17,7 @@ Según vayamos avanzando en el proyecto, seguiremos implementando historias de u
 
 Un logo provisional para la aplicación es el siguiente:
 
-<img width="1024" height="1024" alt="logocasino" src="https://github.com/user-attachments/assets/e9a87fa8-99a8-448c-b2a3-dc86ed6e4d6e" />
+<img width="512" height="512" alt="logocasino" src="https://github.com/user-attachments/assets/e9a87fa8-99a8-448c-b2a3-dc86ed6e4d6e" />
 
 ---
 
