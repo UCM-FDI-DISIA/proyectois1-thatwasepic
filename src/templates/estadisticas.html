@@ -1,0 +1,423 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2>📊 Tus Estadísticas</h2>
+                <p class="text-muted">Resumen de tu actividad en el casino</p>
+            </div>
+            <div>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary me-2">
+                    ← Volver al Dashboard
+                </a>
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalFondos">
+                    💰 Agregar Fondos
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Resumen General -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>📈 Resumen General</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <h4 id="total-partidas">
+                            {% set ns = namespace(total_partidas=0) %}
+                            {% for stat in stats %}
+                                {% set ns.total_partidas = ns.total_partidas + stat.partidas_jugadas %}
+                            {% endfor %}
+                            {{ ns.total_partidas }}
+                        </h4>
+                        <p class="text-muted">Total Partidas</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h4 class="text-success" id="total-victorias">
+                            {% set ns = namespace(total_victorias=0) %}
+                            {% for stat in stats %}
+                                {% set ns.total_victorias = ns.total_victorias + stat.partidas_ganadas %}
+                            {% endfor %}
+                            {{ ns.total_victorias }}
+                        </h4>
+                        <p class="text-muted">Victorias</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h4 id="ratio-victoria">
+                            {% set ns = namespace(total_partidas=0, total_victorias=0) %}
+                            {% for stat in stats %}
+                                {% set ns.total_partidas = ns.total_partidas + stat.partidas_jugadas %}
+                                {% set ns.total_victorias = ns.total_victorias + stat.partidas_ganadas %}
+                            {% endfor %}
+                            {% if ns.total_partidas > 0 %}
+                                {{ "%.1f"|format((ns.total_victorias / ns.total_partidas) * 100) }}%
+                            {% else %}
+                                0%
+                            {% endif %}
+                        </h4>
+                        <p class="text-muted">Ratio Victoria</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h4 class="{% set ns = namespace(total_ganancia=0) %}{% for stat in stats %}{% set ns.total_ganancia = ns.total_ganancia + stat.ganancia_total %}{% endfor %}{% if ns.total_ganancia >= 0 %}text-success{% else %}text-danger{% endif %}" id="total-ganancia">
+                            ${{ "%.2f"|format(ns.total_ganancia) }}
+                        </h4>
+                        <p class="text-muted">Ganancia Total</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para agregar fondos -->
+<div class="modal fade" id="modalFondos" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Agregar Fondos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="cantidad_estadisticas" class="form-label">Cantidad a agregar:</label>
+                    <input type="number" class="form-control" id="cantidad_estadisticas" min="1" step="1" placeholder="Ej: 100">
+                </div>
+                <div id="resultado_fondos_estadisticas"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="agregarFondosDesdeEstadisticas()">Agregar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estadísticas por Juego -->
+<div class="row mt-4">
+    {% for stat in stats %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    {% if stat.juego == 'blackjack' %}🎲 
+                    {% elif stat.juego == 'poker' %}🃏 
+                    {% elif stat.juego == 'coinflip' %}🪙
+                    {% elif stat.juego == 'tragaperras' %}🎰
+                    {% elif stat.juego == 'caballos' %}🏇
+                    {% endif %}
+                    {{ stat.juego|title }}
+                </h5>
+                <span class="badge {% if stat.ganancia_total >= 0 %}bg-success{% else %}bg-danger{% endif %}">
+                    ${{ "%.2f"|format(stat.ganancia_total) }}
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <small class="text-muted">Partidas</small>
+                        <h6>{{ stat.partidas_jugadas }}</h6>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted">Victorias</small>
+                        <h6 class="text-success">{{ stat.partidas_ganadas }}</h6>
+                    </div>
+                </div>
+                
+                <div class="progress mb-2" style="height: 8px;">
+                    <div class="progress-bar {% if stat.partidas_jugadas > 0 %}bg-success{% endif %}" 
+                         style="width: {% if stat.partidas_jugadas > 0 %}{{ (stat.partidas_ganadas / stat.partidas_jugadas) * 100 }}%{% else %}0%{% endif %}">
+                    </div>
+                </div>
+                <small class="text-muted">
+                    Ratio: 
+                    {% if stat.partidas_jugadas > 0 %}
+                        {{ "%.1f"|format((stat.partidas_ganadas / stat.partidas_jugadas) * 100) }}%
+                    {% else %}
+                        0%
+                    {% endif %}
+                </small>
+                
+                <div class="mt-3">
+                    <div class="d-flex justify-content-between small">
+                        <span>Apuesta Total:</span>
+                        <span class="fw-bold">${{ "%.2f"|format(stat.apuesta_total) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between small">
+                        <span>Ganancia Neta:</span>
+                        <span class="{% if stat.ganancia_total >= 0 %}text-success{% else %}text-danger{% endif %} fw-bold">
+                            ${{ "%.2f"|format(stat.ganancia_total) }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Gráfico de Distribución -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>📋 Distribución de Partidas por Juego</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for stat in stats %}
+                    <div class="col-md-2 col-6 mb-3">
+                        <div class="text-center">
+                            <div class="mb-2" style="font-size: 2em;">
+                                {% if stat.juego == 'blackjack' %}🎲 
+                                {% elif stat.juego == 'poker' %}🃏 
+                                {% elif stat.juego == 'coinflip' %}🪙
+                                {% elif stat.juego == 'tragaperras' %}🎰
+                                {% elif stat.juego == 'caballos' %}🏇
+                                {% endif %}
+                            </div>
+                            <h6>{{ stat.partidas_jugadas }}</h6>
+                            <small class="text-muted">{{ stat.juego|title }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Historial de Apuestas -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">🕐 Apuestas Recientes</h5>
+                <span class="badge bg-primary">{{ apuestas|length }}</span>
+            </div>
+            <div class="card-body">
+                {% if apuestas %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Juego</th>
+                                <th>Cantidad</th>
+                                <th>Resultado</th>
+                                <th>Ganancia</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for apuesta in apuestas %}
+                            <tr>
+                                <td>
+                                    <span class="me-2">
+                                        {% if apuesta.juego == 'blackjack' %}🎲 
+                                        {% elif apuesta.juego == 'poker' %}🃏 
+                                        {% elif apuesta.juego == 'coinflip' %}🪙
+                                        {% elif apuesta.juego == 'tragaperras' %}🎰
+                                        {% elif apuesta.juego == 'caballos' %}🏇
+                                        {% endif %}
+                                    </span>
+                                    {{ apuesta.juego|title }}
+                                </td>
+                                <td class="fw-bold">${{ "%.2f"|format(apuesta.cantidad) }}</td>
+                                <td>
+                                    <span class="badge {% if apuesta.resultado == 'ganada' %}bg-success{% elif apuesta.resultado == 'perdida' %}bg-danger{% else %}bg-warning{% endif %}">
+                                        {{ apuesta.resultado|title }}
+                                    </span>
+                                </td>
+                                <td class="{% if apuesta.ganancia > 0 %}text-success{% elif apuesta.ganancia == 0 %}text-muted{% else %}text-danger{% endif %} fw-bold">
+                                    ${{ "%.2f"|format(apuesta.ganancia) }}
+                                </td>
+                                <td>
+                                    <small class="text-muted">{{ apuesta.fecha.strftime('%d/%m/%Y %H:%M') }}</small>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <h6 class="text-muted">No hay apuestas registradas</h6>
+                    <p class="text-muted">¡Comienza a jugar para ver tu historial!</p>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary mt-2">Ir a Juegos</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Resumen Financiero -->
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6>💰 Resumen Financiero</h6>
+            </div>
+            <div class="card-body">
+                {% set ns = namespace(total_apostado=0, total_ganado=0, total_perdido=0) %}
+                {% for stat in stats %}
+                    {% set ns.total_apostado = ns.total_apostado + stat.apuesta_total %}
+                    {% if stat.ganancia_total > 0 %}
+                        {% set ns.total_ganado = ns.total_ganado + stat.ganancia_total %}
+                    {% else %}
+                        {% set ns.total_perdido = ns.total_perdido + stat.ganancia_total %}
+                    {% endif %}
+                {% endfor %}
+                
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Total Apostado:</span>
+                    <strong>${{ "%.2f"|format(ns.total_apostado) }}</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Total Ganado:</span>
+                    <strong class="text-success">${{ "%.2f"|format(ns.total_ganado) }}</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Total Perdido:</span>
+                    <strong class="text-danger">${{ "%.2f"|format(ns.total_perdido|abs) }}</strong>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between">
+                    <span>Balance Neto:</span>
+                    {% set ns_total_ganancia = namespace(total=0) %}
+                    {% for stat in stats %}
+                        {% set ns_total_ganancia.total = ns_total_ganancia.total + stat.ganancia_total %}
+                    {% endfor %}
+                    <strong class="{% if ns_total_ganancia.total >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        ${{ "%.2f"|format(ns_total_ganancia.total) }}
+                    </strong>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6>🎯 Juego Más Jugado</h6>
+            </div>
+            <div class="card-body">
+                {% set ns_juego = namespace(mas_jugado=None) %}
+                {% for stat in stats %}
+                    {% if ns_juego.mas_jugado is none or stat.partidas_jugadas > ns_juego.mas_jugado.partidas_jugadas %}
+                        {% set ns_juego.mas_jugado = stat %}
+                    {% endif %}
+                {% endfor %}
+                
+                {% if ns_juego.mas_jugado and ns_juego.mas_jugado.partidas_jugadas > 0 %}
+                <div class="text-center">
+                    <div style="font-size: 3em;">
+                        {% if ns_juego.mas_jugado.juego == 'blackjack' %}🎲 
+                        {% elif ns_juego.mas_jugado.juego == 'poker' %}🃏 
+                        {% elif ns_juego.mas_jugado.juego == 'coinflip' %}🪙
+                        {% elif ns_juego.mas_jugado.juego == 'tragaperras' %}🎰
+                        {% elif ns_juego.mas_jugado.juego == 'caballos' %}🏇
+                        {% endif %}
+                    </div>
+                    <h5 class="mt-2">{{ ns_juego.mas_jugado.juego|title }}</h5>
+                    <p class="text-muted">{{ ns_juego.mas_jugado.partidas_jugadas }} partidas</p>
+                </div>
+                {% else %}
+                <div class="text-center text-muted">
+                    <p>No hay datos suficientes</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function agregarFondosDesdeEstadisticas() {
+    const cantidad = parseFloat(document.getElementById('cantidad_estadisticas').value);
+    
+    if (!cantidad || cantidad <= 0) {
+        alert('Ingresa una cantidad válida');
+        return;
+    }
+    
+    fetch('/api/agregar_fondos', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            cantidad: cantidad
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+            return;
+        }
+        
+        document.getElementById('balance').textContent = data.nuevo_balance.toFixed(2);
+        
+        document.getElementById('resultado_fondos_estadisticas').innerHTML = `
+            <div class="alert alert-success">
+                ${data.mensaje}
+            </div>
+        `;
+        
+        setTimeout(() => {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalFondos'));
+            modal.hide();
+            document.getElementById('cantidad_estadisticas').value = '';
+            document.getElementById('resultado_fondos_estadisticas').innerHTML = '';
+        }, 2000);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al agregar fondos');
+    });
+}
+</script>
+
+<style>
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.progress {
+    background-color: #e9ecef;
+}
+
+.badge {
+    font-size: 0.7em;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+}
+
+.text-muted {
+    color: #6c757d !important;
+}
+
+/* Colores personalizados para los juegos */
+.card-header:has(🎲) { background: linear-gradient(135deg, #28a745, #20c997); color: white; }
+.card-header:has(🃏) { background: linear-gradient(135deg, #dc3545, #fd7e14); color: white; }
+.card-header:has(🪙) { background: linear-gradient(135deg, #ffc107, #fd7e14); color: white; }
+.card-header:has(🎰) { background: linear-gradient(135deg, #6f42c1, #e83e8c); color: white; }
+.card-header:has(🏇) { background: linear-gradient(135deg, #17a2b8, #20c997); color: white; }
+</style>
+{% endblock %}

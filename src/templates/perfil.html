@@ -1,0 +1,353 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-xl-10">
+        <!-- Header del Perfil -->
+        <div class="profile-card mb-5">
+            <div class="profile-header">
+                <div class="profile-avatar float">
+                    <i class="fas fa-user-astronaut text-white"></i>
+                </div>
+                <h1 class="text-white fw-bold mb-2">{{ user.username }}</h1>
+                <p class="text-cyan mb-0">
+                    <i class="fas fa-id-card me-2"></i>
+                    Miembro desde {{ user.created_at.strftime('%d/%m/%Y') }}
+                </p>
+            </div>
+            
+            <!-- Estadísticas Rápidas -->
+            <div class="profile-stats">
+                <div class="stat-item">
+                    <div class="stat-value neon-pulse">
+                        ${{ "%.2f"|format(user.balance) }}
+                    </div>
+                    <div class="stat-label">Balance Actual</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">
+                        {% set total_partidas = 0 %}
+                        {% for stat in stats %}
+                            {% set total_partidas = total_partidas + stat.partidas_jugadas %}
+                        {% endfor %}
+                        {{ total_partidas }}
+                    </div>
+                    <div class="stat-label">Total Partidas</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">
+                        {% set total_victorias = 0 %}
+                        {% for stat in stats %}
+                            {% set total_victorias = total_victorias + stat.partidas_ganadas %}
+                        {% endfor %}
+                        {{ total_victorias }}
+                    </div>
+                    <div class="stat-label">Victorias</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value {% set ns = namespace(total_ganancia=0) %}{% for stat in stats %}{% set ns.total_ganancia = ns.total_ganancia + stat.ganancia_total %}{% endfor %}{% if ns.total_ganancia >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        ${{ "%.2f"|format(ns.total_ganancia) }}
+                    </div>
+                    <div class="stat-label">Ganancia Total</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Formulario de Edición -->
+            <div class="col-lg-6">
+                <div class="card profile-card h-100">
+                    <div class="card-header">
+                        <i class="fas fa-user-edit me-2"></i>
+                        EDITAR PERFIL
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" class="scanline">
+                            <div class="mb-4">
+                                <label for="username" class="form-label">
+                                    <i class="fas fa-user me-2"></i>NOMBRE DE USUARIO
+                                </label>
+                                <input type="text" class="form-control" id="username" name="username" 
+                                       value="{{ user.username }}" required>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="email" class="form-label">
+                                    <i class="fas fa-envelope me-2"></i>EMAIL
+                                </label>
+                                <input type="email" class="form-control" id="email" name="email" 
+                                       value="{{ user.email }}" required>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="password" class="form-label">
+                                    <i class="fas fa-key me-2"></i>NUEVA CONTRASEÑA
+                                </label>
+                                <input type="password" class="form-control" id="password" name="password" 
+                                       placeholder="Dejar vacío para no cambiar">
+                                <div class="form-text text-cyan">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Mínimo 6 caracteres
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-3">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-sync-alt me-2"></i>
+                                    ACTUALIZAR PERFIL
+                                </button>
+                                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-arrow-left me-2"></i>
+                                    VOLVER AL DASHBOARD
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gestión de Fondos -->
+            <div class="col-lg-6">
+                <div class="card profile-card h-100">
+                    <div class="card-header">
+                        <i class="fas fa-coins me-2"></i>
+                        GESTIÓN DE FONDOS
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <div class="display-4 text-gradient fw-bold mb-2">
+                                ${{ "%.2f"|format(user.balance) }}
+                            </div>
+                            <p class="text-cyan mb-4">Saldo disponible</p>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="cantidad_fondos" class="form-label">
+                                <i class="fas fa-money-bill-wave me-2"></i>AGREGAR FONDOS VIRTUALES
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-dark border-cyan text-cyan">
+                                    <i class="fas fa-dollar-sign"></i>
+                                </span>
+                                <input type="number" class="form-control" id="cantidad_fondos" 
+                                       placeholder="Cantidad" min="1" step="1">
+                                <button class="btn btn-success" onclick="agregarFondos()">
+                                    <i class="fas fa-rocket me-2"></i>AGREGAR
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Opciones Rápidas -->
+                        <div class="row g-2 mb-4">
+                            <div class="col-6">
+                                <button class="btn btn-outline-primary w-100" onclick="agregarRapido(100)">
+                                    +$100
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button class="btn btn-outline-primary w-100" onclick="agregarRapido(500)">
+                                    +$500
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button class="btn btn-outline-primary w-100" onclick="agregarRapido(1000)">
+                                    +$1,000
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button class="btn btn-outline-primary w-100" onclick="agregarRapido(5000)">
+                                    +$5,000
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="resultado_fondos"></div>
+
+                        <!-- Información del Sistema -->
+                        <div class="alert alert-info glass-effect mt-4">
+                            <div class="d-flex">
+                                <i class="fas fa-robot me-3 display-6"></i>
+                                <div>
+                                    <h6 class="alert-heading text-cyan mb-2">SISTEMA EDUCATIVO</h6>
+                                    <p class="mb-0 text-small">
+                                        Los fondos son virtuales y se utilizan exclusivamente 
+                                        para fines educativos. ¡Disfruta aprendiendo!
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estadísticas Rápidas por Juego -->
+            <div class="col-12">
+                <div class="card profile-card">
+                    <div class="card-header">
+                        <i class="fas fa-chart-network me-2"></i>
+                        ESTADÍSTICAS POR JUEGO
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            {% for stat in stats %}
+                            <div class="col-md-4 col-lg-2">
+                                <div class="stat-item text-center">
+                                    <div class="mb-2" style="font-size: 2rem;">
+                                        {% if stat.juego == 'blackjack' %}🎲 
+                                        {% elif stat.juego == 'poker' %}🃏 
+                                        {% elif stat.juego == 'coinflip' %}🪙
+                                        {% elif stat.juego == 'tragaperras' %}🎰
+                                        {% elif stat.juego == 'caballos' %}🏇
+                                        {% endif %}
+                                    </div>
+                                    <div class="stat-value small">
+                                        {{ stat.partidas_jugadas }}
+                                    </div>
+                                    <div class="stat-label">
+                                        {{ stat.juego|title }}
+                                    </div>
+                                    <div class="text-small {% if stat.ganancia_total >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                        ${{ "%.2f"|format(stat.ganancia_total) }}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function agregarFondos() {
+    const cantidad = parseFloat(document.getElementById('cantidad_fondos').value);
+    
+    if (!cantidad || cantidad <= 0) {
+        mostrarNotificacion('Ingresa una cantidad válida', 'error');
+        return;
+    }
+    
+    realizarTransaccion(cantidad);
+}
+
+function agregarRapido(cantidad) {
+    document.getElementById('cantidad_fondos').value = cantidad;
+    realizarTransaccion(cantidad);
+}
+
+function realizarTransaccion(cantidad) {
+    // Efecto de carga
+    const btn = event?.target || document.querySelector('.btn-success');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>PROCESANDO...';
+    btn.disabled = true;
+
+    fetch('/api/agregar_fondos', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            cantidad: cantidad
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            mostrarNotificacion(data.error, 'error');
+            return;
+        }
+        
+        // Actualizar balance en toda la aplicación
+        document.getElementById('balance').textContent = data.nuevo_balance.toFixed(2);
+        document.querySelector('.display-4').textContent = '$' + data.nuevo_balance.toFixed(2);
+        
+        // Mostrar notificación de éxito
+        mostrarNotificacion(data.mensaje, 'success');
+        
+        // Efecto visual
+        document.querySelector('.display-4').classList.add('neon-pulse');
+        setTimeout(() => {
+            document.querySelector('.display-4').classList.remove('neon-pulse');
+        }, 2000);
+        
+        // Limpiar campo
+        document.getElementById('cantidad_fondos').value = '';
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarNotificacion('Error de conexión', 'error');
+    })
+    .finally(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    });
+}
+
+function mostrarNotificacion(mensaje, tipo) {
+    const alertClass = tipo === 'success' ? 'alert-success' : 'alert-danger';
+    const icon = tipo === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle';
+    
+    const notificacion = document.createElement('div');
+    notificacion.className = `alert ${alertClass} alert-dismissible fade show`;
+    notificacion.innerHTML = `
+        <i class="fas ${icon} me-2"></i>${mensaje}
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.getElementById('resultado_fondos').innerHTML = '';
+    document.getElementById('resultado_fondos').appendChild(notificacion);
+    
+    // Auto-eliminar después de 5 segundos
+    setTimeout(() => {
+        if (notificacion.parentElement) {
+            notificacion.remove();
+        }
+    }, 5000);
+}
+
+// Efectos de entrada
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(50px)';
+        setTimeout(() => {
+            card.style.transition = 'all 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 200);
+    });
+});
+</script>
+
+<style>
+.text-cyan { color: var(--neon-cyan); }
+.text-pink { color: var(--neon-pink); }
+.text-matrix { color: var(--matrix-green); }
+
+.profile-avatar {
+    background: var(--gradient-cyber) !important;
+}
+
+.input-group-text {
+    background: rgba(0, 243, 255, 0.1) !important;
+    border: 1px solid var(--neon-cyan) !important;
+    color: var(--neon-cyan) !important;
+}
+
+.text-small {
+    font-size: 0.8rem;
+}
+
+.alert-info.glass-effect {
+    background: rgba(0, 243, 255, 0.1) !important;
+    border: 1px solid var(--neon-cyan);
+    backdrop-filter: blur(10px);
+}
+</style>
+{% endblock %}
