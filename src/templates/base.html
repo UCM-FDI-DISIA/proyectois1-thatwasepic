@@ -31,6 +31,12 @@
                     <a class="nav-link {{ 'active' if request.endpoint == 'dashboard' }}" href="{{ url_for('dashboard') }}">
                         <i class="fas fa-home me-1"></i>DASHBOARD
                     </a>
+                    <a class="nav-link {{ 'active' if request.endpoint == 'estadisticas' }}" href="{{ url_for('estadisticas') }}">
+                        <i class="fas fa-chart-network me-1"></i>DATOS
+                    </a>
+                    <a class="nav-link {{ 'active' if request.endpoint == 'perfil' }}" href="{{ url_for('perfil') }}">
+                        <i class="fas fa-user-astronaut me-1"></i>PERFIL
+                    </a>
                     <a class="nav-link" href="{{ url_for('logout') }}">
                         <i class="fas fa-power-off me-1"></i>SALIR
                     </a>

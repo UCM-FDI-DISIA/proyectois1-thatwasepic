@@ -4,6 +4,9 @@
 <!-- separador para que el header fijo no tape el contenido -->
 <div class="header-spacer" style="height: 80px;"></div>
 
+<!-- Fondo simple -->
+<div class="simple-background"></div>
+
 <!-- Sección de juegos -->
 <section class="games-section">
     <div class="container">
@@ -89,10 +92,45 @@
 </div>
 
 <style>
+/* ==== FONDO SIMPLE PERO ATRACTIVO ==== */
+.simple-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background: 
+        linear-gradient(135deg, #0a0a0f 0%, #151520 50%, #1a1a2e 100%);
+}
+
+.simple-background::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 20% 30%, rgba(0, 243, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(255, 0, 255, 0.1) 0%, transparent 50%);
+    animation: pulse 8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.5;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
 /* ==== SECCIÓN DE JUEGOS CON TUS COLORES EXACTOS ==== */
 .games-section {
     padding: 40px 0;
     min-height: 100vh;
+    position: relative;
 }
 
 .section-title {
@@ -114,12 +152,13 @@
 }
 
 .game-card {
-    background: rgba(30, 30, 50, 0.8);
+    background: rgba(30, 30, 50, 0.9);
     border-radius: 10px;
     overflow: hidden;
     border: 1px solid rgba(0, 243, 255, 0.3);
     transition: all 0.3s ease;
     cursor: pointer;
+    backdrop-filter: blur(5px);
 }
 
 .game-card:hover {
@@ -157,6 +196,7 @@
     padding: 60px 0;
     text-align: center;
     background: rgba(0, 243, 255, 0.05);
+    position: relative;
 }
 
 .challenge-title {
