@@ -3,7 +3,9 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from models import db, User
 import os
 
-app = Flask(__name__)
+app = Flask(__name__,
+            template_folder='../templates',
+            static_folder='../static')
 
 # Configuración
 app.config['SECRET_KEY'] = 'clave-secreta-casino-educativo-2024'
