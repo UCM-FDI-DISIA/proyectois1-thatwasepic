@@ -808,86 +808,79 @@ function resolverResultadoGlobal(){
     estadisticas.empates++;
   }
   
-  actualizarEstadisticas();
-  // === Persistir la ronda en el backend (ARREGLADO) ===
-// 1) Total apostado (incluye dobles/splits y seguro si lo hubo)
-let totalApostado = 0;
-manosJugador.forEach(m => totalApostado += (m.apuesta || 0));
-if (seguroTomado) totalApostado += (costoSeguro || 0);
+    actualizarEstadisticas();
 
-// 2) Total cobrado (sumamos pagos por mano SIN usar delta)
-let totalCobrado = 0;
+  // === Persistir la ronda en el backend ===
+  // 1) Total apostado (apuestas de todas las manos + seguro si se tomó)
+  let totalApostado = 0;
+  manosJugador.forEach(m => totalApostado += (m.apuesta || 0));
+  if (seguroTomado) totalApostado += (costoSeguro || 0);
 
-// Pago por cada mano del jugador
-manosJugador.forEach(m => {
-  const apuesta = m.apuesta || 0;
-  const puntosJ = valorMano(m.cartas).puntos;
-  const jugadorBJ = esBlackjackInicial(m.cartas);
+  // 2) Total cobrado (sumar pagos brutos sin usar 'delta')
+  let totalCobrado = 0;
 
-  if (jugadorBJ && !dealerBJ) {
-    // Blackjack del jugador 3:2 => cobro bruto = apuesta + 1.5*apuesta
-    totalCobrado += apuesta * 2.5;
-  } else if (puntosJ > 21) {
-    // Se pasa => no cobra nada
-  } else if (dealerBJ && !jugadorBJ) {
-    // Dealer blackjack y jugador no => pierde la apuesta
-  } else {
-    // Ni dealer BJ ni jugador BJ
-    if (puntosDealer > 21) {
-      // Dealer se pasa: gana normal => 2x
-      totalCobrado += apuesta * 2;
-    } else if (puntosJ > puntosDealer) {
-      // Gana normal
-      totalCobrado += apuesta * 2;
-    } else if (puntosJ === puntosDealer) {
-      // Empate => se devuelve la apuesta
-      totalCobrado += apuesta;
+  // usamos las variables ya calculadas arriba:
+  // const puntosDealer = valorMano(manoDealer).puntos;
+  // const dealerBJ     = esBlackjackInicial(manoDealer);
+
+  manosJugador.forEach(m => {
+    const apuesta   = m.apuesta || 0;
+    const puntosJ   = valorMano(m.cartas).puntos;
+    const jugadorBJ = esBlackjackInicial(m.cartas);
+
+    if (jugadorBJ && !dealerBJ) {
+      // Blackjack jugador => cobra 2.5x
+      totalCobrado += apuesta * 2.5;
+    } else if (puntosJ > 21) {
+      // pierde => no cobra
+    } else if (dealerBJ && !jugadorBJ) {
+      // pierde => no cobra
     } else {
-      // Pierde => no cobra
+      if (puntosDealer > 21 || puntosJ > puntosDealer) {
+        // gana normal => 2x
+        totalCobrado += apuesta * 2;
+      } else if (puntosJ === puntosDealer) {
+        // push => devuelve apuesta
+        totalCobrado += apuesta;
+      } else {
+        // pierde => no cobra
+      }
     }
-  }
-});
+  });
 
-// 3) Seguro (si se tomó)
-// El seguro paga 2:1 (profit = 2*costoSeguro) + devolución del seguro.
-// Por tanto, cobro bruto del seguro = 3 * costoSeguro SI dealer tiene BJ.
-if (seguroTomado) {
-  if (dealerBJ) {
+  // Seguro: paga 2:1 + devolución del coste (3x bruto) si dealer tiene BJ
+  if (seguroTomado && dealerBJ) {
     totalCobrado += (costoSeguro || 0) * 3;
-  } else {
-    // Si no hay BJ del dealer, el seguro se pierde (no cobra)
   }
-}
 
-// 4) Enviar a backend (cantidad = apostado, ganancia = cobrado)
-const resultadoApi = (tipoSalida === 'GANASTE') ? 'ganada'
-                   : (tipoSalida === 'PERDISTE') ? 'perdida'
-                   : 'empate';
+  const resultadoApi = (wins>losses) ? 'ganada' : (losses>wins ? 'perdida' : 'empate');
 
-fetch('/api/blackjack/apostar', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    cantidad: totalApostado,
-    ganancia: totalCobrado,
-    resultado: resultadoApi
+  fetch('/api/blackjack/apostar', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      cantidad: totalApostado,
+      ganancia: totalCobrado,
+      resultado: resultadoApi
+    })
   })
-})
-.then(r => r.json())
-.then(data => {
-  // Si backend devuelve nuevo_balance, sincronizamos la UI
-  if (data && typeof data.nuevo_balance === 'number') {
-    balance = data.nuevo_balance;
-  }
-  const $bal = document.getElementById('balance');
-  if ($bal) $bal.textContent = balance.toFixed(2);
-  const $stat = document.getElementById('stat-saldo');
-  if ($stat) $stat.textContent = balance.toFixed(2);
-})
-.catch(err => console.error('Error al persistir la ronda:', err));
-
-  finDeRonda(tipoSalida, delta, '');
+  .then(r => r.json())
+  .then(data => {
+    if (data && typeof data.nuevo_balance === 'number') {
+      // Sincronizamos con el saldo del servidor (fuente de la verdad)
+      balance = data.nuevo_balance;
+    }
+    const $bal = document.getElementById('balance');
+    if ($bal) $bal.textContent = balance.toFixed(2);
+    const $stat = document.getElementById('stat-saldo');
+    if ($stat) $stat.textContent = balance.toFixed(2);
+  })
+  .catch(err => console.error('Error al persistir la ronda:', err))
+  .finally(() => {
+    finDeRonda(tipoSalida, delta, '');
+  });
 }
+
 
 function finDeRonda(tipo, delta, detalle){
   juegoActivo=false;
