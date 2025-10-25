@@ -20,3 +20,10 @@ def home():
         'nuevo_balance': current_user.balance,
         'mensaje': f'Se agregaron ${cantidad:.2f} a tu cuenta'
     })
+
+bp = Blueprint('balance', __name__, url_prefix='/api')
+
+@bp.route('/balance', methods=['GET'])
+@login_required
+def home():
+    return jsonify({'balance': current_user.balance})
