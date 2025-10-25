@@ -168,9 +168,21 @@ body{background:#12191b;color:#e7e7e7;font-family:system-ui,-apple-system,Segoe 
           <div class="topbar-center">
             <div class="estado" id="estado-sistema">EN ESPERA</div>
           </div>
-          <div class="topbar-right">
-            <div class="help-pill" id="open-help">AYUDA</div>
-          </div>
+         <div class="topbar-right" style="display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 12px; width: 100%; margin-right: 10px;">
+  <!-- Botón de menú principal -->
+  <a href="{{ url_for('dashboard') }}" class="help-pill"
+     style="background:#00c3ff; color:#000; font-weight:700; white-space: nowrap;">
+    <i class="fas fa-home me-1"></i> MENÚ PRINCIPAL
+  </a>
+  <!-- Botón de ayuda -->
+  <div class="help-pill" id="open-help" style="white-space: nowrap;">
+    AYUDA
+  </div>
+</div>
+
+
+
+
         </div>
 
         <!-- MODAL AYUDA -->
