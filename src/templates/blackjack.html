@@ -114,10 +114,42 @@ body{background:#12191b;color:#e7e7e7;font-family:system-ui,-apple-system,Segoe 
 #acciones-globales{position:fixed;right:24px;bottom:24px;z-index:1300;display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;max-width:calc(100vw - 48px)}
 .cyber-alert{background:rgba(0,0,0,.9);border:2px solid;border-radius:var(--border-radius-cyber);backdrop-filter:blur(10px);padding:2rem}
 
+/* Estadísticas */
+.stats-panel {
+  background: rgba(11, 17, 19, 0.8);
+  border: 1px solid rgba(212,175,55,.2);
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 16px;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+.stat-item {
+  text-align: center;
+  padding: 8px;
+  background: rgba(212,175,55,.05);
+  border-radius: 6px;
+}
+.stat-value {
+  font-family: 'Orbitron', monospace;
+  font-weight: 700;
+  color: var(--casino-gold);
+  font-size: 1.1rem;
+}
+.stat-label {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  margin-bottom: 4px;
+}
+
 /* Responsive */
 @media (max-width:768px){
   .carta-holo{width:88px;height:128px}
   #controles-juego{position:static;justify-content:center;margin-top:10px}
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
 </head>
@@ -146,18 +178,68 @@ body{background:#12191b;color:#e7e7e7;font-family:system-ui,-apple-system,Segoe 
           <div class="panel">
             <header><h5>Cómo se juega al Blackjack</h5><div class="help-close" id="close-help">✕</div></header>
             <div class="content">
-              <p><strong>Objetivo:</strong> sumar una mano lo más cercana posible a 21 sin pasarse, y superar la mano del crupier.</p>
-              <p><strong>Valor:</strong> 2–10 valen su número; J, Q, K = 10; A = 11 o 1.</p>
-              <p><strong>Inicio:</strong> dos cartas para ti; crupier con una visible y una oculta.</p>
-              <ul>
-                <li><em>Hit</em>: pedir carta.</li>
-                <li><em>Stand</em>: plantarse.</li>
-                <li><em>Double</em>: duplicas apuesta, una carta y terminas.</li>
-                <li><em>Split</em>: si las dos cartas valen lo mismo, separas (una vez).</li>
-                <li><em>Insurance</em>: si el crupier muestra As, seguro opcional (2:1).</li>
-              </ul>
-              <p><strong>Crupier:</strong> roba hasta 17; se planta en 17 suave.</p>
-              <p><strong>Pagos:</strong> victoria 1:1; push (empate) se devuelve; blackjack 3:2.</p>
+              <p><strong>OBJETIVO DEL BLACKJACK</strong></p>
+<p>El objetivo principal es conseguir una mano cuyo valor sea más cercano a 21 que la mano del crupier, sin pasarse de este número. Cada jugador compite únicamente contra el crupier, no contra otros jugadores.</p>
+
+<p><strong>VALORES DE LAS CARTAS</strong></p>
+<ul>
+<li><strong>Cartas numéricas (2-10):</strong> Valen su valor facial</li>
+<li><strong>Figuras (J, Q, K):</strong> Valen 10 puntos cada una</li>
+<li><strong>As (A):</strong> Vale 11 puntos, pero si con 11 te pasas de 21, automáticamente vale 1 punto</li>
+</ul>
+
+<p><strong>DESARROLLO DEL JUEGO</strong></p>
+<ol>
+<li><strong>Apuesta inicial:</strong> Coloca tu apuesta antes de repartir las cartas</li>
+<li><strong>Reparto inicial:</strong> Recibes 2 cartas boca arriba, el crupier recibe una carta boca arriba y una boca abajo</li>
+<li><strong>Turno del jugador:</strong> Decides cómo jugar tu mano con las siguientes opciones:</li>
+</ol>
+
+<p><strong>OPCIONES DISPONIBLES</strong></p>
+<ul>
+<li><strong>PEDIR (HIT):</strong> Recibir una carta adicional. Puedes pedir tantas cartas como quieras hasta que te plantes o te pases de 21.</li>
+
+<li><strong>PLANTARSE (STAND):</strong> Mantener tu mano actual y pasar el turno al crupier.</li>
+
+<li><strong>DOBLAR (DOUBLE):</strong> Duplicar tu apuesta inicial y recibir exactamente UNA carta más. Solo disponible en las dos primeras cartas.</li>
+
+<li><strong>SEPARAR (SPLIT):</strong> Si tus dos primeras cartas son del mismo valor, puedes dividirlas en dos manos separadas, cada una con su propia apuesta igual a la inicial. Recibirás una carta adicional para cada nueva mano.</li>
+
+<li><strong>SEGURO (INSURANCE):</strong> Cuando el crupier muestra un As, puedes apostar la mitad de tu apuesta inicial a que el crupier tiene blackjack. Si aciertas, recibes 2:1 en el seguro, pero pierdes la apuesta principal.</li>
+</ul>
+
+<p><strong>BLACKJACK NATURAL</strong></p>
+<p>Un "blackjack" es cuando obtienes un As y una carta de valor 10 (10, J, Q, K) en las dos primeras cartas. El blackjack paga 3:2 (apuestas 10€, ganas 15€ adicionales). Si tanto tú como el crupier tienen blackjack, es empate (push).</p>
+
+<p><strong>REGLAS DEL CRUPIER</strong></p>
+<ul>
+<li>El crupier debe pedir cartas hasta alcanzar 17 puntos o más</li>
+<li>Si el crupier tiene 17 suave (A+6), debe plantarse</li>
+<li>El crupier juega después de que todos los jugadores hayan completado sus turnos</li>
+</ul>
+
+<p><strong>PAGOS Y RESULTADOS</strong></p>
+<ul>
+<li><strong>Victoria normal:</strong> 1:1 (apuestas 10€, ganas 10€ adicionales)</li>
+<li><strong>Blackjack:</strong> 3:2 (apuestas 10€, ganas 15€ adicionales)</li>
+<li><strong>Empate (Push):</strong> Recuperas tu apuesta original</li>
+<li><strong>Derrota:</strong> Pierdes tu apuesta</li>
+<li><strong>Seguro:</strong> 2:1 (si el crupier tiene blackjack)</li>
+</ul>
+
+<p><strong>ESTRATEGIAS BÁSICAS</strong></p>
+<ul>
+<li>Si tienes 11 o menos, siempre pide carta</li>
+<li>Si tienes 17 o más, normalmente debes plantearte</li>
+<li>Dobla cuando tengas 11 puntos contra cualquier carta del crupier (excepto si muestra un As)</li>
+<li>Separa Ases y ochos siempre, nunca separes decenas ni cincos</li>
+<li>El seguro generalmente no es favorable matemáticamente</li>
+</ul>
+
+<p><strong>ESTADÍSTICAS DE SESIÓN</strong></p>
+<p>Puedes seguir tu rendimiento en el panel de estadísticas, que incluye partidas jugadas, victorias, derrotas, empates, blackjacks conseguidos y tu saldo actual. Estas estadísticas se mantienen durante toda tu sesión de juego.</p>
+
+<p>¡Disfruta del juego y recuerda jugar responsablemente!</p>
             </div>
           </div>
         </div>
@@ -212,6 +294,37 @@ body{background:#12191b;color:#e7e7e7;font-family:system-ui,-apple-system,Segoe 
           </div>
         </div>
 
+        <!-- Panel de Estadísticas -->
+        <div class="stats-panel" id="stats-panel">
+          <h5 style="text-align:center;margin-bottom:12px;color:var(--casino-gold)">ESTADÍSTICAS DE SESIÓN</h5>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-label">PARTIDAS JUGADAS</div>
+              <div class="stat-value" id="stat-partidas">0</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">VICTORIAS</div>
+              <div class="stat-value" id="stat-victorias">0</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">DERROTAS</div>
+              <div class="stat-value" id="stat-derrotas">0</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">EMPATES</div>
+              <div class="stat-value" id="stat-empates">0</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">BLACKJACKS</div>
+              <div class="stat-value" id="stat-blackjacks">0</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">SALDO ACTUAL</div>
+              <div class="stat-value">€<span id="stat-saldo">500.00</span></div>
+            </div>
+          </div>
+        </div>
+
         <div id="resultado" class="mt-4" style="margin-top:16px"></div>
       </div>
     </div>
@@ -220,7 +333,7 @@ body{background:#12191b;color:#e7e7e7;font-family:system-ui,-apple-system,Segoe 
   <!-- Acciones globales -->
   <div id="acciones-globales">
     <button class="btn btn-global small" id="btn-reiniciar-misma" onclick="reiniciarMismaApuesta()" disabled>REINICIAR (MISMA APUESTA)</button>
-    <button class="btn btn-global exit small" onclick="location.reload()">SALIR</button>
+    <button class="btn btn-global exit small" onclick="salirDelJuego()">SALIR</button>
   </div>
 
 <script>
@@ -239,6 +352,17 @@ let costoSeguro = 0;
 let manosJugador = []; // [{cartas:[], apuesta, doblada:false, terminada:false, sePuedeDoblar:true}]
 let manoDealer = [];
 let indiceManoActual = 0;
+
+// ================== ESTADÍSTICAS ==================
+let estadisticas = {
+  partidasJugadas: 0,
+  victorias: 0,
+  derrotas: 0,
+  empates: 0,
+  blackjacks: 0,
+  rachaActual: 0,
+  mejorRacha: 0
+};
 
 // ================== BARAJA ==================
 const valoresCartas = { '2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':10,'Q':10,'K':10,'A':11 };
@@ -270,10 +394,35 @@ function robar(){
 // ================== UTIL ==================
 function valorMano(cartas){
   let puntos=0, ases=0;
-  for(const c of cartas){ puntos+=valoresCartas[c.valor]; if(c.valor==='A') ases++; }
+  for(const c of cartas){ 
+    puntos+=valoresCartas[c.valor]; 
+    if(c.valor==='A') ases++; 
+  }
   while(puntos>21 && ases>0){ puntos-=10; ases--; }
   return {puntos, suave: ases>0};
 }
+
+function valorManoCrupierVisibles(cartasCrupier) {
+  let puntos = 0, ases = 0;
+  for (let i = 0; i < cartasCrupier.length; i++) {
+    // Solo contar cartas visibles (no ocultas)
+    if (cartasCrupier[i].oculta) continue;
+    
+    const valor = cartasCrupier[i].valor;
+    // CORRECCIÓN: Usar valoresCartas para J, Q, K
+    puntos += valoresCartas[valor];
+    if (valor === 'A') ases += 1;
+  }
+  
+  // Ajustar valor del As si se pasa de 21
+  while (puntos > 21 && ases > 0) {
+    puntos -= 10;
+    ases -= 1;
+  }
+  
+  return puntos;
+}
+
 function esBlackjackInicial(cartas){ return cartas.length===2 && valorMano(cartas).puntos===21; }
 function mismoValor(c1,c2){ return valoresCartas[c1.valor]===valoresCartas[c2.valor]; }
 function limpiarNodo(id){ const el=document.getElementById(id); if(el) el.innerHTML=''; }
@@ -329,7 +478,8 @@ function actualizarMarcadores(){
   document.getElementById('puntos-jugador').textContent=`PUNTOS: ${pj}`;
   document.getElementById('puntos-jugador').className = `puntos-display ${pj>21?'text-danger':'text-success'}`;
 
-  const pd=valorMano(manoDealer).puntos;
+  // CORRECCIÓN: Usar solo cartas visibles del crupier
+  const pd=valorManoCrupierVisibles(manoDealer);
   document.getElementById('puntos-casa').textContent=`PUNTOS: ${pd}`;
   document.getElementById('puntos-casa').className = `puntos-display ${pd>21?'text-danger':'text-success'}`;
 
@@ -338,6 +488,16 @@ function actualizarMarcadores(){
   else { indi.textContent=''; }
 
   document.getElementById('balance').textContent = balance.toFixed(2);
+  document.getElementById('stat-saldo').textContent = balance.toFixed(2);
+}
+
+function actualizarEstadisticas() {
+  document.getElementById('stat-partidas').textContent = estadisticas.partidasJugadas;
+  document.getElementById('stat-victorias').textContent = estadisticas.victorias;
+  document.getElementById('stat-derrotas').textContent = estadisticas.derrotas;
+  document.getElementById('stat-empates').textContent = estadisticas.empates;
+  document.getElementById('stat-blackjacks').textContent = estadisticas.blackjacks;
+  document.getElementById('stat-saldo').textContent = balance.toFixed(2);
 }
 
 function bloquearAcciones(bloq=true){
@@ -383,6 +543,7 @@ function configurarBotonesAccion(){
 }
 
 function setEstado(texto, color){ const el=document.getElementById('estado-sistema'); el.textContent=texto; if(color){el.style.color=color;} }
+
 function mostrarResultadoUI({tipo, delta, detalle}){
   const clases = tipo==='ganada'||tipo==='blackjack'?'alert-success':(tipo==='empate'?'alert-warning':'alert-danger');
   const icono = tipo==='ganada'||tipo==='blackjack'?'⚡':(tipo==='empate'?'⚖️':'💥');
@@ -390,18 +551,18 @@ function mostrarResultadoUI({tipo, delta, detalle}){
                 : tipo==='ganada' ? 'ALGORITMO OPTIMIZADO - VICTORIA'
                 : tipo==='empate' ? 'EMPATE NEURAL DETECTADO'
                 : 'SISTEMA SOBRECARGADO - DERROTA';
-  document.getElementById('ultimo-resultado').textContent = `€${delta.toFixed(2)}`;
-  document.getElementById('ultimo-resultado').style.color = delta>=0 ? 'var(--neon-green)' : 'var(--neon-red)';
+  
+  // QUITAR las estadísticas antiguas y mostrar solo el resultado limpio
   document.getElementById('resultado').innerHTML = `
     <div class="alert ${clases} cyber-alert text-center">
       <div class="display-4 mb-3">${icono}</div>
       <h3 class="text-gradient">${titulo}</h3>
-      ${detalle?`<p class="mt-2">${detalle}</p>`:''}
       <div class="mt-3">
         <div class="text-small text-uppercase">VARIACIÓN DE SALDO</div>
         <div class="h1 fw-bold ${delta>=0?'text-success':'text-danger'}">€${delta.toFixed(2)}</div>
       </div>
     </div>`;
+    
   setEstado('ANÁLISIS COMPLETADO','#ff8c1a');
   document.getElementById('btn-reiniciar-misma').disabled=false;
   actualizarMarcadores();
@@ -442,15 +603,22 @@ function iniciarBlackjack(){
   renderizarManos(); actualizarMarcadores();
   configurarBotonesAccion();
 
+  // CORRECCIÓN: No resolver blackjack inmediatamente, dejar que el jugador juegue
   const jugadorBJ = esBlackjackInicial(manosJugador[0].cartas);
   const dealerBJ  = esBlackjackInicial([manoDealer[0], {...manoDealer[1], oculta:false}]);
 
-  if(jugadorBJ || dealerBJ){
-    revelarCartaOculta();
-    resolverFinDeRondaInicial(jugadorBJ, dealerBJ);
-    return;
+  // Solo ofrecer seguro si el crupier muestra As, pero no resolver inmediatamente
+  if (dealerBJ && jugadorBJ) {
+    // Ambos tienen blackjack - esperar a que el jugador termine su turno
+    // El jugador puede plantarse inmediatamente si quiere
+  } else if (dealerBJ) {
+    // Solo el crupier tiene blackjack - el jugador puede seguir jugando normalmente
+    // Se resolverá al final cuando el jugador se plante
+  } else if (jugadorBJ) {
+    // Solo el jugador tiene blackjack - puede seguir jugando si quiere (aunque no es recomendable)
   }
-  configurarBotonesAccion(); // asegurar habilitado de inicio
+  
+  configurarBotonesAccion();
 }
 
 function onInsurance(){
@@ -533,6 +701,15 @@ function revelarCartaOculta(){
 
 function turnoDealer(){
   revelarCartaOculta();
+  
+  // CORRECCIÓN: Verificar si el crupier ya tiene blackjack
+  const dealerBJ = esBlackjackInicial(manoDealer);
+  if (dealerBJ) {
+    // Si el crupier tiene blackjack, resolver inmediatamente
+    setTimeout(resolverResultadoGlobal, 650);
+    return;
+  }
+  
   const debeRobar = ()=>{
     const v=valorMano(manoDealer);
     return v.puntos<17 || (!DEALER_STAND_SOFT_17 && v.puntos===17 && v.suave);
@@ -548,56 +725,77 @@ function turnoDealer(){
 }
 
 // ========== RESOLUCIONES Y PAGOS ==========
-function resolverFinDeRondaInicial(jugadorBJ, dealerBJ){
-  // Nota: ya descontamos la apuestaBase al iniciar
-  let delta = 0; // variación neta de saldo
-  let detalle = '';
-
-  if(dealerBJ && seguroTomado){
-    balance += costoSeguro*3;
-    delta   += costoSeguro*2;
-    detalle += 'Seguro cobrado (+2:1). ';
-  } else if(seguroTomado){
-    detalle += 'Seguro perdido (-1/2). ';
-  }
-
-  if(jugadorBJ && dealerBJ){
-    balance += apuestaBase; // push
-    detalle += 'Blackjack de ambos (push).';
-    finDeRonda('empate', delta, detalle);
-    return;
-  }
-  if(jugadorBJ){
-    balance += apuestaBase*2.5; // devuelve 2.5x
-    delta   += apuestaBase*1.5; // neto visible
-    detalle += 'Blackjack 3:2.';
-    finDeRonda('blackjack', delta, detalle);
-    return;
-  }
-  if(dealerBJ){
-    detalle += 'Crupier tiene blackjack.';
-    finDeRonda('perdida', delta, detalle);
-    return;
-  }
-}
-
 function resolverResultadoGlobal(){
   const puntosDealer=valorMano(manoDealer).puntos;
+  const dealerBJ = esBlackjackInicial(manoDealer);
   let delta=0;
   let wins=0, losses=0, pushes=0;
 
   manosJugador.forEach(m=>{
     const pj=valorMano(m.cartas).puntos;
-    if(pj>21){ losses++; return; }
-    if(puntosDealer>21){ wins++; balance += m.apuesta*2; delta += m.apuesta; return; }
-    if(pj>puntosDealer){ wins++; balance += m.apuesta*2; delta += m.apuesta; }
-    else if(pj<puntosDealer){ losses++; }
-    else { pushes++; balance += m.apuesta; }
+    const jugadorBJ = esBlackjackInicial(m.cartas);
+    
+    if(dealerBJ && jugadorBJ){
+      // Ambos blackjack - push
+      pushes++;
+      balance += m.apuesta; // devolver apuesta
+    } else if(dealerBJ){
+      // Solo crupier blackjack - pierde (a menos que tenga seguro)
+      losses++;
+    } else if(jugadorBJ){
+      // Solo jugador blackjack - gana 3:2
+      wins++;
+      balance += m.apuesta * 2.5;
+      delta += m.apuesta * 1.5;
+      estadisticas.blackjacks++;
+    } else if(pj>21){
+      // Jugador se pasó
+      losses++;
+    } else if(puntosDealer>21){
+      // Crupier se pasó
+      wins++;
+      balance += m.apuesta*2;
+      delta += m.apuesta;
+    } else if(pj>puntosDealer){
+      // Jugador gana
+      wins++;
+      balance += m.apuesta*2;
+      delta += m.apuesta;
+    } else if(pj<puntosDealer){
+      // Crupier gana
+      losses++;
+    } else {
+      // Empate
+      pushes++;
+      balance += m.apuesta;
+    }
   });
 
+  // Manejar seguro
+  if(dealerBJ && seguroTomado){
+    balance += costoSeguro * 3; // paga 2:1
+    delta += costoSeguro * 2;
+  }
+
   const tipoSalida = wins>losses ? 'ganada' : (losses>wins ? 'perdida' : 'empate');
-  const detalle = `Resultados — G:${wins} / P:${losses} / E:${pushes}` + (seguroTomado?' • Seguro (si no hubo BJ del dealer) perdido':'');
-  finDeRonda(tipoSalida, delta, detalle);
+  
+  // ACTUALIZAR ESTADÍSTICAS
+  estadisticas.partidasJugadas++;
+  if (tipoSalida === 'ganada') {
+    estadisticas.victorias++;
+    estadisticas.rachaActual++;
+    if (estadisticas.rachaActual > estadisticas.mejorRacha) {
+      estadisticas.mejorRacha = estadisticas.rachaActual;
+    }
+  } else if (tipoSalida === 'perdida') {
+    estadisticas.derrotas++;
+    estadisticas.rachaActual = 0;
+  } else {
+    estadisticas.empates++;
+  }
+  
+  actualizarEstadisticas();
+  finDeRonda(tipoSalida, delta, '');
 }
 
 function finDeRonda(tipo, delta, detalle){
@@ -613,11 +811,18 @@ function reiniciarMismaApuesta(){
   iniciarBlackjack();
 }
 
+function salirDelJuego() {
+  if (confirm('¿Estás seguro de que quieres salir? Se perderán las estadísticas de esta sesión.')) {
+    location.reload();
+  }
+}
+
 // ========== EVENTOS INICIALES ==========
 document.addEventListener('DOMContentLoaded', ()=>{
   deck = barajar(crearBaraja(DECKS));
   bloquearAcciones(true);
   actualizarMarcadores();
+  actualizarEstadisticas();
 
   // Botones y ayuda
   document.getElementById('btn-pedir').onclick = onHit;
