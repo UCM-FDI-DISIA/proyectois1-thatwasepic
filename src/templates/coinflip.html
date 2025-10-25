@@ -1,0 +1,551 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-xl-8">
+        <div class="card game-card cyber-grid">
+            <div class="card-header">
+                <i class="fas fa-dice me-2"></i>
+                MONEDA BINARIA
+            </div>
+            <div class="card-body">
+                <!-- Panel de Control -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="digital-display text-center mb-3">
+                            <div class="text-small text-uppercase" style="color: var(--neon-cyan);">
+                                <i class="fas fa-coins me-2"></i>BALANCE
+                            </div>
+                            <div class="h3 mb-0 text-gradient fw-bold">
+                                $<span id="balance">{{ "%.2f"|format(current_user.balance) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="digital-display text-center mb-3">
+                            <div class="text-small text-uppercase" style="color: var(--neon-pink);">
+                                <i class="fas fa-satellite-dish me-2"></i>ESTADO
+                            </div>
+                            <div class="h3 mb-0 text-gradient fw-bold" id="estado-sistema">
+                                EN ESPERA
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="digital-display text-center mb-3">
+                            <div class="text-small text-uppercase" style="color: var(--neon-green);">
+                                <i class="fas fa-bolt me-2"></i>ÚLTIMO RESULTADO
+                            </div>
+                            <div class="h3 mb-0 text-gradient fw-bold" id="ultimo-resultado">
+                                $0.00
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controles de Apuesta -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label for="cantidad" class="form-label">
+                            <i class="fas fa-money-bill-wave me-2"></i>INVERSIÓN BINARIA
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-cyan text-cyan">
+                                <i class="fas fa-dollar-sign"></i>
+                            </span>
+                            <input type="number" class="form-control" id="cantidad" 
+                                   min="1" max="{{ current_user.balance }}" step="1" value="10">
+                            <button class="btn btn-outline-cyan" onclick="apuestaRapida(25)">25</button>
+                            <button class="btn btn-outline-cyan" onclick="apuestaRapida(50)">50</button>
+                            <button class="btn btn-outline-cyan" onclick="apuestaRapida(100)">100</button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            <i class="fas fa-bullseye me-2"></i>SELECCIÓN DE PROTOCOLO
+                        </label>
+                        <div class="text-center">
+                            <button class="btn btn-outline-primary btn-lg me-2 protocol-btn" onclick="seleccionarProtocolo('cara')">
+                                <i class="fas fa-crown me-2"></i>PROTOCOLO ALFA
+                            </button>
+                            <button class="btn btn-outline-success btn-lg protocol-btn" onclick="seleccionarProtocolo('cruz')">
+                                <i class="fas fa-leaf me-2"></i>PROTOCOLO BETA
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Área de Simulación -->
+                <div class="simulation-field mb-5">
+                    <!-- Moneda Holográfica -->
+                    <div class="holo-coin-container">
+                        <div id="moneda" class="holo-coin" onclick="lanzarMoneda()">
+                            <div class="coin-face coin-cara">
+                                <div class="coin-icon">👑</div>
+                                <div class="coin-text">ALFA</div>
+                                <div class="coin-glow"></div>
+                            </div>
+                            <div class="coin-face coin-cruz">
+                                <div class="coin-icon">🌿</div>
+                                <div class="coin-text">BETA</div>
+                                <div class="coin-glow"></div>
+                            </div>
+                            <div class="coin-edge"></div>
+                            <div class="quantum-particles"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Información de Estado -->
+                    <div class="text-center mt-4">
+                        <div id="eleccion-actual" class="protocol-display"></div>
+                        <div id="estado-moneda" class="status-display">SELECCIONA UN PROTOCOLO</div>
+                    </div>
+                </div>
+
+                <!-- Controles de Ejecución -->
+                <div class="text-center">
+                    <button class="btn btn-primary btn-lg btn-neon-pulse" onclick="lanzarMoneda()" id="btn-lanzar">
+                        <i class="fas fa-rocket me-2"></i>EJECUTAR SIMULACIÓN CUÁNTICA
+                    </button>
+                </div>
+
+                <div id="resultado" class="mt-4"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let protocoloSeleccionado = null;
+let simulacionEnProgreso = false;
+
+function apuestaRapida(cantidad) {
+    document.getElementById('cantidad').value = cantidad;
+}
+
+function seleccionarProtocolo(protocolo) {
+    if (simulacionEnProgreso) return;
+    
+    protocoloSeleccionado = protocolo;
+    
+    // Resetear botones
+    document.querySelectorAll('.protocol-btn').forEach(btn => {
+        btn.classList.remove('btn-primary', 'btn-success');
+        btn.classList.add('btn-outline-primary', 'btn-outline-success');
+    });
+    
+    // Resaltar seleccionado
+    const btnSeleccionado = protocolo === 'cara' ? 
+        document.querySelector('.protocol-btn:nth-child(1)') : 
+        document.querySelector('.protocol-btn:nth-child(2)');
+    
+    if (protocolo === 'cara') {
+        btnSeleccionado.classList.remove('btn-outline-primary');
+        btnSeleccionado.classList.add('btn-primary');
+    } else {
+        btnSeleccionado.classList.remove('btn-outline-success');
+        btnSeleccionado.classList.add('btn-success');
+    }
+    
+    document.getElementById('eleccion-actual').innerHTML = `
+        <div class="protocol-active">
+            <i class="fas fa-check-circle me-2"></i>
+            PROTOCOLO ${protocolo === 'cara' ? 'ALFA' : 'BETA'} ACTIVADO
+        </div>
+    `;
+    
+    document.getElementById('estado-moneda').textContent = 'SISTEMA LISTO PARA SIMULACIÓN';
+    document.getElementById('estado-moneda').style.color = 'var(--neon-green)';
+}
+
+function lanzarMoneda() {
+    const cantidad = parseFloat(document.getElementById('cantidad').value);
+    const balance = parseFloat('{{ current_user.balance }}');
+    
+    if (!protocoloSeleccionado) {
+        mostrarNotificacion('SELECCIONA UN PROTOCOLO PRIMERO', 'error');
+        return;
+    }
+    
+    if (!cantidad || cantidad <= 0) {
+        mostrarNotificacion('INGRESA UNA INVERSIÓN VÁLIDA', 'error');
+        return;
+    }
+    
+    if (cantidad > balance) {
+        mostrarNotificacion('FONDOS INSUFICIENTES', 'error');
+        return;
+    }
+    
+    if (simulacionEnProgreso) return;
+    
+    simulacionEnProgreso = true;
+    document.getElementById('btn-lanzar').disabled = true;
+    document.getElementById('estado-sistema').textContent = 'SIMULACIÓN CUÁNTICA ACTIVA';
+    document.getElementById('estado-sistema').style.color = 'var(--neon-green)';
+    document.getElementById('estado-moneda').textContent = 'INICIANDO PROCESO CUÁNTICO...';
+    document.getElementById('resultado').innerHTML = '';
+    
+    const moneda = document.getElementById('moneda');
+    const particulas = moneda.querySelector('.quantum-particles');
+    
+    // Efecto de carga
+    moneda.style.animation = 'quantumFloat 2s ease-in-out infinite';
+    particulas.style.animation = 'particleBurst 2s ease-in-out infinite';
+    
+    // Simular proceso cuántico
+    setTimeout(() => {
+        const resultado = Math.random() < 0.5 ? 'cara' : 'cruz';
+        ejecutarResultado(resultado, cantidad);
+    }, 3000);
+}
+
+function ejecutarResultado(resultado, cantidad) {
+    const moneda = document.getElementById('moneda');
+    const particulas = moneda.querySelector('.quantum-particles');
+    
+    // Detener animaciones previas
+    moneda.style.animation = 'none';
+    particulas.style.animation = 'none';
+    
+    // Animación de resultado
+    if (resultado === 'cara') {
+        moneda.style.transform = 'rotateY(0deg) scale(1.2)';
+    } else {
+        moneda.style.transform = 'rotateY(180deg) scale(1.2)';
+    }
+    
+    setTimeout(() => {
+        const gano = protocoloSeleccionado === resultado;
+        const ganancia = gano ? cantidad * 2 : 0;
+        
+        document.getElementById('estado-moneda').textContent = 
+            `RESULTADO: PROTOCOLO ${resultado === 'cara' ? 'ALFA' : 'BETA'}`;
+        
+        // Enviar resultado al servidor
+        fetch('/api/coinflip/apostar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                cantidad: cantidad,
+                eleccion: protocoloSeleccionado,
+                resultado_moneda: resultado
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                mostrarNotificacion(data.error, 'error');
+                return;
+            }
+            
+            document.getElementById('balance').textContent = data.nuevo_balance.toFixed(2);
+            document.getElementById('ultimo-resultado').textContent = '$' + data.ganancia.toFixed(2);
+            document.getElementById('ultimo-resultado').style.color = data.ganancia > 0 ? 'var(--neon-green)' : 'var(--neon-red)';
+            
+            mostrarResultadoFinal(data, resultado, cantidad);
+        })
+        .finally(() => {
+            simulacionEnProgreso = false;
+            document.getElementById('btn-lanzar').disabled = false;
+            document.getElementById('estado-sistema').textContent = 'ANÁLISIS COMPLETADO';
+            document.getElementById('estado-sistema').style.color = 'var(--neon-cyan)';
+        });
+    }, 1000);
+}
+
+function mostrarResultadoFinal(data, resultado, cantidad) {
+    const gano = data.resultado === 'ganada';
+    const resultadoDiv = document.getElementById('resultado');
+    
+    if (gano) {
+        resultadoDiv.innerHTML = `
+            <div class="alert alert-success cyber-alert text-center">
+                <div class="display-4 mb-3">⚡</div>
+                <h3 class="text-gradient">PROTOCOLO EXITOSO</h3>
+                <p>Resultado Cuántico: ${resultado === 'cara' ? 'PROTOCOLO ALFA' : 'PROTOCOLO BETA'}</p>
+                <div class="mt-3">
+                    <div class="text-small text-uppercase">ENERGÍA GENERADA</div>
+                    <div class="h1 fw-bold text-success">$${data.ganancia.toFixed(2)}</div>
+                    <div class="text-muted">Multiplicador 2x aplicado</div>
+                </div>
+            </div>
+        `;
+    } else {
+        resultadoDiv.innerHTML = `
+            <div class="alert alert-danger cyber-alert text-center">
+                <div class="display-4 mb-3">💥</div>
+                <h3 class="text-gradient">INTERFERENCIA CUÁNTICA</h3>
+                <p>Resultado: ${resultado === 'cara' ? 'PROTOCOLO ALFA' : 'PROTOCOLO BETA'}</p>
+                <div class="mt-3">
+                    <div class="text-small text-uppercase">ENERGÍA DISPERSADA</div>
+                    <div class="h1 fw-bold text-danger">-$${cantidad.toFixed(2)}</div>
+                    <p class="mt-2">Reconfigura los parámetros</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Resetear después de 3 segundos
+    setTimeout(() => {
+        protocoloSeleccionado = null;
+        document.getElementById('eleccion-actual').innerHTML = '';
+        document.getElementById('estado-moneda').textContent = 'SELECCIONA UN PROTOCOLO';
+        document.getElementById('estado-moneda').style.color = 'var(--neon-cyan)';
+        moneda.style.transform = 'rotateY(0deg) scale(1)';
+        
+        // Resetear botones
+        document.querySelectorAll('.protocol-btn').forEach(btn => {
+            btn.classList.remove('btn-primary', 'btn-success');
+            btn.classList.add('btn-outline-primary', 'btn-outline-success');
+        });
+    }, 3000);
+}
+
+function mostrarNotificacion(mensaje, tipo) {
+    // Implementación simple de notificación
+    alert(mensaje);
+}
+</script>
+
+<style>
+.simulation-field {
+    background: linear-gradient(135deg, rgba(0, 243, 255, 0.05), rgba(255, 0, 255, 0.05));
+    border: 2px solid var(--neon-cyan);
+    border-radius: var(--border-radius-cyber);
+    padding: 40px 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.simulation-field::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(0, 243, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 0, 255, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.holo-coin-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    perspective: 1000px;
+    height: 200px;
+}
+
+.holo-coin {
+    width: 150px;
+    height: 150px;
+    position: relative;
+    transform-style: preserve-3d;
+    cursor: pointer;
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.coin-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em;
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    border: 4px solid;
+    box-shadow: 
+        0 0 20px currentColor,
+        inset 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+.coin-cara {
+    background: linear-gradient(135deg, #ff6b6b, #ffd700);
+    border-color: #ff6b6b;
+    color: #ff6b6b;
+}
+
+.coin-cruz {
+    background: linear-gradient(135deg, #4ecdc4, #44a08d);
+    border-color: #4ecdc4;
+    color: #4ecdc4;
+    transform: rotateY(180deg);
+}
+
+.coin-icon {
+    font-size: 3em;
+    margin-bottom: 5px;
+}
+
+.coin-text {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.6em;
+    font-weight: 700;
+    text-shadow: 0 0 5px currentColor;
+}
+
+.coin-glow {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    border-radius: 50%;
+    background: radial-gradient(circle, currentColor 0%, transparent 70%);
+    opacity: 0.3;
+    z-index: -1;
+}
+
+.coin-edge {
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #8B4513, #D2691E, #8B4513);
+    z-index: -2;
+}
+
+.quantum-particles {
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+    border-radius: 50%;
+    background: 
+        radial-gradient(circle at 30% 30%, rgba(0, 243, 255, 0.5) 0%, transparent 50%),
+        radial-gradient(circle at 70% 70%, rgba(255, 0, 255, 0.5) 0%, transparent 50%);
+    z-index: -3;
+    opacity: 0;
+}
+
+.protocol-display {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.2em;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.protocol-active {
+    color: var(--neon-green);
+    text-shadow: 0 0 10px var(--neon-green);
+}
+
+.status-display {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.1em;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 5px var(--neon-cyan);
+}
+
+.btn-neon-pulse {
+    font-family: 'Orbitron', monospace;
+    font-weight: 600;
+    border: 2px solid var(--neon-cyan);
+    background: rgba(0, 0, 0, 0.8);
+    padding: 15px 30px;
+    font-size: 1.1em;
+    animation: neonPulse 2s infinite;
+}
+
+.btn-neon-pulse:hover {
+    animation: none;
+    box-shadow: 0 0 20px var(--neon-cyan);
+}
+
+.protocol-btn {
+    font-family: 'Orbitron', monospace;
+    font-weight: 600;
+    border: 2px solid;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 12px 24px;
+    transition: all 0.3s ease;
+}
+
+.protocol-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 243, 255, 0.4);
+}
+
+.cyber-alert {
+    background: rgba(0, 0, 0, 0.9);
+    border: 2px solid;
+    border-radius: var(--border-radius-cyber);
+    backdrop-filter: blur(10px);
+    padding: 2rem;
+}
+
+@keyframes quantumFloat {
+    0%, 100% { 
+        transform: translateY(0px) rotateY(0deg); 
+    }
+    25% { 
+        transform: translateY(-20px) rotateY(90deg); 
+    }
+    50% { 
+        transform: translateY(-40px) rotateY(180deg); 
+    }
+    75% { 
+        transform: translateY(-20px) rotateY(270deg); 
+    }
+}
+
+@keyframes particleBurst {
+    0%, 100% { 
+        opacity: 0; 
+        transform: scale(1);
+    }
+    50% { 
+        opacity: 1; 
+        transform: scale(1.5);
+    }
+}
+
+@keyframes neonPulse {
+    0%, 100% { 
+        box-shadow: 0 0 5px var(--neon-cyan);
+    }
+    50% { 
+        box-shadow: 0 0 20px var(--neon-cyan), 0 0 30px var(--neon-cyan);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .holo-coin {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .coin-icon {
+        font-size: 2.5em;
+    }
+    
+    .protocol-btn {
+        padding: 10px 16px;
+        font-size: 0.9em;
+        margin-bottom: 10px;
+        width: 100%;
+    }
+    
+    .btn-neon-pulse {
+        padding: 12px 24px;
+        font-size: 1em;
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}

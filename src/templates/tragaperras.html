@@ -1,0 +1,615 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-xl-8">
+        <div class="card game-card">
+            <div class="card-header">
+                <i class="fas fa-sliders-h me-2"></i><!--Nombre superior -->
+                Tragaperras (Slots Machine)
+            </div>
+            <div class="card-body">
+                <!-- Panel de Control -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="digital-display text-center mb-3">
+                            <div class="text-small text-uppercase" style="color: var(--neon-green);">
+                                <i class="fas fa-coins me-2"></i>BALANCE INICIAL
+                            </div>
+                            <div class="h3 mb-0 text-gradient fw-bold">
+                                $<span id="balance">{{ "%.2f"|format(current_user.balance) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="digital-display text-center mb-3">
+                            <div class="text-small text-uppercase" style="color: var(--neon-cyan);">
+                                <i class="fas fa-bolt me-2"></i>ÚLTIMO PREMIO
+                            </div>
+                            <div class="h3 mb-0 text-gradient fw-bold" id="ultimo-premio">
+                                $0.00
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controles de Apuesta -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label for="cantidad" class="form-label">
+                            <i class="fas fa-money-bill-wave me-2"></i>CANTIDAD A APOSTAR
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-cyan text-cyan">
+                                <i class="fas fa-dollar-sign"></i>
+                            </span>
+                            <input type="number" class="form-control" id="cantidad" 
+                                   min="1" max="{{ current_user.balance }}" step="1" value="10">
+                        </div>
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end">
+                        <button class="btn btn-primary btn-lg w-100" onclick="girarTragaperras()" id="btn-girar">
+                            <i class="fas fa-play me-2"></i>GIRAR RODILLOS
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Máquina Tragaperras -->
+                <div class="tragaperras-container mb-5">
+                    <div class="rodillos">
+                        <div class="rodillo" id="rodillo1">
+                            <div class="simbolo-container">
+                                <div class="simbolo">🍒</div>
+                            </div>
+                        </div>
+                        <div class="rodillo" id="rodillo2">
+                            <div class="simbolo-container">
+                                <div class="simbolo">🍋</div>
+                            </div>
+                        </div>
+                        <div class="rodillo" id="rodillo3">
+                            <div class="simbolo-container">
+                                <div class="simbolo">🍊</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="linea-pago"></div>
+                </div>
+
+                <!-- Resultados -->
+                <div id="resultado" class="text-center"></div>
+
+                <!-- Tabla de Pagos -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <i class="fas fa-table me-2"></i>TABLA DE PREMIOS
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-4 mb-3">
+                                <div class="premio-item">
+                                    <div class="simbolos-combinacion">7️⃣7️⃣7️⃣</div>
+                                    <div class="premio-valor text-success">50x</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="premio-item">
+                                    <div class="simbolos-combinacion">💎💎💎</div>
+                                    <div class="premio-valor text-success">30x</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="premio-item">
+                                    <div class="simbolos-combinacion">⭐⭐⭐</div>
+                                    <div class="premio-valor text-success">20x</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="premio-item">
+                                    <div class="simbolos-combinacion">🍒🍒🍒</div>
+                                    <div class="premio-valor text-warning">10x</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="premio-item">
+                                    <div class="simbolos-combinacion">🍋🍋🍋</div>
+                                    <div class="premio-valor text-warning">8x</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="premio-item">
+                                    <div class="simbolos-combinacion">🍊🍊🍊</div>
+                                    <div class="premio-valor text-warning">6x</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="premio-item">
+                                    <div class="simbolos-combinacion">❓❓❓</div>
+                                    <div class="premio-valor text-info">2x (2 igual)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Símbolos disponibles en la tragaperras
+const simbolos = ['🍒', '🍋', '🍊', '⭐', '7️⃣', '💎'];
+
+// Tabla de premios coeficientes
+const premios = {
+    '7️⃣7️⃣7️⃣': 50,
+    '💎💎💎': 30,
+    '⭐⭐⭐': 20,
+    '🍒🍒🍒': 10,
+    '🍋🍋🍋': 8,
+    '🍊🍊🍊': 6
+};
+
+let girando = false;
+
+function girarTragaperras() {
+    const cantidad = parseFloat(document.getElementById('cantidad').value);
+    const balance = parseFloat('{{ current_user.balance }}');
+    const btnGirar = document.getElementById('btn-girar');
+    
+    if (!cantidad || cantidad <= 0) {
+        mostrarResultado('Ingresa una cantidad válida', 'info');
+        return;
+    }
+    
+    if (cantidad > balance) {
+        mostrarResultado('Fondos insuficientes', 'info');
+        return;
+    }
+    
+    if (girando) return;
+    
+    girando = true;
+    btnGirar.disabled = true;
+    btnGirar.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>GIRANDO...';
+    document.getElementById('resultado').innerHTML = '';
+    
+    // Restar apuesta del balance temporalmente
+    const balanceActual = parseFloat(document.getElementById('balance').textContent);
+    document.getElementById('balance').textContent = (balanceActual - cantidad).toFixed(2);
+    
+    // Animación de giro mejorada
+    let giros = 0;
+    const maxGiros = 25;
+    
+    const interval = setInterval(() => {
+        girarRodilloRapido('rodillo1');
+        girarRodilloRapido('rodillo2');
+        girarRodilloRapido('rodillo3');
+        
+        giros++;
+        if (giros >= maxGiros) {
+            clearInterval(interval);
+            
+            // Obtener resultado final con probabilidades
+            const resultado = generarResultadoConProbabilidades();
+            
+            // Mostrar resultado final
+            mostrarResultadoFinal(resultado, cantidad);
+        }
+    }, 80);
+}
+
+function girarRodilloRapido(rodilloId) {
+    const rodillo = document.getElementById(rodilloId);
+    const simboloAleatorio = simbolos[Math.floor(Math.random() * simbolos.length)];
+    rodillo.innerHTML = `<div class="simbolo-container"><div class="simbolo">${simboloAleatorio}</div></div>`;
+}
+
+function generarResultadoConProbabilidades() {
+    const resultados = [];
+    
+    for (let i = 0; i < 3; i++) {
+        const rand = Math.random();
+        let simbolo;
+        
+        // Probabilidades ajustadas
+        if (rand < 0.25) simbolo = '🍒';        // 25%
+        else if (rand < 0.45) simbolo = '🍋';   // 20%
+        else if (rand < 0.60) simbolo = '🍊';   // 15%
+        else if (rand < 0.75) simbolo = '⭐';   // 15%
+        else if (rand < 0.90) simbolo = '💎';   // 15%
+        else simbolo = '7️⃣';                   // 10%
+        
+        resultados.push(simbolo);
+    }
+    
+    return resultados;
+}
+
+function mostrarResultadoFinal(resultados, cantidad) {
+    // Actualizar visualmente los rodillos con el resultado final
+    document.getElementById('rodillo1').innerHTML = `<div class="simbolo-container"><div class="simbolo">${resultados[0]}</div></div>`;
+    document.getElementById('rodillo2').innerHTML = `<div class="simbolo-container"><div class="simbolo">${resultados[1]}</div></div>`;
+    document.getElementById('rodillo3').innerHTML = `<div class="simbolo-container"><div class="simbolo">${resultados[2]}</div></div>`;
+    
+    // Calcular premio
+    const premio = calcularPremio(resultados, cantidad);
+    const gano = premio > 0;
+    
+    // Efectos visuales para ganador
+    if (gano) {
+        document.querySelector('.tragaperras-container').classList.add('win-animation');
+        
+        // Añadir clase de ganador a los rodillos individuales
+        document.querySelectorAll('.rodillo').forEach(rodillo => {
+            rodillo.classList.add('win-symbol');
+        });
+        
+        setTimeout(() => {
+            document.querySelector('.tragaperras-container').classList.remove('win-animation');
+            document.querySelectorAll('.rodillo').forEach(rodillo => {
+                rodillo.classList.remove('win-symbol');
+            });
+        }, 2000);
+    }
+    
+    setTimeout(() => {
+        enviarResultadoTragaperras(gano ? 'ganada' : 'perdida', premio, cantidad);
+        
+        if (gano) {
+            document.getElementById('resultado').innerHTML = `
+                <div class="alert alert-success">
+                    <h4>¡GANADOR! 🎉</h4>
+                    <p>Combinación: ${resultados.join(' ')}</p>
+                    <p class="fw-bold">Premio: $${premio.toFixed(2)}</p>
+                </div>
+            `;
+            document.getElementById('ultimo-premio').textContent = '$' + premio.toFixed(2);
+            
+            // Efecto de confeti para ganancias grandes
+            if (premio >= cantidad * 20) {
+                crearConfeti();
+            }
+        } else {
+            document.getElementById('resultado').innerHTML = `
+                <div class="alert alert-danger">
+                    <h4>Sin premio 😞</h4>
+                    <p>Combinación: ${resultados.join(' ')}</p>
+                    <p>Mejor suerte la próxima vez</p>
+                </div>
+            `;
+        }
+        
+        girando = false;
+        document.getElementById('btn-girar').disabled = false;
+        document.getElementById('btn-girar').innerHTML = '<i class="fas fa-play me-2"></i>GIRAR RODILLOS';
+    }, 500);
+}
+
+function calcularPremio(resultados, apuesta) {
+    const combinacion = resultados.join('');
+    
+    // Verificar combinaciones exactas
+    if (premios[combinacion]) {
+        return apuesta * premios[combinacion];
+    }
+    
+    // Verificar 2 símbolos iguales
+    if (resultados[0] === resultados[1] || resultados[1] === resultados[2] || resultados[0] === resultados[2]) {
+        return apuesta * 2;
+    }
+    
+    return 0;
+}
+
+function crearConfeti() {
+    const confettiContainer = document.createElement('div');
+    confettiContainer.style.position = 'fixed';
+    confettiContainer.style.top = '0';
+    confettiContainer.style.left = '0';
+    confettiContainer.style.width = '100%';
+    confettiContainer.style.height = '100%';
+    confettiContainer.style.pointerEvents = 'none';
+    confettiContainer.style.zIndex = '9999';
+    
+    document.body.appendChild(confettiContainer);
+    
+    // Crear más confeti con diferentes estilos
+    const confettiTypes = ['🎉', '🎊', '⭐', '💎', '💰', '🍒', '🍋', '🍊', '7️⃣'];
+    
+    for (let i = 0; i < 200; i++) {
+        const confetti = document.createElement('div');
+        confetti.innerHTML = confettiTypes[Math.floor(Math.random() * confettiTypes.length)];
+        confetti.style.position = 'absolute';
+        confetti.style.fontSize = (Math.random() * 20 + 15) + 'px';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.opacity = '0.8';
+        confetti.style.animation = `confetti-fall ${Math.random() * 3 + 2}s linear forwards`;
+        confetti.style.animationDelay = (Math.random() * 1) + 's';
+        
+        confettiContainer.appendChild(confetti);
+    }
+    
+    setTimeout(() => {
+        if (confettiContainer.parentNode) {
+            document.body.removeChild(confettiContainer);
+        }
+    }, 4000);
+}
+
+function mostrarResultado(mensaje, tipo) {
+    const resultadoDiv = document.getElementById('resultado');
+    let clase = 'alert-info';
+    let icono = '<i class="fas fa-info-circle me-2"></i>';
+    
+    if (tipo === 'success') {
+        clase = 'alert-success';
+        icono = '<i class="fas fa-check-circle me-2"></i>';
+    } else if (tipo === 'danger') {
+        clase = 'alert-danger';
+        icono = '<i class="fas fa-exclamation-circle me-2"></i>';
+    }
+    
+    resultadoDiv.innerHTML = `
+        <div class="alert ${clase}">
+            ${icono}<strong>${mensaje}</strong>
+        </div>
+    `;
+}
+
+function enviarResultadoTragaperras(resultado, ganancia, cantidad) {
+    fetch('/api/tragaperras/apostar', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            cantidad: cantidad,
+            resultado: resultado,
+            ganancia: ganancia
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            mostrarResultado(data.error, 'danger');
+            // Revertir cambio temporal del balance
+            const balanceActual = parseFloat(document.getElementById('balance').textContent);
+            document.getElementById('balance').textContent = (balanceActual + cantidad).toFixed(2);
+            return;
+        }
+        document.getElementById('balance').textContent = data.nuevo_balance.toFixed(2);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarResultado('Error de conexión', 'danger');
+        // Revertir cambio temporal del balance
+        const balanceActual = parseFloat(document.getElementById('balance').textContent);
+        document.getElementById('balance').textContent = (balanceActual + cantidad).toFixed(2);
+        
+        girando = false;
+        document.getElementById('btn-girar').disabled = false;
+        document.getElementById('btn-girar').innerHTML = '<i class="fas fa-play me-2"></i>GIRAR RODILLOS';
+    });
+}
+
+// Inicialización
+document.addEventListener('DOMContentLoaded', function() {
+    // Asegurar que el input de cantidad tenga valores válidos
+    const cantidadInput = document.getElementById('cantidad');
+    cantidadInput.addEventListener('change', function() {
+        const max = parseFloat('{{ current_user.balance }}');
+        const value = parseFloat(this.value);
+        
+        if (value < 1) this.value = 1;
+        if (value > max) this.value = max;
+    });
+});
+</script>
+
+<style>
+.tragaperras-container {
+    background: linear-gradient(135deg, #2d2d4d, #1a1a2e);
+    border: 3px solid var(--neon-cyan);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: var(--glow-cyan);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.rodillos {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.rodillo {
+    width: 140px;
+    height: 140px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 3px solid var(--neon-cyan);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 
+        inset 0 0 25px rgba(0, 243, 255, 0.3),
+        0 0 15px rgba(0, 243, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.simbolo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+}
+
+.simbolo {
+    font-size: 5.5em;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+    transform: scale(1);
+    transition: transform 0.2s ease;
+}
+
+/* Mejora específica para cada emoji */
+.rodillo .simbolo-container .simbolo {
+    font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+}
+
+.linea-pago {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 85%;
+    height: 6px;
+    background: linear-gradient(90deg, transparent, rgba(40, 230, 81, 0.726), transparent);
+    box-shadow: 
+        0 0 20px rgba(40, 230, 81, 0.726),
+        0 0 40px rgba(255, 215, 0, 0.3);
+    z-index: 2;
+    border-radius: 3px;
+}
+
+.premio-item {
+    padding: 15px;
+    border: 1px solid var(--neon-cyan);
+    border-radius: 10px;
+    background: rgba(0, 243, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.premio-item:hover {
+    transform: translateY(-5px);
+    border-color: var(--neon-pink);
+    box-shadow: var(--glow-pink);
+}
+
+.simbolos-combinacion {
+    font-size: 2.2em;
+    margin-bottom: 10px;
+    line-height: 1.2;
+    font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+}
+
+.premio-valor {
+    font-size: 1.3em;
+    font-weight: 800;
+    font-family: 'Orbitron', monospace;
+}
+
+/* ANIMACIÓN DE CONFETI CORREGIDA */
+@keyframes confetti-fall {
+    0% {
+        transform: translateY(-100px) rotate(0deg) translateX(0px);
+        opacity: 1;
+    }
+    70% {
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateY(100vh) rotate(360deg) translateX(calc((var(--random-x) - 0.5) * 200px));
+        opacity: 0;
+    }
+}
+
+/* Aplicar variables CSS para movimiento horizontal aleatorio */
+.confetti-piece {
+    --random-x: calc(var(--i) / var(--total));
+}
+
+/* Efectos de ganador */
+@keyframes pulse-win {
+    0% {
+        box-shadow: 
+            var(--glow-cyan),
+            inset 0 0 25px rgba(0, 243, 255, 0.3);
+    }
+    50% {
+        box-shadow: 
+            0 0 30px rgba(40, 230, 81, 0.8),
+            0 0 60px rgba(40, 230, 81, 0.4),
+            inset 0 0 35px rgba(40, 230, 81, 0.4);
+        border-color: rgba(40, 230, 81, 0.8);
+    }
+    100% {
+        box-shadow: 
+            var(--glow-cyan),
+            inset 0 0 25px rgba(0, 243, 255, 0.3);
+    }
+}
+
+.win-animation {
+    animation: pulse-win 0.5s ease-in-out 3;
+}
+
+/* Efecto de brillo en símbolos ganadores */
+.rodillo.win-symbol .simbolo {
+    animation: symbol-glow 0.6s ease-in-out 3;
+}
+
+@keyframes symbol-glow {
+    0%, 100% {
+        filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+        transform: scale(1);
+    }
+    50% {
+        filter: drop-shadow(0 0 15px rgba(40, 230, 81, 0.8)) brightness(1.2);
+        transform: scale(1.1);
+    }
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+    .rodillo {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .simbolo {
+        font-size: 4em;
+    }
+    
+    .rodillos {
+        gap: 15px;
+    }
+    
+    .tragaperras-container {
+        padding: 20px;
+    }
+}
+
+/* Mejoras específicas para diferentes navegadores */
+/* Chrome/Safari */
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+    .simbolo {
+        -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.3);
+    }
+}
+
+/* Firefox */
+@-moz-document url-prefix() {
+    .simbolo {
+        text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+    }
+}
+</style>
+{% endblock %}

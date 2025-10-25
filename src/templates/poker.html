@@ -1,0 +1,609 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-xl-10">
+        <div class="card game-card cyber-grid">
+            <div class="card-header">
+                <i class="fas fa-chess-queen me-2"></i>
+                POKER HOLOGRÁFICO
+            </div>
+            <div class="card-body">
+                <!-- Panel de Control -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="digital-display text-center mb-3">
+                            <div class="text-small text-uppercase" style="color: var(--neon-cyan);">
+                                <i class="fas fa-coins me-2"></i>BALANCE
+                            </div>
+                            <div class="h3 mb-0 text-gradient fw-bold">
+                                $<span id="balance">{{ "%.2f"|format(current_user.balance) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="digital-display text-center mb-3">
+                            <div class="text-small text-uppercase" style="color: var(--neon-pink);">
+                                <i class="fas fa-bolt me-2"></i>ESTADO DEL SISTEMA
+                            </div>
+                            <div class="h3 mb-0 text-gradient fw-bold" id="estado-sistema">
+                                EN ESPERA
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controles de Apuesta -->
+                <div id="controles-apuesta" class="mb-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="cantidad" class="form-label">
+                                <i class="fas fa-money-bill-wave me-2"></i>CANTIDAD A APOSTAR
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-dark border-cyan text-cyan">
+                                    <i class="fas fa-dollar-sign"></i>
+                                </span>
+                                <input type="number" class="form-control" id="cantidad" 
+                                       min="1" max="{{ current_user.balance }}" step="1" value="10">
+                            </div>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end">
+                            <button class="btn btn-primary btn-lg w-100" onclick="iniciarPoker()" id="btn-repartir">
+                                <i class="fas fa-play me-2"></i>INICIAR SIMULACIÓN
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mesa de Poker Holográfica -->
+                <div id="mesa-poker" style="display: none;">
+                    <div class="text-center mb-4">
+                        <div class="digital-display d-inline-block px-4">
+                            <div id="estado-juego" class="text-gradient fw-bold">
+                                ANALIZANDO PATRONES DE MANO...
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Campo de Cartas Holográficas -->
+                    <div class="hologram-field mb-5">
+                        <div id="mano-poker" class="cartas-poker-holograficas">
+                            <!-- Cartas se insertarán aquí -->
+                        </div>
+                        <div class="hologram-grid"></div>
+                    </div>
+                    
+                    <!-- Controles de Juego -->
+                    <div id="controles-juego" class="text-center">
+                        <button class="btn btn-success me-2 btn-neon" onclick="sacarNuevasCartas()">
+                            <i class="fas fa-sync-alt me-2"></i>OPTIMIZAR CARTAS
+                        </button>
+                        <button class="btn btn-warning me-2 btn-neon" onclick="conservarTodo()">
+                            <i class="fas fa-lock me-2"></i>BLOQUEAR TODAS
+                        </button>
+                        <button class="btn btn-danger btn-neon" onclick="reiniciarPoker()">
+                            <i class="fas fa-power-off me-2"></i>REINICIAR SISTEMA
+                        </button>
+                    </div>
+                    
+                    <!-- Tabla de Pagos Holográfica -->
+                    <div class="card mt-4 glass-effect">
+                        <div class="card-header">
+                            <i class="fas fa-table me-2"></i>MATRIZ DE PAGOS
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-4 mb-3">
+                                    <div class="premio-item">
+                                        <div class="premio-simbolo">👑</div>
+                                        <div class="premio-nombre">Escalera Real</div>
+                                        <div class="premio-valor text-success">250x</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="premio-item">
+                                        <div class="premio-simbolo">⚡</div>
+                                        <div class="premio-nombre">Escalera Color</div>
+                                        <div class="premio-valor text-success">50x</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="premio-item">
+                                        <div class="premio-simbolo">💎</div>
+                                        <div class="premio-nombre">Póker</div>
+                                        <div class="premio-valor text-success">25x</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="premio-item">
+                                        <div class="premio-simbolo">🏠</div>
+                                        <div class="premio-nombre">Full House</div>
+                                        <div class="premio-valor text-warning">9x</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="premio-item">
+                                        <div class="premio-simbolo">🎨</div>
+                                        <div class="premio-nombre">Color</div>
+                                        <div class="premio-valor text-warning">6x</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="premio-item">
+                                        <div class="premio-simbolo">📈</div>
+                                        <div class="premio-nombre">Escalera</div>
+                                        <div class="premio-valor text-warning">4x</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="premio-item">
+                                        <div class="premio-simbolo">🔺</div>
+                                        <div class="premio-nombre">Trío/Pareja</div>
+                                        <div class="premio-valor text-info">1-3x</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="resultado" class="mt-4"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let manoPoker = [];
+let cartasSeleccionadas = [];
+let apuestaPoker = 0;
+let ronda = 1;
+
+const valores = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+const palos = ['♠', '♥', '♦', '♣'];
+
+function iniciarPoker() {
+    const cantidad = parseFloat(document.getElementById('cantidad').value);
+    const balance = parseFloat('{{ current_user.balance }}');
+    
+    if (!cantidad || cantidad <= 0) {
+        mostrarNotificacion('INGRESA UNA CANTIDAD VÁLIDA', 'error');
+        return;
+    }
+    
+    if (cantidad > balance) {
+        mostrarNotificacion('FONDOS INSUFICIENTES', 'error');
+        return;
+    }
+
+    apuestaPoker = cantidad;
+    ronda = 1;
+    cartasSeleccionadas = [];
+    
+    document.getElementById('controles-apuesta').style.display = 'none';
+    document.getElementById('mesa-poker').style.display = 'block';
+    document.getElementById('estado-sistema').textContent = 'SIMULACIÓN ACTIVA';
+    document.getElementById('estado-sistema').style.color = 'var(--neon-green)';
+    
+    // Repartir 5 cartas con efecto holográfico
+    manoPoker = [];
+    document.getElementById('mano-poker').innerHTML = '';
+    
+    for (let i = 0; i < 5; i++) {
+        setTimeout(() => repartirCartaPoker(), i * 300);
+    }
+}
+
+function repartirCartaPoker() {
+    const valor = valores[Math.floor(Math.random() * valores.length)];
+    const palo = palos[Math.floor(Math.random() * palos.length)];
+    const carta = { valor, palo };
+    manoPoker.push(carta);
+    
+    const cartaElement = document.createElement('div');
+    cartaElement.className = 'carta-holografica';
+    cartaElement.innerHTML = `
+        <div class="hologram-effect"></div>
+        <div class="carta-contenido">
+            <div class="carta-valor-holo">${valor}</div>
+            <div class="carta-palo-holo ${palo === '♥' || palo === '♦' ? 'text-danger' : 'text-cyan'}">${palo}</div>
+            <div class="carta-patron"></div>
+        </div>
+        <div class="carta-borde"></div>
+    `;
+    cartaElement.onclick = () => seleccionarCarta(manoPoker.length - 1, cartaElement);
+    
+    document.getElementById('mano-poker').appendChild(cartaElement);
+}
+
+function seleccionarCarta(indice, elemento) {
+    if (ronda !== 1) return;
+    
+    if (cartasSeleccionadas.includes(indice)) {
+        cartasSeleccionadas = cartasSeleccionadas.filter(i => i !== indice);
+        elemento.classList.remove('carta-seleccionada');
+        elemento.querySelector('.carta-borde').style.borderColor = 'var(--neon-cyan)';
+    } else {
+        cartasSeleccionadas.push(indice);
+        elemento.classList.add('carta-seleccionada');
+        elemento.querySelector('.carta-borde').style.borderColor = 'var(--neon-green)';
+    }
+}
+
+function sacarNuevasCartas() {
+    ronda = 2;
+    document.getElementById('estado-juego').textContent = 'PROCESANDO OPTIMIZACIÓN...';
+    document.getElementById('btn-repartir').disabled = true;
+    
+    // Efecto de transición para cartas no seleccionadas
+    for (let i = 0; i < 5; i++) {
+        if (!cartasSeleccionadas.includes(i)) {
+            const cartaElement = document.getElementById('mano-poker').children[i];
+            cartaElement.style.animation = 'hologramFadeOut 0.5s ease-in-out';
+            
+            setTimeout(() => {
+                const valor = valores[Math.floor(Math.random() * valores.length)];
+                const palo = palos[Math.floor(Math.random() * palos.length)];
+                manoPoker[i] = { valor, palo };
+                
+                cartaElement.innerHTML = `
+                    <div class="hologram-effect"></div>
+                    <div class="carta-contenido">
+                        <div class="carta-valor-holo">${valor}</div>
+                        <div class="carta-palo-holo ${palo === '♥' || palo === '♦' ? 'text-danger' : 'text-cyan'}">${palo}</div>
+                        <div class="carta-patron"></div>
+                    </div>
+                    <div class="carta-borde"></div>
+                `;
+                cartaElement.style.animation = 'hologramFadeIn 0.5s ease-in-out';
+                cartaElement.classList.remove('carta-seleccionada');
+            }, 500);
+        }
+    }
+    
+    setTimeout(evaluarMano, 1500);
+}
+
+function conservarTodo() {
+    cartasSeleccionadas = [0, 1, 2, 3, 4];
+    const cartas = document.querySelectorAll('.carta-holografica');
+    cartas.forEach((carta, index) => {
+        carta.classList.add('carta-seleccionada');
+        carta.querySelector('.carta-borde').style.borderColor = 'var(--neon-green)';
+    });
+    sacarNuevasCartas();
+}
+
+function evaluarMano() {
+    const resultado = determinarMano(manoPoker);
+    finalizarPoker(resultado);
+}
+
+function determinarMano(mano) {
+    // Implementación simplificada de evaluación de mano de poker
+    const valores = mano.map(carta => carta.valor);
+    const palos = mano.map(carta => carta.palo);
+    
+    // Verificar escalera real (simplificado)
+    const tieneAs = valores.includes('A');
+    const tieneFiguras = valores.filter(v => ['10', 'J', 'Q', 'K'].includes(v)).length >= 4;
+    
+    if (tieneAs && tieneFiguras && new Set(palos).size === 1) {
+        return { tipo: 'ESCALERA REAL', multiplicador: 250, icono: '👑' };
+    }
+    
+    // Simular resultados aleatorios para esta demo
+    const resultadosPosibles = [
+        { tipo: 'ESCALERA DE COLOR', multiplicador: 50, icono: '⚡' },
+        { tipo: 'PÓKER', multiplicador: 25, icono: '💎' },
+        { tipo: 'FULL HOUSE', multiplicador: 9, icono: '🏠' },
+        { tipo: 'COLOR', multiplicador: 6, icono: '🎨' },
+        { tipo: 'ESCALERA', multiplicador: 4, icono: '📈' },
+        { tipo: 'TRÍO', multiplicador: 3, icono: '🔺' },
+        { tipo: 'DOBLE PAREJA', multiplicador: 2, icono: '🔺' },
+        { tipo: 'PAREJA', multiplicador: 1, icono: '🔺' },
+        { tipo: 'CARTA ALTA', multiplicador: 0, icono: '📄' }
+    ];
+    
+    // Probabilidad ponderada
+    const rand = Math.random();
+    if (rand < 0.02) return resultadosPosibles[0];
+    if (rand < 0.05) return resultadosPosibles[1];
+    if (rand < 0.1) return resultadosPosibles[2];
+    if (rand < 0.2) return resultadosPosibles[3];
+    if (rand < 0.3) return resultadosPosibles[4];
+    if (rand < 0.45) return resultadosPosibles[5];
+    if (rand < 0.6) return resultadosPosibles[6];
+    if (rand < 0.8) return resultadosPosibles[7];
+    return resultadosPosibles[8];
+}
+
+function finalizarPoker(resultado) {
+    const ganancia = apuestaPoker * resultado.multiplicador;
+    
+    document.getElementById('estado-juego').textContent = `${resultado.icono} ${resultado.tipo} ${resultado.icono}`;
+    
+    let mensaje = '';
+    let clase = '';
+    
+    if (ganancia > 0) {
+        mensaje = `SISTEMA OPTIMIZADO - ${resultado.tipo}`;
+        clase = 'alert-success';
+    } else {
+        mensaje = `ANÁLISIS COMPLETADO - ${resultado.tipo}`;
+        clase = 'alert-danger';
+    }
+    
+    document.getElementById('resultado').innerHTML = `
+        <div class="alert ${clase} cyber-alert text-center">
+            <div class="display-4 mb-3">${resultado.icono}</div>
+            <h3 class="text-gradient">${mensaje}</h3>
+            ${ganancia > 0 ? `
+                <div class="mt-3">
+                    <div class="text-small text-uppercase">MULTIPLICADOR APLICADO</div>
+                    <div class="h1 fw-bold text-success">${resultado.multiplicador}x</div>
+                    <div class="h4 fw-bold">GANANCIA: $${ganancia.toFixed(2)}</div>
+                </div>
+            ` : `
+                <p class="mt-3">Continúa optimizando tu estrategia</p>
+            `}
+        </div>
+    `;
+    
+    // Enviar al servidor
+    fetch('/api/poker/apostar', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            cantidad: apuestaPoker,
+            resultado: ganancia > 0 ? 'ganada' : 'perdida',
+            ganancia: ganancia
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            mostrarNotificacion(data.error, 'error');
+            return;
+        }
+        document.getElementById('balance').textContent = data.nuevo_balance.toFixed(2);
+        document.getElementById('estado-sistema').textContent = 'ANÁLISIS COMPLETADO';
+    })
+    .finally(() => {
+        document.getElementById('btn-repartir').disabled = false;
+    });
+}
+
+function reiniciarPoker() {
+    document.getElementById('controles-apuesta').style.display = 'block';
+    document.getElementById('mesa-poker').style.display = 'none';
+    document.getElementById('mano-poker').innerHTML = '';
+    document.getElementById('resultado').innerHTML = '';
+    document.getElementById('estado-sistema').textContent = 'EN ESPERA';
+    document.getElementById('estado-sistema').style.color = 'var(--neon-cyan)';
+    cartasSeleccionadas = [];
+}
+
+function mostrarNotificacion(mensaje, tipo) {
+    // Implementación simple de notificación
+    alert(mensaje);
+}
+</script>
+
+<style>
+.hologram-field {
+    position: relative;
+    background: linear-gradient(135deg, rgba(0, 243, 255, 0.1), rgba(255, 0, 255, 0.1));
+    border: 2px solid var(--neon-cyan);
+    border-radius: var(--border-radius-cyber);
+    padding: 40px 20px;
+    margin-bottom: 30px;
+    overflow: hidden;
+}
+
+.hologram-grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        linear-gradient(90deg, transparent 95%, rgba(0, 243, 255, 0.1) 100%),
+        linear-gradient(0deg, transparent 95%, rgba(0, 243, 255, 0.1) 100%);
+    background-size: 30px 30px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.cartas-poker-holograficas {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 2;
+}
+
+.carta-holografica {
+    width: 120px;
+    height: 170px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    perspective: 1000px;
+}
+
+.carta-contenido {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 15px;
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+    border: 2px solid var(--neon-cyan);
+}
+
+.carta-borde {
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border: 2px solid var(--neon-cyan);
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    z-index: 1;
+}
+
+.hologram-effect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 30%, rgba(0, 243, 255, 0.1) 50%, transparent 70%);
+    border-radius: 12px;
+    animation: hologramScan 3s linear infinite;
+    z-index: 3;
+    pointer-events: none;
+}
+
+.carta-valor-holo {
+    font-size: 1.4em;
+    font-weight: 800;
+    font-family: 'Orbitron', monospace;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px currentColor;
+}
+
+.carta-palo-holo {
+    font-size: 2.5em;
+    text-align: center;
+    text-shadow: 0 0 15px currentColor;
+}
+
+.carta-patron {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    height: 80%;
+    background: 
+        radial-gradient(circle, transparent 20%, rgba(0, 243, 255, 0.1) 100%);
+    opacity: 0.3;
+}
+
+.carta-holografica:hover {
+    transform: translateY(-10px) scale(1.05);
+}
+
+.carta-holografica:hover .carta-borde {
+    border-color: var(--neon-pink);
+    box-shadow: 0 0 30px var(--neon-pink);
+}
+
+.carta-seleccionada .carta-contenido {
+    background: linear-gradient(135deg, #1a2e1a, #162e16);
+    border-color: var(--neon-green);
+}
+
+.carta-seleccionada .carta-borde {
+    border-color: var(--neon-green);
+    box-shadow: 0 0 30px var(--neon-green);
+}
+
+.premio-item {
+    padding: 20px;
+    border: 1px solid var(--neon-cyan);
+    border-radius: 10px;
+    background: rgba(0, 243, 255, 0.05);
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.premio-item:hover {
+    transform: translateY(-5px);
+    border-color: var(--neon-pink);
+    box-shadow: var(--glow-pink);
+}
+
+.premio-simbolo {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+.premio-nombre {
+    font-size: 0.9em;
+    color: var(--neon-cyan);
+    margin-bottom: 5px;
+    font-family: 'Orbitron', monospace;
+}
+
+.premio-valor {
+    font-size: 1.3em;
+    font-weight: 800;
+    font-family: 'Orbitron', monospace;
+}
+
+.btn-neon {
+    font-family: 'Orbitron', monospace;
+    font-weight: 600;
+    border: 2px solid;
+    background: rgba(0, 0, 0, 0.8);
+    transition: all 0.3s ease;
+}
+
+.cyber-alert {
+    background: rgba(0, 0, 0, 0.9);
+    border: 2px solid;
+    border-radius: var(--border-radius-cyber);
+    backdrop-filter: blur(10px);
+}
+
+@keyframes hologramScan {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+@keyframes hologramFadeIn {
+    0% { opacity: 0; transform: scale(0.8) rotateY(180deg); }
+    100% { opacity: 1; transform: scale(1) rotateY(0deg); }
+}
+
+@keyframes hologramFadeOut {
+    0% { opacity: 1; transform: scale(1) rotateY(0deg); }
+    100% { opacity: 0; transform: scale(0.8) rotateY(180deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .carta-holografica {
+        width: 80px;
+        height: 120px;
+    }
+    
+    .carta-valor-holo {
+        font-size: 1em;
+    }
+    
+    .carta-palo-holo {
+        font-size: 1.8em;
+    }
+    
+    .cartas-poker-holograficas {
+        gap: 10px;
+    }
+}
+</style>
+{% endblock %}

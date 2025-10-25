@@ -11,6 +11,9 @@
                         <h1 class="hero-title mb-3" style="font-size: 3rem;">
                             BIENVENIDO, <span class="text-gradient">{{ user.username }}</span>
                         </h1>
+                        <p class="hero-subtitle mb-0">
+                            Desafia al Azar en nuestra plataforma de juegos LogBait.
+                        </p>
                     </div>
                     <div class="col-md-4 text-md-end">
                         <div class="digital-display d-inline-block">
@@ -28,55 +31,132 @@
     </div>
 </div>
 
-<!-- Panel de Estado del Sistema -->
-<div class="row justify-content-center">
-    <div class="col-lg-10">
-        <div class="card" style="border: 2px solid var(--neon-green); background: rgba(0, 255, 136, 0.05);">
-            <div class="card-body text-center p-5">
-                <div class="display-1 text-gradient mb-4" style="font-size: 5rem;">
-                    <i class="fas fa-cogs"></i>
-                </div>
-                <h2 class="text-white mb-3">SISTEMA EN MODO BÁSICO</h2>
-                <p class="lead mb-4">
-                    Actualmente solo están disponibles las funciones de autenticación y dashboard básico.
-                    Las funcionalidades de juegos estarán disponibles en futuras actualizaciones del sistema.
+<!-- Panel de Juegos Holográfico -->
+<div class="row g-5">
+    <!-- Blackjack -->
+    <div class="col-xl-3 col-lg-4 col-md-6">
+        <div class="card game-card matrix-rain">
+            <div class="card-body text-center p-4">
+                <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">🎲</div>
+                <h3 class="card-title">BLACKJACK</h3>
+                <p class="card-text mb-4">
+                    Algoritmo de 21 puntos. Enfrenta a la IA central en duelo probabilístico.
                 </p>
-                
-                <div class="row mt-5">
-                    <div class="col-md-4 mb-4">
-                        <div class="card game-card">
-                            <div class="card-body">
-                                <i class="fas fa-user-circle display-4 text-primary mb-3"></i>
-                                <h5>Autenticación</h5>
-                                <p class="small text-muted">Sistema de login y registro activo</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-4">
-                        <div class="card game-card">
-                            <div class="card-body">
-                                <i class="fas fa-tachometer-alt display-4 text-success mb-3"></i>
-                                <h5>Dashboard</h5>
-                                <p class="small text-muted">Panel de control principal</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-4">
-                        <div class="card game-card">
-                            <div class="card-body">
-                                <i class="fas fa-shield-alt display-4 text-warning mb-3"></i>
-                                <h5>Seguridad</h5>
-                                <p class="small text-muted">Sistema protegido y seguro</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <a href="{{ url_for('blackjack.home') }}" class="btn btn-primary btn-lg w-100">
+                    <i class="fas fa-brain me-2"></i>JUGAR YA
+                </a>
+            </div>
+        </div>
+    </div>
 
-                <div class="mt-5">
-                    <a href="{{ url_for('logout.home') }}" class="btn btn-danger btn-lg">
-                        <i class="fas fa-power-off me-2"></i>DESCONECTAR SISTEMA
-                    </a>
-                </div>
+    <!-- Poker -->
+    <div class="col-xl-3 col-lg-4 col-md-6">
+        <div class="card game-card matrix-rain" style="animation-delay: 0.2s">
+            <div class="card-body text-center p-4">
+                <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">🃏</div>
+                <h3 class="card-title">POKER HOLOGRÁFICO</h3>
+                <p class="card-text mb-4">
+                    Sistema de manos probabilísticas. Optimiza tu estrategia de combinaciones.
+                </p>
+                <a href="{{ url_for('poker.home') }}" class="btn btn-primary btn-lg w-100">
+                    <i class="fas fa-chess-queen me-2"></i>RETA A LA IA
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cara o Cruz -->
+    <div class="col-xl-3 col-lg-4 col-md-6">
+        <div class="card game-card matrix-rain" style="animation-delay: 0.4s">
+            <div class="card-body text-center p-4">
+                <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">🪙</div>
+                <h3 class="card-title">COINFLIP</h3>
+                <p class="card-text mb-4">
+                    Experimento de probabilidad 50/50. Testea la teoría del caos controlado.
+                </p>
+                <a href="{{ url_for('coinflip.home') }}" class="btn btn-primary btn-lg w-100">
+                    <i class="fas fa-dice me-2"></i>TODO O NADA
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tragaperras -->
+    <div class="col-xl-3 col-lg-4 col-md-6">
+        <div class="card game-card matrix-rain" style="animation-delay: 0.6s">
+            <div class="card-body text-center p-4">
+                <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">🎰</div>
+                <h3 class="card-title">RODILLOS CUÁNTICOS</h3>
+                <p class="card-text mb-4">
+                    Generador de combinaciones aleatorias. Estudia distribuciones probabilísticas.
+                </p>
+                <a href="{{ url_for('tragaperras.home') }}" class="btn btn-primary btn-lg w-100">
+                    <i class="fas fa-cogs me-2"></i>GIRAR
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Carrera de Caballos -->
+    <div class="col-xl-3 col-lg-4 col-md-6">
+        <div class="card game-card matrix-rain" style="animation-delay: 0.8s">
+            <div class="card-body text-center p-4">
+                <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">🏇</div>
+                <h3 class="card-title">CARRERA ALGORÍTMICA</h3>
+                <p class="card-text mb-4">
+                    Simulador de variables múltiples. Analiza patrones de comportamiento.
+                </p>
+                <a href="{{ url_for('caballos.home') }}" class="btn btn-primary btn-lg w-100">
+                    <i class="fas fa-horse me-2"></i>INICIAR CARRERA
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="col-xl-3 col-lg-4 col-md-6">
+        <div class="card game-card matrix-rain" style="animation-delay: 1s">
+            <div class="card-body text-center p-4">
+                <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">📊</div>
+                <h3 class="card-title">PANEL DE DATOS</h3>
+                <p class="card-text mb-4">
+                    Centro de análisis. Monitoriza tu progreso y métricas.
+                </p>
+                <a href="{{ url_for('estadisticas.home') }}" class="btn btn-outline-primary btn-lg w-100">
+                    <i class="fas fa-chart-bar me-2"></i>ACCEDER DATOS
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Perfil -->
+    <div class="col-xl-3 col-lg-4 col-md-6">
+        <div class="card game-card matrix-rain" style="animation-delay: 1.2s">
+            <div class="card-body text-center p-4">
+                <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">👤</div>
+                <h3 class="card-title">PERFIL DE USUARIO</h3>
+                <p class="card-text mb-4">
+                    Configuración de identidad digital. Gestiona tu presencia en el sistema.
+                </p>
+                <a href="{{ url_for('perfil.home') }}" class="btn btn-outline-primary btn-lg w-100">
+                    <i class="fas fa-user-cog me-2"></i>CONFIGURAR SISTEMA
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sistema -->
+    <div class="col-xl-3 col-lg-4 col-md-6">
+        <div class="card game-card matrix-rain" style="animation-delay: 1.4s">
+            <div class="card-body text-center p-4">
+                <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">⚙️</div>
+                <h3 class="card-title">CENTRO DE CONTROL</h3>
+                <p class="card-text mb-4">
+                    Panel de administración del sistema. Acceso a configuraciones avanzadas.
+                </p>
+                <a href="{{ url_for('logout.home') }}" class="btn btn-danger btn-lg w-100">
+                    <i class="fas fa-power-off me-2"></i>DESCONECTAR SISTEMA
+                </a>
             </div>
         </div>
     </div>
@@ -91,7 +171,7 @@
                     <div class="col-md-9">
                         <h4 class="text-white mb-2">
                             <i class="fas fa-robot text-warning me-2"></i>
-                            LogBait
+                            SISTEMA EDUCATIVO
                         </h4>
                         <p class="text-muted mb-0">
                             Plataforma de aprendizaje experimental. Todas las transacciones son virtuales 
@@ -100,7 +180,7 @@
                     </div>
                     <div class="col-md-3 text-md-end">
                         <span class="badge" style="background: var(--gradient-matrix); color: black; font-size: 1rem;">
-                            <i class="fas fa-graduation-cap me-1"></i>Fines Educativos
+                            <i class="fas fa-graduation-cap me-1"></i>MODO EDUCATIVO
                         </span>
                     </div>
                 </div>
@@ -140,10 +220,6 @@ document.addEventListener('DOMContentLoaded', function() {
 <style>
 .mb-6 {
     margin-bottom: 5rem !important;
-}
-
-.mt-6 {
-    margin-top: 5rem !important;
 }
 
 .text-cyan { color: var(--neon-cyan); }
