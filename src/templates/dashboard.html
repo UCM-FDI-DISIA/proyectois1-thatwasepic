@@ -87,7 +87,7 @@
                 <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">🪙</div>
                 <h3 class="card-title">COINFLIP</h3>
                 <p class="card-text mb-4">
-                    Experimento de probabilidad 50/50. Testea la teoría del caos controlado.
+                    Todo o nada: lanza una moneda como experimento de probabilidad 50/50.
                 </p>
                 <a href="{{ url_for('coinflip.home') }}" class="btn btn-primary btn-lg w-100">
                     <i class="fas fa-dice me-2"></i>TODO O NADA
@@ -101,9 +101,9 @@
         <div class="card game-card matrix-rain" style="animation-delay: 0.6s">
             <div class="card-body text-center p-4">
                 <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">🎰</div>
-                <h3 class="card-title">RODILLOS CUÁNTICOS</h3>
+                <h3 class="card-title">TRAGAPERRAS</h3>
                 <p class="card-text mb-4">
-                    Generador de combinaciones aleatorias. Estudia distribuciones probabilísticas.
+                    Gira los rodillos, combina símbolos y descubre premios.
                 </p>
                 <a href="{{ url_for('tragaperras.home') }}" class="btn btn-primary btn-lg w-100">
                     <i class="fas fa-cogs me-2"></i>GIRAR
@@ -117,9 +117,9 @@
         <div class="card game-card matrix-rain" style="animation-delay: 0.8s">
             <div class="card-body text-center p-4">
                 <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">🏇</div>
-                <h3 class="card-title">CARRERA ALGORÍTMICA</h3>
+                <h3 class="card-title">CARRERA DE CABALLOS</h3>
                 <p class="card-text mb-4">
-                    Simulador de variables múltiples. Analiza patrones de comportamiento.
+                    Simulador de carreras de caballos, apostando por tu corcel favorito.
                 </p>
                 <a href="{{ url_for('caballos.home') }}" class="btn btn-primary btn-lg w-100">
                     <i class="fas fa-horse me-2"></i>INICIAR CARRERA
@@ -133,7 +133,7 @@
         <div class="card game-card matrix-rain" style="animation-delay: 1s">
             <div class="card-body text-center p-4">
                 <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">📊</div>
-                <h3 class="card-title">PANEL DE DATOS</h3>
+                <h3 class="card-title">PANEL DE ESTADÍSTICAS</h3>
                 <p class="card-text mb-4">
                     Centro de análisis. Monitoriza tu progreso y métricas.
                 </p>
@@ -154,28 +154,14 @@
                     Configuración de identidad digital. Gestiona tu presencia en el sistema.
                 </p>
                 <a href="{{ url_for('perfil.home') }}" class="btn btn-outline-primary btn-lg w-100">
-                    <i class="fas fa-user-cog me-2"></i>CONFIGURAR SISTEMA
+                    <i class="fas fa-user-cog me-2"></i>CONFIGURAR PERFIL
+                </a>
+                <a href="{{ url_for('logout.home') }}" class="btn btn-danger btn-lg w-100" style="margin-top: 0.4em;">
+                    <i class="fas fa-power-off me-2"></i>SALIR
                 </a>
             </div>
         </div>
     </div>
-
-    <!-- Sistema -->
-    <div class="col-xl-3 col-lg-4 col-md-6">
-        <div class="card game-card matrix-rain" style="animation-delay: 1.4s">
-            <div class="card-body text-center p-4">
-                <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">⚙️</div>
-                <h3 class="card-title">CENTRO DE CONTROL</h3>
-                <p class="card-text mb-4">
-                    Panel de administración del sistema. Acceso a configuraciones avanzadas.
-                </p>
-                <a href="{{ url_for('logout.home') }}" class="btn btn-danger btn-lg w-100">
-                    <i class="fas fa-power-off me-2"></i>DESCONECTAR SISTEMA
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- Información del Sistema -->
 <div class="row mt-6">
