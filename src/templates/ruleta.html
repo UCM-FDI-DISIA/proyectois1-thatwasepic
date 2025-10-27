@@ -509,7 +509,7 @@ function showVisuals(){
 
 /* ================== TOTALES Y CONTROLES ================== */
 function totalStake(){ return bets.reduce((a,b)=>a+b.amount,0); }
-function updateTotals(){ betTotalEl.textContent = totalStake(); bankEl.textContent = bank; }
+function updateTotals(){ betTotalEl.textContent = centsToEuro(totalStake()); bankEl.textContent = centsToEuro(bank); }
 function clearBets(){ const refund=totalStake(); bank+=refund; bets=[]; updateTotals(); showVisuals(); flash(`Borras jugada (${centsToEuro(refund)})`); history.push({type:'clear',amount:refund}); }
 document.getElementById('clearBtn').onclick=clearBets;
 
