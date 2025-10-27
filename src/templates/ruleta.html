@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="es" data-mode="bet">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ruleta Europea 🎯</title>
+  <style>
+    :root{
+      --felt:#1a2240; --felt-dark:#151b34; --gold:#e0b14a; --cream:#f3efe2; --shadow:0 6px 18px rgba(0,0,0,.22);
+      --tile:#202a55; --tile-outer:#1e264c; --text:#e8ecff; --badge-bg:rgba(255,255,255,.92); --badge-fg:#10121f;
+    }
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0; font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif; background: radial-gradient(900px 600px at 60% 30%, #0f1330, var(--felt-dark)); color:var(--text); display:flex; flex-direction:column; gap:10px;}
+    header{ padding:12px 16px; color:var(--cream); display:flex; align-items:center; justify-content:space-between; }
+    .pill{background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15); padding:6px 10px; border-radius:999px}
+    main{display:grid; gap:18px; padding:0 16px 16px; max-width:1400px; width:100%; margin:0 auto; grid-template-columns: 380px 1fr;}
+    .panel{background:linear-gradient(180deg, var(--felt), var(--felt-dark)); border:2px solid rgba(255,255,255,.12); border-radius:18px; padding:14px; box-shadow:var(--shadow)}
+    .wheel-wrap{display:grid; place-items:center}
+    .controls{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; align-items:center; justify-content:center}
+    .btn{appearance:none; border:none; padding:10px 14px; border-radius:12px; background:var(--gold); color:#1a1a1a; font-weight:700; cursor:pointer; box-shadow:var(--shadow)}
+    .btn.secondary{background:#e5e7ff; color:#10121f}
+    .wheel-wrap svg{ width:100%; height:auto; display:block; max-width:460px; }
+    .table{display:grid; grid-template-columns: 90px repeat(12, 1fr) 140px 140px; gap:5px; padding:10px; background:var(--felt); border-radius:14px; border:1px solid rgba(255,255,255,.15)}
+    .cell{position:relative; background:var(--tile); border:1px solid rgba(0,0,0,.35); color:#fafafa; text-align:center; padding:22px 8px; border-radius:10px; user-select:none; font-size:22px; font-weight:800}
+    .cell.zero{grid-row: 1 / span 3; background:#1d6f3e; display:flex; align-items:center; justify-content:center}
+    .cell.red{background:#9e1f24} .cell.black{background:#0b0b0b}
+    .outside{ background:var(--tile-outer); font-weight:800; font-size:18px }
+    .bet-badge{position:absolute; right:8px; bottom:8px; background:var(--badge-bg); color:var(--badge-fg); padding:2px 8px; border-radius:999px; font-size:13px; font-weight:900}
+    .color-dot{position:absolute; left:8px; bottom:8px; width:14px; height:14px; border-radius:50%; border:2px solid rgba(0,0,0,.45); box-shadow: inset 0 0 0 2px rgba(255,255,255,.25)}
+    .stack{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); pointer-events:auto}
+    .mini-chip{width:26px; height:26px; border-radius:50%; border:3px dotted rgba(0,0,0,.35); display:grid; place-items:center; font-size:10px; font-weight:900; color:#000; position:absolute; left:0; top:0;}
+    .chips{display:flex; gap:10px; flex-wrap:wrap; align-items:center; padding:10px}
+    .chip{width:56px; height:56px; border-radius:50%; display:grid; place-items:center; font-weight:900; box-shadow:var(--shadow); border:6px dotted rgba(0,0,0,.25); cursor:grab; color:#000}
+    .group{background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.15); border-radius:14px; padding:10px; margin-top:12px}
+    .log{height:200px; overflow:auto; background:#0f1535; color:#eafdf0; padding:10px; border-radius:12px; font-family:ui-monospace,Consolas,monospace}
+  
+.logo-link{
+  display:inline-block; margin-left:12px; padding:8px 16px; border-radius:999px;
+  text-decoration:none; text-transform:uppercase; letter-spacing:.08em; font-weight:800;
+  color:#e8ecff; border:1px solid rgba(255,255,255,.18);
+  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  box-shadow:0 6px 18px rgba(0,0,0,.22), inset 0 0 0 1px rgba(255,255,255,.06);
+  backdrop-filter: blur(2px);
+}
+.logo-link:hover{ border-color:rgba(255,255,255,.35); transform:translateY(-1px); }
+.logo-link:active{ transform:translateY(0); box-shadow:0 4px 14px rgba(0,0,0,.28), inset 0 0 0 1px rgba(255,255,255,.08); }
+</style>
+</head>
+<body data-mode="bet">
+  <header>
+    <div style="font-weight:800; font-size:18px">🎯 Ruleta europea</div>
+    <div class="balances"><a href="/dashboard" class="logo-link">LOGBAIT</a>
+      <span class="pill">Banco: <b id="bank">0</b>¢</span>
+      <span class="pill">Apuesta actual: <b id="betTotal">0</b>¢</span>
+      <span class="pill">Última acción: <span id="lastAction">—</span></span>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel wheel-wrap">
+      <svg id="wheel" viewBox="-220 -220 440 440" aria-label="ruleta">
+        <defs>
+          <radialGradient id="rim" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#c08a26"/>
+            <stop offset="70%" stop-color="#8a5e10"/>
+            <stop offset="100%" stop-color="#5a3b08"/>
+          </radialGradient>
+        </defs>
+        <circle r="210" fill="url(#rim)"/>
+        <g id="numbers"></g>
+        <circle r="110" fill="#2f7a3d"/>
+        <circle r="20" fill="#1a4a25"/>
+        <circle id="ball" r="6" fill="#f3efe2" cx="0" cy="-170"/>
+      </svg>
+      <div class="controls">
+        <button id="spinBtn" class="btn">Girar</button>
+        <button id="clearBtn" class="btn secondary">Borrar jugada</button>
+        <button id="undoBtn" class="btn secondary">Deshacer</button>
+        <button id="dupBtn" class="btn">Duplicar apuesta</button>
+        <button id="repeatBtn" class="btn">Última jugada</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="chips" id="chips">
+        <div class="chip" draggable="true" data-value="20">0,20€</div>
+        <div class="chip" draggable="true" data-value="50">0,50€</div>
+        <div class="chip" draggable="true" data-value="100">1€</div>
+        <div class="chip" draggable="true" data-value="200">2€</div>
+        <div class="chip" draggable="true" data-value="500">5€</div>
+        <div class="chip" draggable="true" data-value="1000">10€</div>
+        <label class="pill" style="background:#fff; color:#111; display:flex; align-items:center; gap:6px; margin-left:auto">
+          + Moneda: <input id="customChip" type="number" min="10" step="10" value="250" style="width:6em">¢
+          <button id="addChip" class="btn secondary">Añadir</button>
+        </label>
+      </div>
+
+      <div class="bets-buttons" style="margin:8px 0 4px;">
+        <button class="btn" id="voisinsBtn">Vecinos del 0</button>
+        <button class="btn" id="tiersBtn">Tiers</button>
+        <button class="btn" id="orphBtn">Huérfanos</button>
+      </div>
+
+      <div class="table" id="layout"></div>
+
+      <div class="group">
+        <h3 style="margin:6px 6px 10px;">Apuestas exteriores</h3>
+        <div class="bets-buttons">
+          <button class="btn" data-out="red">Rojo</button>
+          <button class="btn" data-out="black">Negro</button>
+          <button class="btn" data-out="even">Par</button>
+          <button class="btn" data-out="odd">Impar</button>
+          <button class="btn" data-out="low">1–18</button>
+          <button class="btn" data-out="high">19–36</button>
+          <button class="btn" data-out="d1">1ª Docena</button>
+          <button class="btn" data-out="d2">2ª Docena</button>
+          <button class="btn" data-out="d3">3ª Docena</button>
+          <button class="btn" data-out="c1">Columna 1</button>
+          <button class="btn" data-out="c2">Columna 2</button>
+          <button class="btn" data-out="c3">Columna 3</button>
+        </div>
+      </div>
+
+      <div class="log" id="log"></div>
+    </section>
+  </main>
+
+  <footer>
+    <small style="opacity:.8;padding:10px 16px;display:block">Demo educativa. Mínimo por casilla: 20¢.</small>
+  </footer>
+
+<script>
+/* ================== DATOS Y ESTADO ================== */
+const EURO_SEQ = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
+const REDS = new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
+const ALL = Array.from({length:36},(_,i)=>i+1);
+
+const PAYOUT = { straight:35, split:17, street:11, corner:8, line:5, dozen:2, column:2, even:1 };
+
+const bankEl=document.getElementById('bank'); const betTotalEl=document.getElementById('betTotal'); const lastActionEl=document.getElementById('lastAction'); const logEl=document.getElementById('log');
+let bank=0; let bets=[]; let history=[]; let lastBets=[]; let spinning=false;
+
+/* ================== FORMATO Y LOG ================== */
+function centsToEuro(c){ return (c/100).toLocaleString('es-ES',{style:'currency',currency:'EUR'}); }
+function flash(t){ lastActionEl.textContent=t; }
+function log(t){ const p=document.createElement('div'); p.innerHTML=t; logEl.prepend(p); }
+
+/* ================== API BACKEND (opcional) ================== */
+function renderStats(stats){
+  if(!stats) return;
+  const set=(id,v)=>{ const el=document.getElementById(id); if(el) el.textContent = (v||0); };
+  set('spins', stats.spins);
+  set('betCents', stats.bet_cents);
+  set('winCents', stats.win_cents);
+  set('retCents', stats.returned_cents);
+  set('netCents', stats.net_cents);
+}
+async function refreshState(){
+  // 1) Intento: estado de la ruleta
+  try{
+    const s = await apiGET('/api/ruleta/state');
+    if (s && typeof s.balance === 'number' && s.balance > 0) {
+      bank = s.balance;
+      updateTotals();
+      renderStats(s.stats);
+      return; // ya tenemos saldo en céntimos
+    }
+  }catch(e){ /* ignoramos, seguimos al plan B */ }
+
+  // 2) Plan B: estado global de la cuenta
+  try{
+    const a = await apiGET('/api/account/state');
+    if (a && a.ok) {
+      // 'a.balance' en céntimos, o 'a.balance_float' en euros
+      bank = (typeof a.balance === 'number')
+        ? a.balance
+        : Math.round((a.balance_float || 0) * 100);
+      updateTotals();
+      if (a.ruleta_stats) renderStats(a.ruleta_stats);
+    }
+  }catch(e){ /* si también falla, lo reintenta el poll*/ }
+}
+
+async function apiGET(url){ const r=await fetch(url,{credentials:'same-origin'}); if(!r.ok) throw new Error(await r.text()); return r.json(); }
+async function apiPOST(url, body){ const r=await fetch(url,{method:'POST', headers:{'Content-Type':'application/json'}, credentials:'same-origin', body: JSON.stringify(body)}); if(!r.ok) throw new Error(await r.text()); return r.json(); }
+(async()=>{ await refreshState(); })();
+
+/* ================== SVG RUEDA ================== */
+const gNums=document.getElementById('numbers'); const ball=document.getElementById('ball'); const R_OUT=190, R_TEXT=165;
+EURO_SEQ.forEach((n,idx)=>{
+  const a0=(2*Math.PI/EURO_SEQ.length)*idx-Math.PI/2;
+  const a1=(2*Math.PI/EURO_SEQ.length)*(idx+1)-Math.PI/2;
+  const x0=R_OUT*Math.cos(a0), y0=R_OUT*Math.sin(a0);
+  const x1=R_OUT*Math.cos(a1), y1=R_OUT*Math.sin(a1);
+  const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+  p.setAttribute('d',`M ${x0.toFixed(2)} ${y0.toFixed(2)} A ${R_OUT} ${R_OUT} 0 0 1 ${x1.toFixed(2)} ${y1.toFixed(2)} L ${(R_OUT-40)*Math.cos(a1).toFixed(2)} ${(R_OUT-40)*Math.sin(a1).toFixed(2)} A ${R_OUT-40} ${R_OUT-40} 0 0 0 ${(R_OUT-40)*Math.cos(a0).toFixed(2)} ${(R_OUT-40)*Math.sin(a0).toFixed(2)} Z`);
+  p.setAttribute('fill', n===0?'#0a9a4a':(REDS.has(n)?'#b72025':'#111')); p.setAttribute('stroke','#222'); p.setAttribute('stroke-width','1'); gNums.appendChild(p);
+  const label=document.createElementNS('http://www.w3.org/2000/svg','text');
+  const ang=(a0+a1)/2; label.setAttribute('x',(R_TEXT*Math.cos(ang)).toFixed(2)); label.setAttribute('y',(R_TEXT*Math.sin(ang)).toFixed(2));
+  label.setAttribute('fill','#fff'); label.setAttribute('font-size','12'); label.setAttribute('text-anchor','middle'); label.setAttribute('dominant-baseline','middle'); label.textContent=String(n); gNums.appendChild(label);
+});
+
+/* ================== TABLERO ================== */
+const layout=document.getElementById('layout'); const outsideMap=new Map(); const indexToCell={};
+const zero=cell('0','zero'); zero.style.gridRow='1 / span 3'; zero.style.gridColumn='1 / 2'; layout.appendChild(zero);
+for(let r=0;r<3;r++){
+  for(let c=0;c<12;c++){
+    const n=3*c+(3-r);
+    const col=REDS.has(n)?'red':'black';
+    const d=cell(String(n),col);
+    d.dataset.kind='straight';
+    d.dataset.cover=JSON.stringify([n]);
+    d.dataset.label=`${n}`;
+    d.dataset.number=String(n);
+    layout.appendChild(d);
+    indexToCell[n]=d;
+  }
+}
+const d1=outsideCell('1ª Docena','dozen',ALL.filter(n=>n<=12)),
+      d2=outsideCell('2ª Docena','dozen',ALL.filter(n=>n>=13&&n<=24)),
+      d3=outsideCell('3ª Docena','dozen',ALL.filter(n=>n>=25));
+d1.style.gridColumn='14 / 15'; d2.style.gridColumn='15 / 16'; d3.style.gridColumn='16 / 17';
+d1.style.gridRow=d2.style.gridRow=d3.style.gridRow='1 / span 3';
+layout.appendChild(d1); layout.appendChild(d2); layout.appendChild(d3);
+
+const c1=outsideCell('Columna 1','column',ALL.filter(n=>n%3===1)),
+      c2=outsideCell('Columna 2','column',ALL.filter(n=>n%3===2)),
+      c3=outsideCell('Columna 3','column',ALL.filter(n=>n%3===0));
+c1.style.gridColumn='2 / 14'; c1.style.gridRow='4 / 5';
+c2.style.gridColumn='2 / 14'; c2.style.gridRow='5 / 6';
+c3.style.gridColumn='2 / 14'; c3.style.gridRow='6 / 7';
+layout.appendChild(c1); layout.appendChild(c2); layout.appendChild(c3);
+
+const simpleRow=document.createElement('div');
+simpleRow.style.gridColumn='14 / 17'; simpleRow.style.gridRow='4 / 7';
+simpleRow.style.display='grid'; simpleRow.style.gridTemplateColumns='repeat(2, 1fr)'; simpleRow.style.gap='6px';
+['Rojo','Negro','Par','Impar','1–18','19–36'].forEach(lbl=>{
+  const map = {
+    'Rojo':{kind:'even', set:ALL.filter(n=>REDS.has(n))},
+    'Negro':{kind:'even', set:ALL.filter(n=>!REDS.has(n)&&n!==0)},
+    'Par':{kind:'even', set:ALL.filter(n=>n%2===0&&n!==0)},
+    'Impar':{kind:'even', set:ALL.filter(n=>n%2===1)},
+    '1–18':{kind:'even', set:ALL.filter(n=>n>=1&&n<=18)},
+    '19–36':{kind:'even', set:ALL.filter(n=>n>=19)}
+  };
+  const v=map[lbl];
+  const el=outsideCell(lbl,v.kind,v.set); el.style.minHeight='48px'; simpleRow.appendChild(el);
+});
+layout.appendChild(simpleRow);
+
+function cell(text, extra=''){ const d=document.createElement('div'); d.className=`cell ${extra}`.trim(); d.textContent=text; enableDrop(d); return d; }
+function outsideCell(text, kind, set){ const d=cell(text,'outside'); d.dataset.kind=kind; d.dataset.cover=JSON.stringify(set); d.dataset.label=text; outsideMap.set(text,d); return d; }
+
+/* ================== ARRÁSTRE & DETECCIÓN DE ZONA ================== */
+function enableDrop(el){
+  el.ondragover=(e)=>{e.preventDefault();};
+  el.ondrop=(e)=>{
+    e.preventDefault(); droppedSomewhere=true;
+    const kind=el.dataset.kind||'straight';
+    const mv=e.dataTransfer.getData('chip_move'); const chipVal=e.dataTransfer.getData('chip');
+    if(kind!=='straight'){
+      const set=new Set(JSON.parse(el.dataset.cover||'[]'));
+      const target={type:kind,set,label:el.dataset.label||el.textContent};
+      if(mv){ const m=JSON.parse(mv); const from=findBetByKey(m.key); if(from){ transferChip(from,target,m.amount);} }
+      else if(chipVal){ placeBet(target, Number(chipVal)); }
+      return;
+    }
+    const rect=el.getBoundingClientRect();
+    const x=(e.clientX-rect.left)/rect.width;
+    const y=(e.clientY-rect.top)/rect.height;
+    const num=Number(el.dataset.number||'0');
+    const target = computeTargetFromPosition(num,x,y); if(!target) return;
+    if(mv){ const m=JSON.parse(mv); const from=findBetByKey(m.key); if(from){ transferChip(from,target,m.amount);} }
+    else if(chipVal){ placeBet(target, Number(chipVal)); }
+  };
+}
+
+function getRC(n){ const c=Math.ceil(n/3)-1; const r=3-((n-1)%3)-1; return {r,c}; }
+function numAt(r,c){ if(r<0||r>2||c<0||c>11) return null; return 3*c + (3-r); }
+
+/* 
+  computeTargetFromPosition:
+  - Esquina (corner) si cae cerca de una intersección válida 2x2
+  - Caballo (split) si cae cerca de un borde con vecino válido
+  - Calle (street) si cae en la franja central horizontal (la columna de 12) -> 3 números verticales
+  - Seisena (line) si cae en la franja central y cerca del borde izquierdo/derecho -> 6 números (dos calles)
+  - Pleno en el resto
+*/
+function computeTargetFromPosition(n,x,y){
+  const {r,c}=getRC(n);
+  const m=0.26; // margen para considerar “cerca de borde/esquina”
+
+  // Esquinas (4 números)
+  const nearLeft = x<m, nearRight = x>1-m, nearTop = y<m, nearBot = y>1-m;
+  if(nearLeft&&nearTop){
+    const a=n,b=numAt(r,c-1),c2=numAt(r-1,c),d=numAt(r-1,c-1);
+    if(b&&c2&&d) return {type:'corner',set:new Set([a,b,c2,d]),label:`${a}-${b}-${c2}-${d}`};
+  }
+  if(nearRight&&nearTop){
+    const a=n,b=numAt(r,c+1),c2=numAt(r-1,c),d=numAt(r-1,c+1);
+    if(b&&c2&&d) return {type:'corner',set:new Set([a,b,c2,d]),label:`${a}-${b}-${c2}-${d}`};
+  }
+  if(nearLeft&&nearBot){
+    const a=n,b=numAt(r,c-1),c2=numAt(r+1,c),d=numAt(r+1,c-1);
+    if(b&&c2&&d) return {type:'corner',set:new Set([a,b,c2,d]),label:`${a}-${b}-${c2}-${d}`};
+  }
+  if(nearRight&&nearBot){
+    const a=n,b=numAt(r,c+1),c2=numAt(r+1,c),d=numAt(r+1,c+1);
+    if(b&&c2&&d) return {type:'corner',set:new Set([a,b,c2,d]),label:`${a}-${b}-${c2}-${d}`};
+  }
+
+  // Caballos (2 números)
+  if(nearLeft){ const b=numAt(r,c-1); if(b) return {type:'split',set:new Set([n,b]),label:`${n}-${b}`}; }
+  if(nearRight){ const b=numAt(r,c+1); if(b) return {type:'split',set:new Set([n,b]),label:`${n}-${b}`}; }
+  if(nearTop){ const b=numAt(r-1,c); if(b) return {type:'split',set:new Set([n,b]),label:`${n}-${b}`}; }
+  if(nearBot){ const b=numAt(r+1,c); if(b) return {type:'split',set:new Set([n,b]),label:`${n}-${b}`}; }
+
+  // Zona central: Calle (3 números verticales) y Seisena (6 números = dos calles)
+  const centerBand = x>0.33 && x<0.67;
+  if(centerBand){
+    const a=numAt(0,c), b=numAt(1,c), d=numAt(2,c);
+    if(a && b && d){
+      // Si además cae muy a la izquierda o derecha, interpretamos SEISENA (dos calles contiguas)
+      if(x<=0.40){ // tirando a izquierda
+        const a2=numAt(0,c-1), b2=numAt(1,c-1), d2=numAt(2,c-1);
+        if(a2&&b2&&d2){
+          const set = new Set([a,b,d,a2,b2,d2]);
+          return {type:'line', set, label:`${[...set].sort((u,v)=>u-v).join('-')}`};
+        }
+      } else if(x>=0.60){ // tirando a derecha
+        const a2=numAt(0,c+1), b2=numAt(1,c+1), d2=numAt(2,c+1);
+        if(a2&&b2&&d2){
+          const set = new Set([a,b,d,a2,b2,d2]);
+          return {type:'line', set, label:`${[...set].sort((u,v)=>u-v).join('-')}`};
+        }
+      }
+      // Calle (3)
+      const setStreet=new Set([a,b,d]);
+      return {type:'street', set:setStreet, label:`${a}-${b}-${d}`};
+    }
+  }
+
+  // Pleno por defecto
+  return {type:'straight', set:new Set([n]), label:String(n)};
+}
+
+/* ================== CHIPS ================== */
+const CHIP_COLORS=new Map([[20,'#ffd54f'],[50,'#4fc3f7'],[100,'#81c784'],[200,'#ba68c8'],[500,'#ff8a65'],[1000,'#e57373']]);
+function pickChipColor(v){ if(CHIP_COLORS.has(v)) return CHIP_COLORS.get(v);
+  if(v<50)return'#ffd54f'; if(v<100)return'#4fc3f7'; if(v<200)return'#81c784'; if(v<500)return'#ba68c8'; if(v<1000)return'#ff8a65'; return'#e57373';
+}
+function styleChips(){ document.querySelectorAll('.chip').forEach(ch=>{ const v=+ch.dataset.value||0; ch.style.background=pickChipColor(v); ch.style.color='#000'; }); }
+styleChips();
+
+const chipsWrap=document.getElementById('chips'); let droppedSomewhere=false; let lastChipValue=50;
+chipsWrap.addEventListener('dragstart', e=>{ const t=e.target.closest('.chip'); if(!t) return; droppedSomewhere=false; e.dataTransfer.setData('chip', t.dataset.value); });
+document.body.addEventListener('dragend', ()=>{ if(!droppedSomewhere) flash('Ficha no colocada'); });
+document.querySelectorAll('.chip').forEach(ch=>ch.addEventListener('click',()=>{ lastChipValue=Number(ch.dataset.value); flash(`Chip activa: ${centsToEuro(lastChipValue)}`); }));
+document.getElementById('spinBtn').onclick = async () => {
+  if (spinning) return;
+  if (bets.length === 0) { flash('Pon al menos una apuesta.'); return; }
+
+  // 1) Reservar en backend
+  let placedBetsSnapshot = bets.map(b => ({
+    type: b.type, set: [...b.set], label: b.label, amount: b.amount
+  }));
+  try{
+    const placed = await apiPOST('/api/ruleta/place', { bets: placedBetsSnapshot, min_cell: 20 });
+    bank = placed.balance; updateTotals();
+  }catch(e){ /* si no hay backend, comenta el try/catch */ }
+
+  // 2) Elegir resultado y ANIMAR hacia ese bolsillo
+  spinning = true; setMode('spin');
+  document.getElementById('spinBtn').disabled = true;
+
+  const resultIdx = Math.floor(Math.random() * EURO_SEQ.length);
+  const resultNumber = EURO_SEQ[resultIdx];
+
+  await spinAnimTo(resultIdx);    // bola y rueda se paran junto al bolsillo correcto
+  settle(resultNumber);           // liquidación local (para feedback inmediato)
+
+  // 3) Liquidar en backend usando EL MISMO número
+  try{
+    const settled = await apiPOST('/api/ruleta/spin', {
+      bets: placedBetsSnapshot,   // mismas apuestas que reservaste
+      result: resultNumber        // <-- CLAVE: el servidor usa este número
+    });
+    bank = settled.balance; updateTotals(); renderStats(settled.stats);
+  }catch(e){ /* demo offline */ }
+};
+
+
+/* ================== EXTERIORES Y ESPECIALES ================== */
+document.querySelectorAll('[data-out]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const map={
+      red:{type:'even', set:ALL.filter(n=>REDS.has(n)), label:'Rojo'},
+      black:{type:'even', set:ALL.filter(n=>!REDS.has(n)&&n!==0), label:'Negro'},
+      even:{type:'even', set:ALL.filter(n=>n%2===0&&n!==0), label:'Par'},
+      odd:{type:'even', set:ALL.filter(n=>n%2===1), label:'Impar'},
+      low:{type:'even', set:ALL.filter(n=>n>=1&&n<=18), label:'1–18'},
+      high:{type:'even', set:ALL.filter(n=>n>=19), label:'19–36'},
+      d1:{type:'dozen', set:ALL.filter(n=>n<=12), label:'1ª Docena'},
+      d2:{type:'dozen', set:ALL.filter(n=>n>=13&&n<=24), label:'2ª Docena'},
+      d3:{type:'dozen', set:ALL.filter(n=>n>=25), label:'3ª Docena'},
+      c1:{type:'column', set:ALL.filter(n=>n%3===1), label:'Columna 1'},
+      c2:{type:'column', set:ALL.filter(n=>n%3===2), label:'Columna 2'},
+      c3:{type:'column', set:ALL.filter(n=>n%3===0), label:'Columna 3'}
+    };
+    const {type,set,label}=map[btn.dataset.out];
+    placeBet({type, set:new Set(set), label}, currentChipValue());
+  });
+});
+
+const SPECIALS={ voisins:[22,18,29,7,28,12,35,3,26,0,32,15,19,4,21,2,25], tiers:[27,13,36,11,30,8,23,10,5,24,16,33], orphelins:[1,20,14,31,9,6,34,17] };
+document.getElementById('voisinsBtn').onclick=()=>massBet(SPECIALS.voisins);
+document.getElementById('tiersBtn').onclick=()=>massBet(SPECIALS.tiers);
+document.getElementById('orphBtn').onclick=()=>massBet(SPECIALS.orphelins);
+function massBet(list){
+  const amount=currentChipValue(); const need=amount*list.length;
+  if(bank<need) return flash(`Fondos insuficientes (${centsToEuro(need)})`);
+  list.forEach(n=> placeBet({type:'straight', set:new Set([n]), label:String(n)}, amount, true));
+  showVisuals(); updateTotals();
+}
+
+/* ================== GESTIÓN DE APUESTAS ================== */
+function currentChipValue(){ return lastChipValue ?? 50; }
+function betKey(obj){ const key=(s)=>[...s].sort((a,b)=>a-b).join('-'); return `${obj.type}:${key(obj.set)}`; }
+function findBetByKey(keyStr){ return bets.find(b=> betKey(b)===keyStr); }
+
+function placeBet(target, amount, silent=false){
+  if(amount<=0) return;
+  if(amount<20){ flash('Apuesta mínima por casilla: 20¢'); return; }
+  if(bank<amount){ flash('Fondos insuficientes'); return; }
+
+  bank -= amount;
+  const key=(s)=>[...s].sort((a,b)=>a-b).join('-');
+  const k=key(target.set);
+  const idx=bets.findIndex(b=> b.type===target.type && key(b.set)===k);
+  if(idx>=0){
+    bets[idx].amount += amount;
+    bets[idx].maxChip = Math.max(bets[idx].maxChip||0, amount);
+    (bets[idx].chips||=[]).push(amount);
+  } else {
+    bets.push({type:target.type, set:new Set(target.set), amount, label:target.label, maxChip:amount, chips:[amount]});
+  }
+  history.push({type:'bet', payload:{...target, amount}});
+  showVisuals(); updateTotals();
+  if(!silent) flash(`Apuestas ${centsToEuro(amount)} a ${target.label}`);
+}
+
+function cloneBets(arr){ return arr.map(b=>({type:b.type,set:new Set(b.set),amount:b.amount,label:b.label,maxChip:b.maxChip,chips:[...(b.chips||[])]})); }
+
+function transferChip(fromBet, target, amount){
+  const idx = fromBet.chips ? fromBet.chips.lastIndexOf(amount) : -1; if(idx<0) return;
+  fromBet.chips.splice(idx,1); fromBet.amount -= amount;
+  if(fromBet.amount<=0){ const i=bets.indexOf(fromBet); if(i>=0) bets.splice(i,1); }
+  else { fromBet.maxChip = fromBet.chips.length? Math.max(...fromBet.chips):0; }
+
+  const key=(s)=>[...s].sort((a,b)=>a-b).join('-'); const k=key(target.set);
+  const j=bets.findIndex(b=> b.type===target.type && key(b.set)===k);
+  if(j>=0){ bets[j].amount += amount; (bets[j].chips||=[]).push(amount); bets[j].maxChip=Math.max(bets[j].maxChip||0, amount); }
+  else { bets.push({type:target.type,set:new Set(target.set),amount:amount,label:target.label,maxChip:amount,chips:[amount]}); }
+  showVisuals(); updateTotals();
+}
+
+/* ================== RENDER DE FICHAS ================== */
+function ensureBadge(el){
+  if(!el) return {badge:null,dot:null,stack:null};
+  let badge=el.querySelector('.bet-badge'); if(!badge){ badge=document.createElement('div'); badge.className='bet-badge'; el.appendChild(badge);}
+  let dot=el.querySelector('.color-dot'); if(!dot){ dot=document.createElement('div'); dot.className='color-dot'; el.appendChild(dot);}
+  let stack=el.querySelector('.stack'); if(!stack){ stack=document.createElement('div'); stack.className='stack'; el.appendChild(stack);}
+  return {badge,dot,stack};
+}
+function renderStack(container, chips, key){
+  container.innerHTML='';
+  const maxShow=6; const show=chips.slice(-maxShow); const baseOffset=3;
+  show.forEach((v,i)=>{
+    const c=document.createElement('div'); c.className='mini-chip';
+    c.style.background=pickChipColor(v); c.style.transform=`translate(${-i*baseOffset}px, ${-i*baseOffset}px)`;
+    c.draggable=true; c.dataset.move = JSON.stringify({key, amount:v});
+    c.addEventListener('dragstart', (e)=>{ e.dataTransfer.setData('chip_move', c.dataset.move); e.dataTransfer.effectAllowed='move'; });
+    container.appendChild(c);
+  });
+  if(chips.length>maxShow){
+    const more=document.createElement('div'); more.className='mini-chip';
+    more.style.background='#fff'; more.style.transform=`translate(${-maxShow*baseOffset}px, ${-maxShow*baseOffset}px)`; more.style.fontSize='9px';
+    more.textContent='+'+(chips.length-maxShow); container.appendChild(more);
+  }
+}
+function anchorElForBet(b){
+  if(b.type==='straight'&&b.set.size===1){ return indexToCell[[...b.set][0]]; }
+  if(b.type==='dozen'||b.type==='column'||b.type==='even'){ return outsideMap.get(b.label); }
+  // Para split/street/corner/line anclamos en el menor número de la combinación
+  const nums=[...b.set].sort((a,b)=>a-b);
+  return indexToCell[nums[0]];
+}
+function showVisuals(){
+  document.querySelectorAll('.bet-badge,.color-dot,.stack').forEach(n=>n.remove());
+  bets.forEach(b=>{
+    const el=anchorElForBet(b); if(!el) return;
+    const color=pickChipColor(b.maxChip||0);
+    const {badge,dot,stack}=ensureBadge(el);
+    if(badge){ badge.textContent=centsToEuro(b.amount); }
+    if(dot){ dot.style.background=color; }
+    if(stack){ renderStack(stack, b.chips||[], betKey(b)); }
+  });
+}
+
+/* ================== TOTALES Y CONTROLES ================== */
+function totalStake(){ return bets.reduce((a,b)=>a+b.amount,0); }
+function updateTotals(){ betTotalEl.textContent = totalStake(); bankEl.textContent = bank; }
+function clearBets(){ const refund=totalStake(); bank+=refund; bets=[]; updateTotals(); showVisuals(); flash(`Borras jugada (${centsToEuro(refund)})`); history.push({type:'clear',amount:refund}); }
+document.getElementById('clearBtn').onclick=clearBets;
+
+document.getElementById('undoBtn').onclick=()=>{
+  const act=history.pop(); if(!act) return;
+  if(act.type==='bet'){
+    const {type,set,label,amount}=act.payload;
+    const key=(s)=>[...s].sort((a,b)=>a-b).join('-'); const k=key(set);
+    const idx=bets.findIndex(b=>b.type===type && key(b.set)===k);
+    if(idx>=0){
+      bets[idx].amount-=amount;
+      if(bets[idx].chips){ const i=bets[idx].chips.lastIndexOf(amount); if(i>=0) bets[idx].chips.splice(i,1); }
+      if(bets[idx].amount<=0) bets.splice(idx,1);
+    }
+    bank+=amount; showVisuals(); updateTotals(); flash(`Deshaces ${centsToEuro(amount)} en ${label}`);
+  } else if(act.type==='clear'){
+    const amt=Math.min(bank, act.amount); bank-=amt; updateTotals(); flash('Deshacer de borrar (no exacto)');
+  }
+};
+
+document.getElementById('dupBtn').onclick=()=>{
+  const need=totalStake(); if(need===0) return flash('Nada que duplicar.');
+  if(bank<need) return flash('Fondos insuficientes para duplicar.');
+  lastBets=cloneBets(bets);
+  bets.forEach(b=>{
+    bank-=b.amount;
+    b.chips=[...b.chips,...b.chips];
+    b.amount+=b.amount;
+    b.maxChip=Math.max(b.maxChip||0,...b.chips);
+  });
+  updateTotals(); showVisuals(); flash('Apuestas duplicadas');
+};
+
+document.getElementById('repeatBtn').onclick=()=>{
+  if(lastBets.length===0) return flash('Sin última jugada.');
+  const need=lastBets.reduce((a,b)=>a+b.amount,0);
+  if(bank<need) return flash('Fondos insuficientes.');
+  bets=cloneBets(lastBets); bank-=need; updateTotals(); showVisuals(); flash('Última jugada colocada');
+};
+
+/* ================== GIRO Y LIQUIDACIÓN ================== */
+function setMode(mode){ document.body.setAttribute('data-mode', mode); }
+
+document.getElementById('spinBtn').onclick = async () => {
+  if (spinning) return;
+  if (bets.length === 0) { flash('Pon al menos una apuesta.'); return; }
+
+  // Reserva en backend (si lo usas). Si falla, no giramos.
+  try{
+    const snapshot = bets.map(b => ({ type:b.type, set:[...b.set], label:b.label, amount:b.amount }));
+    const placed = await apiPOST('/api/ruleta/place', { bets: snapshot, min_cell: 20 });
+    bank = placed.balance; updateTotals();
+  }catch(e){ /* si tu backend no está activo, comenta el try-catch */ }
+
+  spinning = true; setMode('spin');
+  document.getElementById('spinBtn').disabled = true;
+
+  const resultIdx = Math.floor(Math.random() * EURO_SEQ.length);
+  const resultNumber = EURO_SEQ[resultIdx];
+
+  await spinAnimTo(resultIdx);   // rueda y bola quedan alineadas al bolsillo
+
+  // Liquidación local y backend
+  settle(resultNumber);
+  try{
+    const snapshot = lastBets.map(b => ({ type:b.type, set:[...b.set], label:b.label, amount:b.amount }));
+    const settled = await apiPOST('/api/ruleta/spin', { bets: snapshot });
+    bank = settled.balance; updateTotals(); renderStats(settled.stats);
+  }catch(e){ /* demo offline */ }
+};
+
+function spinAnimTo(resultIdx){
+  return new Promise(resolve=>{
+    const start=performance.now();
+    const baseWheel=Math.random()*360;         // ángulo inicial
+    const spinWheel=1440+Math.random()*720;    // 4–6 vueltas
+    const spinBall=3000+Math.random()*1200;    // bola “más rápida”
+    const duration=5200+Math.random()*1000;    // 5.2–6.2 s
+    function easeOutQuint(t){ return 1-Math.pow(1-t,5); }
+    function frame(now){
+      const t=Math.min(1,(now-start)/duration);
+      // Rueda
+      const wheelAngle=baseWheel+easeOutQuint(t)*spinWheel;
+      gNums.setAttribute('transform',`rotate(${wheelAngle})`);
+      // Bola
+      const wobble=(1-t)*6*Math.sin(now/80)+(1-t)*3*Math.sin(now/43);
+      const ballAngle=-(easeOutQuint(t)*spinBall)+wobble;
+      const rad=(ballAngle-90)*Math.PI/180; const r=170-30*easeOutQuint(t)+2*Math.sin(now/60);
+      ball.setAttribute('cx',(r*Math.cos(rad)).toFixed(2)); ball.setAttribute('cy',(r*Math.sin(rad)).toFixed(2));
+      if(t<1){ requestAnimationFrame(frame); } else {
+        alignToPocket(resultIdx); resolve();
+      }
+    }
+    requestAnimationFrame(frame);
+  });
+}
+
+function alignToPocket(resultIdx){
+  const per = 360 / EURO_SEQ.length;
+  const finalWheel = (resultIdx * per);
+  gNums.setAttribute('transform', `rotate(${finalWheel})`);
+  const centerAng = resultIdx * per - 90;
+  const finalBallAng = centerAng - 4;
+  const r2 = 150; const rad2 = finalBallAng * Math.PI / 180;
+  ball.setAttribute('cx', (r2 * Math.cos(rad2)).toFixed(2));
+  ball.setAttribute('cy', (r2 * Math.sin(rad2)).toFixed(2));
+}
+
+function settle(number){
+  const totalStaked = totalStake();
+  const before = bank;
+  let returned = 0, win = 0;
+
+  for (const b of bets){
+    if (b.set.has(number)){
+      const mult = PAYOUT[b.type] ?? 0;
+      win      += b.amount * mult;
+      returned += b.amount;
+    }
+  }
+
+  bank += returned + win;
+
+  log(`<b>Sale ${number}</b>. Apostado: ${centsToEuro(totalStaked)}.
+      Premio: ${centsToEuro(win)}${returned ? ' + devolución ' + centsToEuro(returned) : ''}.
+      Banco: ${centsToEuro(bank)}. Δ ${centsToEuro(bank-before)}`);
+
+  lastBets = cloneBets(bets);
+  bets = [];
+  showVisuals();
+  updateTotals();
+  spinning = false;
+  document.getElementById('spinBtn').disabled = false;
+  setMode('bet');
+}
+
+/* ================== MINI PRUEBA ================== */
+(function smoke(){
+  try{
+    console.assert(PAYOUT.straight===35 && PAYOUT.column===2 && PAYOUT.even===1, 'PAYOUT ok');
+  }catch(e){ console.warn('Test PAYOUT:', e.message); }
+})();
+
+// Refresco pasivo saldo+stats
+let _ruletaPoll = setInterval(()=>refreshState(), 5000);
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) refreshState(); });
+</script>
+</body>
+</html>
