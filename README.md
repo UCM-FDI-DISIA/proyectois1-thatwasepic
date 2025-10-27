@@ -1,6 +1,6 @@
 <h1 style="text-align: center;">🎰 LogBait, Plataforma de Apuestas Online</h1>
 
-<img width="1024" height="1024" alt="image" src="https://github.com/user-attachments/assets/bd5739a7-5476-4d39-aa36-6538b0d02da6" />
+<img width="512" height="512" alt="image" src="https://github.com/user-attachments/assets/bd5739a7-5476-4d39-aa36-6538b0d02da6" />
 
 **LogBait** es una plataforma web de apuestas desarrollada como proyecto académico.  
 Su objetivo es ofrecer una experiencia sencilla, segura y responsable para los usuarios interesados en realizar apuestas en línea de manera simulada.
