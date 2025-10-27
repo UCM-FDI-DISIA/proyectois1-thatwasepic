@@ -12,7 +12,7 @@
                             BIENVENIDO, <span class="text-gradient">{{ user.username }}</span>
                         </h1>
                         <p class="hero-subtitle mb-0">
-                            SISTEMA NEURAL ACTIVADO - SELECCIONA MÓDULO DE APRENDIZAJE
+                            Desafia al Azar en nuestra plataforma de juegos LogBait.
                         </p>
                     </div>
                     <div class="col-md-4 text-md-end">
@@ -22,6 +22,7 @@
                             </div>
                             <div class="h2 mb-0 text-gradient fw-bold">
                                 ${{ "%.2f"|format(user.balance) }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -37,28 +38,12 @@
         <div class="card game-card matrix-rain">
             <div class="card-body text-center p-4">
                 <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">🎲</div>
-                <h3 class="card-title">BLACKJACK NEURAL</h3>
+                <h3 class="card-title">BLACKJACK</h3>
                 <p class="card-text mb-4">
                     Algoritmo de 21 puntos. Enfrenta a la IA central en duelo probabilístico.
                 </p>
-                <a href="{{ url_for('blackjack') }}" class="btn btn-primary btn-lg w-100">
-                    <i class="fas fa-brain me-2"></i>INICIAR SIMULACIÓN
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Poker -->
-    <div class="col-xl-3 col-lg-4 col-md-6">
-        <div class="card game-card matrix-rain" style="animation-delay: 0.2s">
-            <div class="card-body text-center p-4">
-                <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">🃏</div>
-                <h3 class="card-title">POKER HOLOGRÁFICO</h3>
-                <p class="card-text mb-4">
-                    Sistema de manos probabilísticas. Optimiza tu estrategia de combinaciones.
-                </p>
-                <a href="{{ url_for('poker') }}" class="btn btn-primary btn-lg w-100">
-                    <i class="fas fa-chess-queen me-2"></i>ANALIZAR MANOS
+                <a href="{{ url_for('blackjack.home') }}" class="btn btn-primary btn-lg w-100">
+                    <i class="fas fa-brain me-2"></i>JUGAR YA
                 </a>
             </div>
         </div>
@@ -72,8 +57,24 @@
                 <p class="card-text mb-4">
                     Apuesta a pleno, caballos, calles, esquinas y exteriores.
                 </p>
-                <a href="{{ url_for('ruleta_page') }}" class="btn btn-primary btn-lg w-100">
+                <!-- TODO: enlazar a ruleta.home cuando esté implementada -->
+                <a href="{{ url_for('blackjack.home') }}" class="btn btn-primary btn-lg w-100">
                     <i class="fas fa-bullseye me-2"></i>JUGAR RULETA
+                </a>
+            </div>
+        </div>
+    </div>
+    <!-- Poker -->
+    <div class="col-xl-3 col-lg-4 col-md-6">
+        <div class="card game-card matrix-rain" style="animation-delay: 0.2s">
+            <div class="card-body text-center p-4">
+                <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">🃏</div>
+                <h3 class="card-title">POKER HOLOGRÁFICO</h3>
+                <p class="card-text mb-4">
+                    Sistema de manos probabilísticas. Optimiza tu estrategia de combinaciones.
+                </p>
+                <a href="{{ url_for('poker.home') }}" class="btn btn-primary btn-lg w-100">
+                    <i class="fas fa-chess-queen me-2"></i>RETA A LA IA
                 </a>
             </div>
         </div>
@@ -84,12 +85,12 @@
         <div class="card game-card matrix-rain" style="animation-delay: 0.4s">
             <div class="card-body text-center p-4">
                 <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">🪙</div>
-                <h3 class="card-title">MONEDA BINARIA</h3>
+                <h3 class="card-title">COINFLIP</h3>
                 <p class="card-text mb-4">
                     Experimento de probabilidad 50/50. Testea la teoría del caos controlado.
                 </p>
-                <a href="{{ url_for('coinflip') }}" class="btn btn-primary btn-lg w-100">
-                    <i class="fas fa-dice me-2"></i>EJECutar ALGORITMO
+                <a href="{{ url_for('coinflip.home') }}" class="btn btn-primary btn-lg w-100">
+                    <i class="fas fa-dice me-2"></i>TODO O NADA
                 </a>
             </div>
         </div>
@@ -104,8 +105,8 @@
                 <p class="card-text mb-4">
                     Generador de combinaciones aleatorias. Estudia distribuciones probabilísticas.
                 </p>
-                <a href="{{ url_for('tragaperras') }}" class="btn btn-primary btn-lg w-100">
-                    <i class="fas fa-cogs me-2"></i>ACTIVAR RODILLOS
+                <a href="{{ url_for('tragaperras.home') }}" class="btn btn-primary btn-lg w-100">
+                    <i class="fas fa-cogs me-2"></i>GIRAR
                 </a>
             </div>
         </div>
@@ -120,7 +121,7 @@
                 <p class="card-text mb-4">
                     Simulador de variables múltiples. Analiza patrones de comportamiento.
                 </p>
-                <a href="{{ url_for('caballos') }}" class="btn btn-primary btn-lg w-100">
+                <a href="{{ url_for('caballos.home') }}" class="btn btn-primary btn-lg w-100">
                     <i class="fas fa-horse me-2"></i>INICIAR CARRERA
                 </a>
             </div>
@@ -134,9 +135,9 @@
                 <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">📊</div>
                 <h3 class="card-title">PANEL DE DATOS</h3>
                 <p class="card-text mb-4">
-                    Centro de análisis neural. Monitoriza tu progreso y métricas de aprendizaje.
+                    Centro de análisis. Monitoriza tu progreso y métricas.
                 </p>
-                <a href="{{ url_for('estadisticas') }}" class="btn btn-outline-primary btn-lg w-100">
+                <a href="{{ url_for('estadisticas.home') }}" class="btn btn-outline-primary btn-lg w-100">
                     <i class="fas fa-chart-bar me-2"></i>ACCEDER DATOS
                 </a>
             </div>
@@ -148,11 +149,11 @@
         <div class="card game-card matrix-rain" style="animation-delay: 1.2s">
             <div class="card-body text-center p-4">
                 <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">👤</div>
-                <h3 class="card-title">PERFIL NEURAL</h3>
+                <h3 class="card-title">PERFIL DE USUARIO</h3>
                 <p class="card-text mb-4">
-                    Configuración de identidad digital. Gestiona tu presencia en el ecosistema.
+                    Configuración de identidad digital. Gestiona tu presencia en el sistema.
                 </p>
-                <a href="{{ url_for('perfil') }}" class="btn btn-outline-primary btn-lg w-100">
+                <a href="{{ url_for('perfil.home') }}" class="btn btn-outline-primary btn-lg w-100">
                     <i class="fas fa-user-cog me-2"></i>CONFIGURAR SISTEMA
                 </a>
             </div>
@@ -168,7 +169,7 @@
                 <p class="card-text mb-4">
                     Panel de administración del sistema. Acceso a configuraciones avanzadas.
                 </p>
-                <a href="{{ url_for('logout') }}" class="btn btn-danger btn-lg w-100">
+                <a href="{{ url_for('logout.home') }}" class="btn btn-danger btn-lg w-100">
                     <i class="fas fa-power-off me-2"></i>DESCONECTAR SISTEMA
                 </a>
             </div>
@@ -185,7 +186,7 @@
                     <div class="col-md-9">
                         <h4 class="text-white mb-2">
                             <i class="fas fa-robot text-warning me-2"></i>
-                            SISTEMA NEURAL EDUCATIVO ACTIVO
+                            SISTEMA EDUCATIVO
                         </h4>
                         <p class="text-muted mb-0">
                             Plataforma de aprendizaje experimental. Todas las transacciones son virtuales 
