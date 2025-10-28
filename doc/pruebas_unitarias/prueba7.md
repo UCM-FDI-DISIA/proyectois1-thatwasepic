@@ -83,7 +83,7 @@ La prueba se considera **superada** si el sistema acepta la apuesta válida, act
 
 ---
 
-### 🔟 Observaciones / Notas
+### 🔟 Observaciones
 
 * El saldo del usuario debe actualizarse inmediatamente.  
 * Se puede verificar en la base de datos que la apuesta fue registrada correctamente.
@@ -173,7 +173,7 @@ Prueba superada si el sistema impide realizar la apuesta y muestra un mensaje de
 
 ---
 
-### 🔟 Observaciones / Notas
+### 🔟 Observaciones
 
 * Puede probarse también con campo vacío o valores no numéricos (“abc”).  
 * El saldo debe permanecer intacto.
@@ -267,9 +267,9 @@ La prueba se considera superada si el sistema **procesa correctamente una apuest
 
 ---
 
-### 🔟 Observaciones / Notas
+### 🔟 Observaciones
 
-* Puede verificarse en la base de datos que el resultado se registró con estado “perdida”.  
+* Puede verificarse en la base de datos que el resultado se registró.  
 * El saldo debe reflejarse actualizado inmediatamente.
 
 ---
@@ -357,7 +357,7 @@ La prueba se considera superada si el sistema **impide apostar más del saldo di
 
 ---
 
-### 🔟 Observaciones / Notas
+### 🔟 Observaciones
 
 * Puede probarse también con saldo exacto (ejemplo: apostar 10 créditos con saldo 10, que debe ser permitido).  
 * El control de saldo debe realizarse **antes** de procesar el giro.
