@@ -1,6 +1,6 @@
 from flask import request, jsonify, Blueprint, render_template
 from flask_login import login_required, current_user
-from models import db, Apuesta, EstadisticaRuleta
+from models import db, Apuesta
 
 # Blueprint principal para las rutas de la ruleta
 bp = Blueprint('ruleta', __name__)
