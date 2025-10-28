@@ -5,7 +5,7 @@
 **LogBait** es una plataforma web de apuestas desarrollada como proyecto académico.  
 Su objetivo es ofrecer una experiencia sencilla, segura y responsable para los usuarios interesados en realizar apuestas en línea de manera simulada.
 
-> [!NOTA]
+> [!NOTE]
 > Este proyecto no gestiona dinero real. Todas las operaciones y apuestas son ficticias y tienen únicamente fines educativos.
 
 ---
