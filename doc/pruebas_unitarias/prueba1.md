@@ -32,7 +32,7 @@ Se prueba **solo la operación de alta de usuario**, sin incluir el login poster
 
 | Parámetro  | Valor límite inferior | Valor límite superior                          |
 | ---------- | --------------------- | ---------------------------------------------- |
-| Contraseña | 8 caracteres          | (sin límite máximo )                           |
+| Contraseña | 4 caracteres          | (sin límite máximo )                           |
 | Usuario    | 1 carácter            | (sin límite de caracteres)                     |
 
 ---
@@ -86,3 +86,4 @@ La prueba se considera **superada** si el sistema crea el usuario y muestra el m
 * Si el nombre de usuario ya existía, el sistema muestra el mensaje “El nombre de usuario ya existe”.
 * Pueden existir varias cuentas con el mismo email.
 ---
+
