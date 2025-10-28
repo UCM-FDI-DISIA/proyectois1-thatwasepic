@@ -4,8 +4,12 @@
 <div class="row justify-content-center">
     <div class="col-md-10">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h4>🏇 Carrera de Caballos</h4>
+                <!-- Botón HELP añadido aquí -->
+                <button class="btn btn-info btn-sm" onclick="mostrarAyuda()">
+                    ❓ HELP
+                </button>
             </div>
             <div class="card-body">
                 <div class="text-center mb-4">
@@ -157,6 +161,42 @@
         </div>
     </div>
 </div>
+
+<!-- Modal de Ayuda -->
+<div class="modal fade" id="modalAyuda" tabindex="-1" aria-labelledby="modalAyudaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAyudaLabel">🏇 Ayuda - Carrera de Caballos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Descripción del juego “Carrera de Caballos”</h6>
+                <p>Comenzarás viendo tu balance actual y una sección con información de los cuatro caballos disponibles —Relámpago, Trueno, Centella y Azabache—, cada uno con su velocidad, resistencia y multiplicador de ganancia.</p>
+                
+                <h6>A continuación sigue estos pasos:</h6>
+                <ol>
+                    <li><strong>Elige la cantidad a apostar</strong> (limitada por tu saldo).</li>
+                    <li><strong>Selecciona un caballo</strong> al que deseas apostar.</li>
+                    <li><strong>Pulsa “Iniciar carrera”</strong> para comenzar la simulación.</li>
+                </ol>
+                
+                <p>Una vez comience la carrera, los caballos avanzarán visualmente por una pista, con movimiento aleatorio ajustado según su velocidad y resistencia. El primero en llegar a la meta se declarará ganador.</p>
+                
+                <h6>Al finalizar:</h6>
+                <ul>
+                    <li>Si <strong>apostaste por el caballo ganador</strong>, se calcula tu ganancia multiplicando la apuesta por el multiplicador del caballo.</li>
+                    <li>Si <strong>perdiste</strong> (verás como esto no ocurre), se resta la cantidad apostada.</li>
+                </ul>
+                
+                <p>Siempre que quieras, podrás reiniciar la carrera para volver a jugar.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Entendido</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -195,6 +235,12 @@ const caballos = {
         emoji: "🎠"
     }
 };
+
+// Función para mostrar el modal de ayuda
+function mostrarAyuda() {
+    const modal = new bootstrap.Modal(document.getElementById('modalAyuda'));
+    modal.show();
+}
 
 // Calcular probabilidades basadas en características
 function calcularProbabilidades() {
@@ -513,6 +559,18 @@ document.getElementById('cantidad').addEventListener('input', function() {
 .progress {
     height: 8px;
 }
+
+/* Estilos para el botón HELP */
+.btn-info {
+    background: linear-gradient(45deg, #17a2b8, #138496);
+    border: none;
+    font-weight: bold;
+}
+
+.btn-info:hover {
+    background: linear-gradient(45deg, #138496, #117a8b);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
 </style>
 {% endblock %}
-
