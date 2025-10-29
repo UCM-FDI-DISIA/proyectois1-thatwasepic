@@ -33,10 +33,9 @@ def apostar():
         )
         db.session.add(apuesta)
         
-        # Actualizar estadísticas - CORREGIDO
+        #  Actualizar estadísticas
         stats = Estadistica.query.filter_by(user_id=current_user.id, juego='tragaperras').first()
         if not stats:
-            # ✅ Inicializar explícitamente todos los campos
             stats = Estadistica(
                 user_id=current_user.id, 
                 juego='tragaperras',
@@ -49,7 +48,8 @@ def apostar():
         
         stats.partidas_jugadas += 1
         stats.apuesta_total += cantidad
-        stats.ganancia_total += (ganancia - cantidad)
+        # ganancia_total debe sumar ganancia bruta, no neta
+        stats.ganancia_total += ganancia
         
         if ganancia > cantidad:
             stats.partidas_ganadas += 1

@@ -53,7 +53,7 @@ def apostar():
         if not data:
             return jsonify({'error': 'Datos JSON requeridos'}), 400
             
-        # ✅ Obtener datos EXACTAMENTE como los envía tu frontend
+        # Obtener datos EXACTAMENTE como los envía tu frontend
         cantidad = data.get('cantidad')
         resultado = data.get('resultado')  # 'ganada' o 'perdida'
         ganancia = data.get('ganancia')
@@ -81,22 +81,22 @@ def apostar():
         if cantidad > current_user.balance:
             return jsonify({'error': 'Fondos insuficientes'}), 400
         
-        # ✅ Verificar que el caballo apostado existe
+        #  Verificar que el caballo apostado existe
         if caballo_apostado not in CABALLOS:
             return jsonify({'error': 'Caballo apostado no válido'}), 400
             
-        # ✅ Verificar que el caballo ganador existe (si se proporciona)
+        #  Verificar que el caballo ganador existe (si se proporciona)
         if caballo_ganador and caballo_ganador not in CABALLOS:
             return jsonify({'error': 'Caballo ganador no válido'}), 400
         
         print(f"🔍 Validaciones pasadas. Actualizando balance...")
         
-        # ✅ Actualizar balance del usuario
+        #  Actualizar balance del usuario
         balance_anterior = current_user.balance
         current_user.balance = current_user.balance - cantidad + ganancia
         print(f"🔍 Balance actualizado: {balance_anterior} -> {current_user.balance}")
         
-        # ✅ Registrar apuesta
+        #  Registrar apuesta
         apuesta = Apuesta(
             user_id=current_user.id,
             juego='caballos',
@@ -107,7 +107,7 @@ def apostar():
         db.session.add(apuesta)
         print("🔍 Apuesta registrada")
         
-        # ✅ Manejar estadísticas de forma SEGURA
+        #  Manejar estadísticas de forma CORRECTA
         stats = Estadistica.query.filter_by(user_id=current_user.id, juego='caballos').first()
         
         if stats:
@@ -121,10 +121,11 @@ def apostar():
             stats.partidas_jugadas = partidas_jugadas + 1
             if resultado == 'ganada':
                 stats.partidas_ganadas = partidas_ganadas + 1
-            stats.ganancia_total = ganancia_total + (ganancia - cantidad)
+            # ✅ CORRECCIÓN: ganancia_total debe sumar la ganancia bruta, no neta
+            stats.ganancia_total = ganancia_total + ganancia
             stats.apuesta_total = apuesta_total + cantidad
             
-            print(f"🔍 Estadísticas actualizadas: PJ={stats.partidas_jugadas}, PG={stats.partidas_ganadas}")
+            print(f"🔍 Estadísticas actualizadas: PJ={stats.partidas_jugadas}, PG={stats.partidas_ganadas}, GananciaTotal={stats.ganancia_total}, ApuestaTotal={stats.apuesta_total}")
         else:
             print("🔍 Creando nuevas estadísticas")
             # Crear nuevas estadísticas
@@ -133,23 +134,24 @@ def apostar():
                 juego='caballos',
                 partidas_jugadas=1,
                 partidas_ganadas=1 if resultado == 'ganada' else 0,
-                ganancia_total=ganancia - cantidad,
+                # ✅ CORRECCIÓN: ganancia_total debe ser la ganancia bruta
+                ganancia_total=ganancia,
                 apuesta_total=cantidad
             )
             db.session.add(stats)
         
-        # ✅ Hacer commit
+        #  Hacer commit
         db.session.commit()
         print("✅ Commit exitoso")
         
-        # ✅ Preparar respuesta
+        #  Preparar respuesta
         respuesta = {
             'resultado': resultado,
             'ganancia': ganancia,
             'nuevo_balance': current_user.balance
         }
         
-        # ✅ Añadir información de caballos si está disponible
+        #  Añadir información de caballos si está disponible
         if caballo_apostado:
             respuesta['caballo_apostado'] = CABALLOS[caballo_apostado]
         if caballo_ganador:
@@ -165,69 +167,3 @@ def apostar():
         import traceback
         print(f"❌ Traceback: {traceback.format_exc()}")
         return jsonify({'error': f'Error al procesar la apuesta: {str(e)}'}), 500
-
-@bp.route('/info', methods=['GET'])
-@login_required
-def get_info():
-    """Obtener información de los caballos (para futuras mejoras)"""
-    return jsonify({
-        'caballos': list(CABALLOS.values()),
-        'balance': current_user.balance
-    })
-
-@bp.route('/test', methods=['GET'])
-@login_required
-def test():
-    """Endpoint de prueba"""
-    return jsonify({
-        'status': 'ok',
-        'message': 'API de caballos funcionando',
-        'usuario': current_user.username,
-        'balance': current_user.balance
-    })
-
-# Endpoint simple para recibir cualquier apuesta (backup)
-@bp.route('/apostar_simple', methods=['POST'])
-@login_required
-def apostar_simple():
-    """Versión simplificada que acepta cualquier dato"""
-    try:
-        data = request.get_json()
-        print(f"🔍 Apostar simple - Datos: {data}")
-        
-        if not data:
-            return jsonify({'error': 'Datos requeridos'}), 400
-            
-        cantidad = float(data.get('cantidad', 0))
-        ganancia = float(data.get('ganancia', 0))
-        
-        if cantidad <= 0:
-            return jsonify({'error': 'Cantidad inválida'}), 400
-            
-        if cantidad > current_user.balance:
-            return jsonify({'error': 'Fondos insuficientes'}), 400
-        
-        # Actualizar balance
-        current_user.balance = current_user.balance - cantidad + ganancia
-        
-        # Registrar apuesta básica
-        apuesta = Apuesta(
-            user_id=current_user.id,
-            juego='caballos',
-            cantidad=cantidad,
-            resultado='ganada' if ganancia > cantidad else 'perdida',
-            ganancia=ganancia
-        )
-        db.session.add(apuesta)
-        
-        db.session.commit()
-        
-        return jsonify({
-            'success': True,
-            'nuevo_balance': current_user.balance,
-            'mensaje': 'Apuesta procesada correctamente'
-        })
-        
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 500

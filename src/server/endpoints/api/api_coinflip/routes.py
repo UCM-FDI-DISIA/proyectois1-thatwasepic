@@ -1,8 +1,9 @@
 from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
-from models import db
+from models import db, Apuesta, Estadistica
+from datetime import datetime
 
-bp = Blueprint('coinflip_api', __name__, url_prefix='/api/coinflip')
+bp = Blueprint('api_coinflip', __name__, url_prefix='/api/coinflip')
 
 @bp.route('/apostar', methods=['POST'])
 @login_required
@@ -48,7 +49,37 @@ def apostar():
     if gano:
         current_user.balance += ganancia
 
-    # Guardar en base de datos
+    # Crear registro de la apuesta para estadísticas 
+    apuesta = Apuesta(
+        user_id=current_user.id,  # Cambiado de usuario_id a user_id
+        juego='coinflip',
+        cantidad=cantidad,
+        ganancia=ganancia,
+        resultado='ganada' if gano else 'perdida'
+        # Eliminado el campo 'detalles' que no existe en el modelo
+    )
+    
+    db.session.add(apuesta)
+    
+    stats = Estadistica.query.filter_by(user_id=current_user.id, juego='coinflip').first()
+    if not stats:
+        stats = Estadistica(
+            user_id=current_user.id, 
+            juego='coinflip',
+            partidas_jugadas=0,
+            partidas_ganadas=0,
+            ganancia_total=0.0,
+            apuesta_total=0.0
+        )
+        db.session.add(stats)
+    
+    stats.partidas_jugadas += 1
+    stats.apuesta_total += cantidad
+    stats.ganancia_total += ganancia
+    
+    if ganancia > cantidad:  # Si ganó (ganancia = 2*cantidad, por lo tanto > cantidad)
+        stats.partidas_ganadas += 1
+    
     db.session.commit()
 
     return jsonify({

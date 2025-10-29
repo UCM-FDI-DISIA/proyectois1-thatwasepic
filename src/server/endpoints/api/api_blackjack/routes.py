@@ -19,6 +19,37 @@ def apostar():
         
         # Actualizar el balance del usuario
         current_user.balance += cambio_neto
+        
+        #  Registrar apuesta
+        apuesta = Apuesta(
+            user_id=current_user.id,
+            juego='blackjack',
+            cantidad=cantidad,
+            resultado=resultado,
+            ganancia=ganancia
+        )
+        db.session.add(apuesta)
+        
+        # Actualizar estadísticas
+        stats = Estadistica.query.filter_by(user_id=current_user.id, juego='blackjack').first()
+        if not stats:
+            stats = Estadistica(
+                user_id=current_user.id, 
+                juego='blackjack',
+                partidas_jugadas=0,
+                partidas_ganadas=0,
+                ganancia_total=0.0,
+                apuesta_total=0.0
+            )
+            db.session.add(stats)
+        
+        stats.partidas_jugadas += 1
+        stats.apuesta_total += cantidad
+        stats.ganancia_total += ganancia
+        
+        if ganancia > cantidad:
+            stats.partidas_ganadas += 1
+        
         db.session.commit()
         
         return jsonify({

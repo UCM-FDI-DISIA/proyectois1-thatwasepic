@@ -136,7 +136,7 @@ def spin_ruleta():
         # Actualizar balance del usuario
         current_user.balance += total_neto
 
-        # Actualizar estadísticas globales (como en blackjack)
+        # Actualizar estadísticas globales
         stats = Estadistica.query.filter_by(user_id=current_user.id, juego="ruleta").first()
         if not stats:
             stats = Estadistica(
@@ -151,7 +151,9 @@ def spin_ruleta():
 
         stats.partidas_jugadas += 1
         stats.apuesta_total += total_bet_euros
+        #  ganancia_total debe sumar ganancia bruta
         stats.ganancia_total += total_win_euros
+        
         if total_win_euros > 0:
             stats.partidas_ganadas += 1
 
