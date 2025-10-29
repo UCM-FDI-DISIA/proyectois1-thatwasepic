@@ -114,124 +114,104 @@ Ninguno en el sentido de parámetros de función; la prueba simula clicks en los
 
 ---
 
-## PRUEBA 4: EJECUCIÓN COMPLETA DE CARRERA EXITOSA
+## PRUEBA 4: BOTÓN PEDIR AÑADE UNA CARTA Y ACTUALIZA PUNTOS VISIBLES, Y SI AL PEDIR LA MANO SUPERA 21, SE MUESTRA "BUSTED" Y SE DESHABILITAN ACCIONES PARA ESA MANO
 
 ### Identificación
-- **Nombre**: Carrera completa con apuesta ganadora
-- **Módulo**: Juego "Carrera de Caballos" completo
+- **Nombre**: BOTÓN PEDIR AÑADE UNA CARTA Y ACTUALIZA PUNTOS VISIBLES, y si al pedir la mano supera 21, se muestra mano “busted” y se deshabilitan acciones para esa mano.
+- **Módulo**: Juego "Blackjack" 
 
 ### Objetivo
-Verificar el flujo completo desde la apuesta hasta el resultado ganador.
+Verificar que al pulsar el botón PEDIR, el sistema entrega una nueva carta al jugador, actualiza los puntos mostrados en pantalla y refleja correctamente si el jugador se pasa de 21.
 
-### Datos de entrada
-
-saldoInicial = 100
-cantidadApuesta = 50
-caballoSeleccionado = 1 // Relámpago
-caballoGanador = 1 // Relámpago gana
+ ### Diseño de la prueba
+**Particiones de equivalencia:**
+- Parámetro: Botón de apuesta rápida pulsado
+  - Clases válidas: Cuando el juego está activo y mano no terminada.
+  - Clases inválidas: Cuando el juego no está activo o mano ya terminada.
 
 
 ### Pasos de ejecución
-1. Iniciar sesión con usuario válido
-2. Acceder a "Carrera de Caballos"
-3. Seleccionar Relámpago
-4. Apostar 50 créditos
-5. Ejecutar carrera
-6. Simular victoria de Relámpago
-7. Verificar resultados
+1. Iniciar el Blackjack
+2. En el campo “APUESTA”, introducir una cantidad válida (por ejemplo, 10 €) y pulsar “INICIAR SIMULACIÓN”.
+3. Esperar a que se repartan las cartas iniciales: El jugador ve dos cartas visibles en su zona y el crupier muestra una carta visible y otra oculta.
+4. Pulsar el botón “PEDIR”.
+5. Si los puntos del jugador no superan 21, el juego continúa normalmente y los botones siguen activos.
+6. Si los puntos del jugador superan 21, el marcador se muestra en color rojo y el jugador no puede seguir pidiendo cartas.
 
 ### Resultado esperado
-- Se descuenta apuesta del saldo: 100 - 50 = 50
-- Se calcula ganancia: 50 × 1.5 = 75
-- Nuevo saldo: 50 + 75 = 125
-- Se muestra mensaje: "¡GANASTE! 🎉"
-- Se actualiza balance en interfaz
+- Al pulsar “PEDIR”, aparece una carta nueva en la zona del jugador.
+- El marcador de puntos del jugador se actualiza inmediatamente mostrando el nuevo total.
+- Si el total de puntos supera 21, el número aparece en rojo y el jugador pierde automáticamente su turno.
+- Si el total no supera 21, los botones de acción (PEDIR, PLANTARSE) siguen disponibles.
+- En ningún caso el juego se bloquea ni muestra errores visibles.
+- El saldo del jugador permanece igual hasta que la ronda termina.
 
 ---
 
-## PRUEBA 5: RESETEO DE CARRERA
+## PRUEBA 5: BOTÓN “PLANTARSE” FINALIZA LA MANO ACTUAL Y PASA AL SIGUIENTE PASO
 
 ### Identificación
-- **Nombre**: Reseteo correcto del estado del juego
-- **Módulo**: Funcionalidad de reinicio
+- **Nombre**: BOTÓN “PLANTARSE” FINALIZA LA MANO ACTUAL Y PASA AL SIGUIENTE PASO
+- **Módulo**: Juego "Blackjack"
 
 ### Objetivo
-Comprobar que la función `reiniciarCarrera()` restablece correctamente el estado del juego.
+Comprobar que al pulsar PLANTARSE el jugador finaliza su turno para la mano activa y el flujo avanza correctamente: bien al turno del crupier o a la siguiente mano del jugador.
 
 ### Pasos de ejecución
-1. Configurar estado con caballo seleccionado y carrera en curso
-2. Ejecutar `reiniciarCarrera()`
-3. Verificar estado resultante
+1. Pulsar el botón PLANTARSE.
 
 ### Resultado esperado
-- `caballoSeleccionado = null`
-- `carreraEnCurso = false`
-- Todos los caballos en posición inicial (left: 0px)
-- Botones de selección en estado "outline"
-- Información de apuesta limpiada
-- Botón "Iniciar Carrera" habilitado
+- El jugador no puede pedir más cartas para esa mano.
+- La carta oculta del crupier se revela y el crupier inicia su turno (se ven las animaciones/robos del crupier).
+- Los botones de acción del jugador quedan deshabilitados hasta que la ronda termine.
 
 ---
 
-## PRUEBA 6: COMUNICACIÓN CON BACKEND
+## PRUEBA 6: AL DOBLAR, LA APUESTA SE DUPLICA, SE ROBA UNA CARTA Y LA ACCIÓN SE ACABA.
 
 ### Identificación
-- **Nombre**: Envío correcto de resultados al servidor
-- **Módulo**: API Integration
+- **Nombre**: DOBLAR, LA APUESTA SE DUPLICA, SE ROBA UNA CARTA Y LA ACCIÓN SE ACABA.
+- **Módulo**: Juego "Blackjack"
 
 ### Objetivo
-Verificar que los datos se envían correctamente al endpoint del servidor.
-
-### Datos de entrada
-resultado = "ganada"
-cantidad = 50
-ganancia = 75
-caballoApostado = 1
-caballoGanador = 1
+Comprobar, desde la perspectiva del usuario, que al usar la función DOBLAR:
+-La apuesta de la mano se duplica descontando el importe adicional del saldo visible,
+-El sistema reparte exactamente una carta adicional al jugador,
+-La acción termina inmediatamente la mano (no se puede pedir más cartas para esa mano),
+-La opción DOBLAR solo está disponible cuando la mano tiene exactamente dos cartas y hay saldo suficiente para igualar la apuesta original,
 
 ### Pasos de ejecución
-1. Ejecutar `enviarResultadoCaballos()` con datos de prueba
-2. Verificar estructura de la petición HTTP
-3. Comprobar manejo de respuesta exitosa
+1. Pulsar el botón DOBLAR.
 
 ### Resultado esperado
-- Petición POST a '/api/caballos/apostar'
-- Headers incluyen 'Content-Type' y CSRF Token
-- Body contiene todos los datos necesarios
-- En respuesta exitosa, actualiza balance en interfaz
+- El saldo visible se reduce inmediatamente por el importe adicional requerido para igualar la apuesta
+- La apuesta de la mano queda duplicada o la UI muestra claramente que la mano está doblada.
+- Se añade una única carta al conjunto de cartas del jugador (visible inmediatamente).
+- El jugador no puede pedir más cartas para esa mano
 
 ---
 
-## PRUEBA 7: VALIDACIÓN DE ENTRADA DE MONTO
+## PRUEBA 7: BOTÓN “SEPARAR (SPLIT)” DIVIDE LA MANO EN DOS, COBRA LA SEGUNDA APUESTA Y REPARTE CARTAS A CADA MANO
 
 ### Identificación
-- **Nombre**: Validación de entrada de cantidad
-- **Módulo**: Control de formularios
+- **Nombre**: BOTÓN “SEPARAR (SPLIT)” DIVIDE LA MANO EN DOS, COBRA LA SEGUNDA APUESTA Y REPARTE CARTAS A CADA MANO
+- **Módulo**: Juego "Blackjack"
 
 ### Objetivo
-Comprobar que el input de cantidad valida correctamente los valores.
+Verificar que:
+-La acción solo está disponible cuando las dos cartas iniciales del jugador tienen el mismo valor.
+-El sistema cobra la segunda apuesta (igual a la apuesta inicial) descontándola del saldo visible.
+-La mano del jugador se divide en dos manos visibles, cada una con una carta original y una carta adicional repartida automáticamente.
+-Las acciones disponibles y el flujo permiten jugar cada mano por separado o quedan deshabilitadas cuando corresponda.
 
-### Casos de prueba:
-1. **Cantidad mayor al saldo**: Debe ajustarse al saldo máximo
-2. **Cantidad negativa**: No permitida (min="1")
-3. **Valor decimal**: Permitido (step="1" pero parseFloat lo maneja)
-4. **Campo vacío**: Alert "Ingresa una cantidad válida"
+### Pasos de ejecución:
+1. Observar las dos cartas iniciales del jugador; comprobar visualmente que tienen el mismo valor.
+2. Pulsar el boton SEPARAR.
 
----
-
-## PRUEBA 8: ANIMACIÓN Y ESTADOS VISUALES
-
-### Identificación
-- **Nombre**: Estados visuales durante la carrera
-- **Módulo**: Interfaz de usuario
-
-### Objetivo
-Verificar los cambios visuales durante la ejecución de la carrera.
-
-### Verificaciones:
-- Botón "Iniciar Carrera" se deshabilita durante carrera
-- Caballos se mueven progresivamente hacia la meta
-- Caballo ganador tiene animación "pulse"
-- Posiciones se reinician correctamente
+### Resultado esperado
+- El saldo visible disminuye en la cantidad igual a la apuesta inicial.
+- La zona del jugador muestra dos manos separadas, cada una con 2 cartas (una original + una nueva repartida).
+- Al terminar la primera mano, la UI pasa a la segunda mano y habilita las acciones correspondientes.
+- La apuesta total en juego equivale a la suma de las apuestas por mano.
 
 ---
