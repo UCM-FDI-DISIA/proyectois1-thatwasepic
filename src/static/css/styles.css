@@ -95,11 +95,7 @@ body::after {
 
 /* ===== NAVBAR CYBERPUNK AVANZADO ===== */
 .navbar {
-    background: rgba(10, 10, 15, 0.95) !important;
-    backdrop-filter: blur(25px);
     border-bottom: 2px solid transparent;
-    background: linear-gradient(90deg, transparent, var(--neon-cyan), var(--neon-pink), var(--neon-purple), transparent) bottom/100% 2px no-repeat !important;
-    box-shadow: var(--glow-multi);
     padding: 1.2rem 0;
     position: relative;
     z-index: 1000;
@@ -201,6 +197,17 @@ body::after {
     font-family: 'Orbitron', monospace;
     text-transform: uppercase;
     letter-spacing: 1px;
+}
+
+/* Hacer la barra de navegación transparente en la parte superior de la página */
+.navbar {
+    transition: background-color 0.4s ease, backdrop-filter 0.4s ease;
+    background-color: transparent;
+}
+
+.navbar.scrolled {
+    background-color: rgba(10, 10, 15, 0.9); /* opaco pero con transparencia */
+    backdrop-filter: blur(8px);
 }
 
 /* ===== HERO SECTION FUTURISTA ===== */
@@ -593,4 +600,25 @@ body::after {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--gradient-sunset);
     box-shadow: var(--glow-multi);
+}
+
+/* --- Fuerza la visibilidad del fondo de la navbar --- */
+.navbar {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    z-index: 2000; /* más alto que tarjetas, etc. */
+    background-color: transparent;
+    transition: background-color 0.4s ease, backdrop-filter 0.4s ease;
+}
+
+/* cuando se hace scroll */
+.navbar.scrolled {
+    background-color: rgba(10, 10, 15, 0.9);
+    backdrop-filter: blur(8px);
+}
+
+/* corrige Bootstrap, que hace la navbar transparente */
+.navbar.navbar-dark {
+    background-color: transparent !important;
 }
