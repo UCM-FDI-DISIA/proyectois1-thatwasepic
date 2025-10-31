@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estadísticas Avanzadas - Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .admin-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .admin-nav {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .stat-card h3 {
+            color: #00f3ff;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #00f3ff;
+            padding-bottom: 5px;
+        }
+        
+        .top-user {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+        }
+        
+        .user-rank {
+            font-weight: bold;
+            color: #00f3ff;
+            margin-right: 10px;
+        }
+        
+        .user-balance {
+            font-weight: bold;
+        }
+        
+        .positive { color: #00ff88; }
+        .negative { color: #ff6b6b; }
+        
+        .section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .section h2 {
+            margin-bottom: 15px;
+            color: #00f3ff;
+            border-bottom: 2px solid #00f3ff;
+            padding-bottom: 10px;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        .table th, .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .table th {
+            background: rgba(0, 243, 255, 0.2);
+            color: #00f3ff;
+        }
+        
+        .table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 5px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #00ff88, #00f3ff);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>📉 Estadísticas Avanzadas</h1>
+            <p>Bienvenido, {{ current_user.username }} | <a href="{{ url_for('dashboard.home') }}" style="color: #00ff88;">Volver al Casino</a></p>
+            
+            <div class="admin-nav">
+                <a href="{{ url_for('admin_panel.home') }}" class="nav-btn">📊 Dashboard</a>
+                <a href="{{ url_for('admin_usuarios.home') }}" class="nav-btn">👥 Usuarios</a>
+                <a href="{{ url_for('admin_apuestas.home') }}" class="nav-btn">📈 Apuestas</a>
+                <a href="{{ url_for('admin_estadisticas.home') }}" class="nav-btn">📉 Estadísticas</a>
+                <a href="{{ url_for('logout.home') }}" class="nav-btn" style="background: linear-gradient(45deg, #ff6b6b, #c23616);">🚪 Cerrar Sesión</a>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <!-- Top Usuarios por Balance -->
+            <div class="stat-card">
+                <h3>🏆 Top 10 Usuarios por Balance</h3>
+                {% for usuario in top_usuarios_balance %}
+                <div class="top-user">
+                    <div>
+                        <span class="user-rank">#{{ loop.index }}</span>
+                        {{ usuario.username }}
+                    </div>
+                    <div class="user-balance {% if usuario.balance >= 0 %}positive{% else %}negative{% endif %}">
+                        ${{ "%.2f"|format(usuario.balance) }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Top Apostadores -->
+            <div class="stat-card">
+                <h3>🎯 Top 10 Apostadores</h3>
+                {% for apostador in top_apostadores %}
+                <div class="top-user">
+                    <div>
+                        <span class="user-rank">#{{ loop.index }}</span>
+                        {{ apostador.username }}
+                    </div>
+                    <div class="user-balance">
+                        ${{ "%.2f"|format(apostador.total_apostado or 0) }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📈 Estadísticas Detalladas del Sistema</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                <div>
+                    <h3>🎮 Distribución por Juegos</h3>
+                    <p>Análisis de popularidad de cada juego</p>
+                    <!-- Aquí podrías agregar gráficos con Chart.js -->
+                </div>
+                <div>
+                    <h3>📊 Rendimiento del Sistema</h3>
+                    <p>Métricas de uso y performance</p>
+                    <!-- Aquí podrías agregar más estadísticas -->
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>💡 Recomendaciones del Sistema</h2>
+            <div style="background: rgba(0, 243, 255, 0.1); padding: 15px; border-radius: 10px; margin: 10px 0;">
+                <h4>🎯 Juegos Más Populares</h4>
+                <p>Basado en el número de apuestas, estos son los juegos más jugados:</p>
+                <!-- Aquí podrías agregar análisis automático -->
+            </div>
+            <div style="background: rgba(0, 255, 136, 0.1); padding: 15px; border-radius: 10px; margin: 10px 0;">
+                <h4>💰 Usuarios Destacados</h4>
+                <p>Usuarios con mejor rendimiento en apuestas:</p>
+                <!-- Aquí podrías agregar análisis de usuarios -->
+            </div>
+        </div>
+    </div>
+</body>
+</html>

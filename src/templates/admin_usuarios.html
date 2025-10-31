@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios - Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .admin-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .admin-nav {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+        
+        .section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .section h2 {
+            margin-bottom: 15px;
+            color: #00f3ff;
+            border-bottom: 2px solid #00f3ff;
+            padding-bottom: 10px;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        .table th, .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .table th {
+            background: rgba(0, 243, 255, 0.2);
+            color: #00f3ff;
+        }
+        
+        .table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-primary { background: #00f3ff; color: black; }
+        .btn-success { background: #00ff88; color: black; }
+        .btn-danger { background: #ff6b6b; color: white; }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .search-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            font-size: 16px;
+        }
+        
+        .balance-positive { color: #00ff88; }
+        .balance-negative { color: #ff6b6b; }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .page-btn {
+            padding: 8px 12px;
+            background: rgba(0, 243, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .page-btn:hover {
+            background: rgba(0, 243, 255, 0.4);
+        }
+        
+        .page-btn.active {
+            background: #00f3ff;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>👥 Gestión de Usuarios</h1>
+            <p>Bienvenido, {{ current_user.username }} | <a href="{{ url_for('dashboard.home') }}" style="color: #00ff88;">Volver al Casino</a></p>
+            
+            <div class="admin-nav">
+                <a href="{{ url_for('admin_panel.home') }}" class="nav-btn">📊 Dashboard</a>
+                <a href="{{ url_for('admin_usuarios.home') }}" class="nav-btn">👥 Usuarios</a>
+                <a href="{{ url_for('admin_apuestas.home') }}" class="nav-btn">📈 Apuestas</a>
+                <a href="{{ url_for('admin_estadisticas.home') }}" class="nav-btn">📉 Estadísticas</a>
+                <a href="{{ url_for('logout.home') }}" class="nav-btn" style="background: linear-gradient(45deg, #ff6b6b, #c23616);">🚪 Cerrar Sesión</a>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📊 Lista Completa de Usuarios ({{ usuarios|length }} total)</h2>
+            
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="🔍 Buscar usuarios..." onkeyup="filterUsers()" id="searchInput">
+            </div>
+
+            <table class="table" id="usersTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuario</th>
+                        <th>Email</th>
+                        <th>Balance</th>
+                        <th>Registro</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for usuario in usuarios %}
+                    <tr>
+                        <td>{{ usuario.id }}</td>
+                        <td>
+                            <strong>{{ usuario.username }}</strong>
+                            {% if usuario.username == current_user.username %}
+                            <span style="color: #00ff88; margin-left: 5px;">(Tú)</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ usuario.email }}</td>
+                        <td class="{% if usuario.balance >= 0 %}balance-positive{% else %}balance-negative{% endif %}">
+                            ${{ "%.2f"|format(usuario.balance) }}
+                        </td>
+                        <td>{{ usuario.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>
+                            <a href="{{ url_for('admin_usuario_detalle.home', user_id=usuario.id) }}" class="btn btn-primary">👀 Ver</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function filterUsers() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase();
+            const table = document.getElementById('usersTable');
+            const tr = table.getElementsByTagName('tr');
+            
+            for (let i = 1; i < tr.length; i++) {
+                const tdUsername = tr[i].getElementsByTagName('td')[1];
+                const tdEmail = tr[i].getElementsByTagName('td')[2];
+                if (tdUsername || tdEmail) {
+                    const txtValueUsername = tdUsername.textContent || tdUsername.innerText;
+                    const txtValueEmail = tdEmail.textContent || tdEmail.innerText;
+                    if (txtValueUsername.toLowerCase().indexOf(filter) > -1 || 
+                        txtValueEmail.toLowerCase().indexOf(filter) > -1) {
+                        tr[i].style.display = '';
+                    } else {
+                        tr[i].style.display = 'none';
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

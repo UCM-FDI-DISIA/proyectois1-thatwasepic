@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administrativo - Casino Educativo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .admin-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .admin-nav {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 10px 0;
+            background: linear-gradient(45deg, #00f3ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .section h2 {
+            margin-bottom: 15px;
+            color: #00f3ff;
+            border-bottom: 2px solid #00f3ff;
+            padding-bottom: 10px;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        .table th, .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .table th {
+            background: rgba(0, 243, 255, 0.2);
+            color: #00f3ff;
+        }
+        
+        .table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        .badge-success { background: #00ff88; color: black; }
+        .badge-danger { background: #ff6b6b; color: white; }
+        .badge-warning { background: #ffa500; color: black; }
+        
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary { background: #00f3ff; color: black; }
+        .btn-success { background: #00ff88; color: black; }
+        .btn-danger { background: #ff6b6b; color: white; }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .games-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .game-stat {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>🎮 Panel Administrativo - Casino Educativo</h1>
+            <p>Bienvenido, {{ current_user.username }} | <a href="{{ url_for('dashboard.home') }}" style="color: #00ff88;">Volver al Casino</a></p>
+            
+            <div class="admin-nav">
+                <a href="{{ url_for('admin_panel.home') }}" class="nav-btn">📊 Dashboard</a>
+                <a href="{{ url_for('admin_usuarios.home') }}" class="nav-btn">👥 Usuarios</a>
+                <a href="{{ url_for('admin_apuestas.home') }}" class="nav-btn">📈 Apuestas</a>
+                <a href="{{ url_for('admin_estadisticas.home') }}" class="nav-btn">📉 Estadísticas</a>
+                <a href="{{ url_for('logout.home') }}" class="nav-btn" style="background: linear-gradient(45deg, #ff6b6b, #c23616);">🚪 Cerrar Sesión</a>
+            </div>
+        </div>
+
+        <!-- Estadísticas Principales -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>👥 Total Usuarios</h3>
+                <div class="stat-number">{{ total_usuarios }}</div>
+                <p>Usuarios registrados</p>
+            </div>
+            <div class="stat-card">
+                <h3>🎯 Total Apuestas</h3>
+                <div class="stat-number">{{ total_apuestas }}</div>
+                <p>Apuestas realizadas</p>
+            </div>
+            <div class="stat-card">
+                <h3>💰 Balance Total</h3>
+                <div class="stat-number">${{ "%.2f"|format(total_balance) }}</div>
+                <p>En el sistema</p>
+            </div>
+            <div class="stat-card">
+                <h3>📊 Total Apostado</h3>
+                <div class="stat-number">${{ "%.2f"|format(total_apostado) }}</div>
+                <p>Historial completo</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎮 Estadísticas por Juego</h2>
+            <div class="games-stats">
+                {% for juego, stats in juegos_stats.items() %}
+                <div class="game-stat">
+                    <h3>{{ juego.upper() }}</h3>
+                    <p><strong>Apuestas:</strong> {{ stats.total_apuestas or 0 }}</p>
+                    <p><strong>Ganadas:</strong> {{ stats.ganadas or 0 }}</p>
+                    <p><strong>Apostado:</strong> ${{ "%.2f"|format(stats.total_apostado or 0) }}</p>
+                    <p><strong>Ganado:</strong> ${{ "%.2f"|format(stats.total_ganado or 0) }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <!-- Usuarios Recientes -->
+            <div class="section">
+                <h2>👥 Usuarios Recientes</h2>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Balance</th>
+                            <th>Registro</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for usuario in usuarios_recientes %}
+                        <tr>
+                            <td>{{ usuario.username }}</td>
+                            <td>${{ "%.2f"|format(usuario.balance) }}</td>
+                            <td>{{ usuario.created_at.strftime('%d/%m/%Y') }}</td>
+                            <td>
+                                <a href="{{ url_for('admin_usuario_detalle.home', user_id=usuario.id) }}" class="btn btn-primary">Ver</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Apuestas Recientes -->
+            <div class="section">
+                <h2>📈 Apuestas Recientes</h2>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Juego</th>
+                            <th>Cantidad</th>
+                            <th>Resultado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for apuesta in apuestas_recientes %}
+                        <tr>
+                            <td>{{ apuesta.user.username }}</td>
+                            <td>{{ apuesta.juego }}</td>
+                            <td>${{ "%.2f"|format(apuesta.cantidad) }}</td>
+                            <td>
+                                <span class="badge {% if apuesta.resultado == 'ganada' %}badge-success{% elif apuesta.resultado == 'perdida' %}badge-danger{% else %}badge-warning{% endif %}">
+                                    {{ apuesta.resultado }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

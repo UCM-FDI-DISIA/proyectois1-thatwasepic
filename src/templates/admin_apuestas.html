@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Apuestas - Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .admin-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .admin-nav {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+        
+        .section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .section h2 {
+            margin-bottom: 15px;
+            color: #00f3ff;
+            border-bottom: 2px solid #00f3ff;
+            padding-bottom: 10px;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        .table th, .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .table th {
+            background: rgba(0, 243, 255, 0.2);
+            color: #00f3ff;
+        }
+        
+        .table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        .badge-success { background: #00ff88; color: black; }
+        .badge-danger { background: #ff6b6b; color: white; }
+        .badge-warning { background: #ffa500; color: black; }
+        
+        .positive { color: #00ff88; }
+        .negative { color: #ff6b6b; }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .page-btn {
+            padding: 8px 12px;
+            background: rgba(0, 243, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .page-btn:hover {
+            background: rgba(0, 243, 255, 0.4);
+        }
+        
+        .page-btn.active {
+            background: #00f3ff;
+            color: black;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-select {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+        }
+        
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .summary-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .summary-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>📈 Gestión de Apuestas</h1>
+            <p>Bienvenido, {{ current_user.username }} | <a href="{{ url_for('dashboard.home') }}" style="color: #00ff88;">Volver al Casino</a></p>
+            
+            <div class="admin-nav">
+                <a href="{{ url_for('admin_panel.home') }}" class="nav-btn">📊 Dashboard</a>
+                <a href="{{ url_for('admin_usuarios.home') }}" class="nav-btn">👥 Usuarios</a>
+                <a href="{{ url_for('admin_apuestas.home') }}" class="nav-btn">📈 Apuestas</a>
+                <a href="{{ url_for('admin_estadisticas.home') }}" class="nav-btn">📉 Estadísticas</a>
+                <a href="{{ url_for('logout.home') }}" class="nav-btn" style="background: linear-gradient(45deg, #ff6b6b, #c23616);">🚪 Cerrar Sesión</a>
+            </div>
+        </div>
+
+        <!-- Resumen -->
+        <div class="summary">
+            <div class="summary-item">
+                <h3>Total Apuestas</h3>
+                <div class="summary-number">{{ apuestas.total }}</div>
+                <p>En el sistema</p>
+            </div>
+            <div class="summary-item">
+                <h3>Página Actual</h3>
+                <div class="summary-number">{{ apuestas.page }}</div>
+                <p>de {{ apuestas.pages }}</p>
+            </div>
+            <div class="summary-item">
+                <h3>Apuestas por Página</h3>
+                <div class="summary-number">{{ apuestas.per_page }}</div>
+                <p>Registros mostrados</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎯 Historial de Apuestas</h2>
+            
+            <div class="filters">
+                <select class="filter-select" onchange="filterByGame(this.value)">
+                    <option value="">Todos los juegos</option>
+                    <option value="blackjack">Blackjack</option>
+                    <option value="poker">Poker</option>
+                    <option value="coinflip">Coinflip</option>
+                    <option value="tragaperras">Tragaperras</option>
+                    <option value="caballos">Caballos</option>
+                </select>
+                
+                <select class="filter-select" onchange="filterByResult(this.value)">
+                    <option value="">Todos los resultados</option>
+                    <option value="ganada">Ganadas</option>
+                    <option value="perdida">Perdidas</option>
+                    <option value="empate">Empates</option>
+                </select>
+            </div>
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuario</th>
+                        <th>Juego</th>
+                        <th>Cantidad</th>
+                        <th>Resultado</th>
+                        <th>Ganancia</th>
+                        <th>Fecha</th>
+                        <th>Balance Neto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for apuesta in apuestas.items %}
+                    <tr>
+                        <td>{{ apuesta.id }}</td>
+                        <td>
+                            <a href="{{ url_for('admin_usuario_detalle.home', user_id=apuesta.user.id) }}" style="color: #00f3ff; text-decoration: none;">
+                                {{ apuesta.user.username }}
+                            </a>
+                        </td>
+                        <td>{{ apuesta.juego }}</td>
+                        <td>${{ "%.2f"|format(apuesta.cantidad) }}</td>
+                        <td>
+                            <span class="badge {% if apuesta.resultado == 'ganada' %}badge-success{% elif apuesta.resultado == 'perdida' %}badge-danger{% else %}badge-warning{% endif %}">
+                                {{ apuesta.resultado }}
+                            </span>
+                        </td>
+                        <td class="{% if apuesta.ganancia > 0 %}positive{% else %}negative{% endif %}">
+                            ${{ "%.2f"|format(apuesta.ganancia) }}
+                        </td>
+                        <td>{{ apuesta.fecha.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td class="{% if (apuesta.ganancia - apuesta.cantidad) >= 0 %}positive{% else %}negative{% endif %}">
+                            ${{ "%.2f"|format(apuesta.ganancia - apuesta.cantidad) }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Paginación -->
+            {% if apuestas.pages > 1 %}
+            <div class="pagination">
+                {% if apuestas.has_prev %}
+                    <a href="{{ url_for('admin_apuestas.home', page=apuestas.prev_num) }}" class="page-btn">← Anterior</a>
+                {% endif %}
+                
+                {% for page_num in apuestas.iter_pages(left_edge=2, left_current=2, right_current=3, right_edge=2) %}
+                    {% if page_num %}
+                        <a href="{{ url_for('admin_apuestas.home', page=page_num) }}" class="page-btn {% if page_num == apuestas.page %}active{% endif %}">
+                            {{ page_num }}
+                        </a>
+                    {% else %}
+                        <span class="page-btn">...</span>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if apuestas.has_next %}
+                    <a href="{{ url_for('admin_apuestas.home', page=apuestas.next_num) }}" class="page-btn">Siguiente →</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function filterByGame(game) {
+            // Aquí puedes implementar filtrado por juego
+            alert('Filtrar por juego: ' + game);
+            // En una implementación real, harías una petición al servidor
+        }
+        
+        function filterByResult(result) {
+            // Aquí puedes implementar filtrado por resultado
+            alert('Filtrar por resultado: ' + result);
+            // En una implementación real, harías una petición al servidor
+        }
+    </script>
+</body>
+</html>
