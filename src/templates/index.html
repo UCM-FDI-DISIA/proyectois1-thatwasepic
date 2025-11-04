@@ -132,7 +132,10 @@
         <p id="modalGameDescription">Descripción del juego.</p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Cerrar</button>
+        {% if current_user.is_authenticated %}
+        <a type="button" class="btn btn-primary" href="{{ url_for('dashboard.home') }}">Ir al Dashboard</a>
+        {% endif %}
       </div>
     </div>
   </div>
