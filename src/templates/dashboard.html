@@ -35,7 +35,7 @@
 <div class="row g-5">
     <!-- Blackjack -->
     <div class="col-xl-3 col-lg-4 col-md-6">
-        <div class="card game-card matrix-rain">
+        <div class="card animated-card matrix-rain">
             <div class="card-body text-center p-4">
                 <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">🎲</div>
                 <h3 class="card-title">BLACKJACK</h3>
@@ -50,7 +50,7 @@
     </div>
     <!-- Ruleta Europea -->
     <div class="col-xl-3 col-lg-4 col-md-6">
-        <div class="card game-card matrix-rain" style="animation-delay: 0.25s">
+        <div class="card animated-card matrix-rain">
             <div class="card-body text-center p-4">
                 <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">🎯</div>
                 <h3 class="card-title">RULETA EUROPEA</h3>
@@ -66,7 +66,7 @@
     </div>
     <!-- Poker -->
     <div class="col-xl-3 col-lg-4 col-md-6">
-        <div class="card game-card matrix-rain" style="animation-delay: 0.2s">
+        <div class="card animated-card matrix-rain">
             <div class="card-body text-center p-4">
                 <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">🃏</div>
                 <h3 class="card-title">POKER HOLOGRÁFICO</h3>
@@ -82,7 +82,7 @@
 
     <!-- Cara o Cruz -->
     <div class="col-xl-3 col-lg-4 col-md-6">
-        <div class="card game-card matrix-rain" style="animation-delay: 0.4s">
+        <div class="card animated-card matrix-rain">
             <div class="card-body text-center p-4">
                 <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">🪙</div>
                 <h3 class="card-title">COINFLIP</h3>
@@ -98,7 +98,7 @@
 
     <!-- Tragaperras -->
     <div class="col-xl-3 col-lg-4 col-md-6">
-        <div class="card game-card matrix-rain" style="animation-delay: 0.6s">
+        <div class="card animated-card matrix-rain">
             <div class="card-body text-center p-4">
                 <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">🎰</div>
                 <h3 class="card-title">TRAGAPERRAS</h3>
@@ -114,7 +114,7 @@
 
     <!-- Carrera de Caballos -->
     <div class="col-xl-3 col-lg-4 col-md-6">
-        <div class="card game-card matrix-rain" style="animation-delay: 0.8s">
+        <div class="card animated-card matrix-rain">
             <div class="card-body text-center p-4">
                 <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">🏇</div>
                 <h3 class="card-title">CARRERA DE CABALLOS</h3>
@@ -130,7 +130,7 @@
 
     <!-- Estadísticas -->
     <div class="col-xl-3 col-lg-4 col-md-6">
-        <div class="card game-card matrix-rain" style="animation-delay: 1s">
+        <div class="card animated-card matrix-rain">
             <div class="card-body text-center p-4">
                 <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">📊</div>
                 <h3 class="card-title">PANEL DE ESTADÍSTICAS</h3>
@@ -146,7 +146,7 @@
 
     <!-- Perfil -->
     <div class="col-xl-3 col-lg-4 col-md-6">
-        <div class="card game-card matrix-rain" style="animation-delay: 1.2s">
+        <div class="card animated-card matrix-rain">
             <div class="card-body text-center p-4">
                 <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">👤</div>
                 <h3 class="card-title">PERFIL DE USUARIO</h3>
@@ -188,22 +188,10 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="{{ url_for('static', filename='js/game_card_animation.js') }}"></script>
 <script>
 // Efectos interactivos para el dashboard
 document.addEventListener('DOMContentLoaded', function() {
-    // Efecto de escaneo para las cards
-    const cards = document.querySelectorAll('.game-card');
-    cards.forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'scale(0.8) rotateY(180deg)';
-        
-        setTimeout(() => {
-            card.style.transition = 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-            card.style.opacity = '1';
-            card.style.transform = 'scale(1) rotateY(0deg)';
-        }, index * 200);
-    });
-
     // Efecto de parpadeo para el display digital
     const display = document.querySelector('.digital-display');
     setInterval(() => {

@@ -13,7 +13,7 @@
 
     <!-- Blackjack -->
     <div class="col-12 col-lg-4 col-md-6">
-        <div class="card hover-card clickable h-100" data-game="blackjack">
+        <div class="card hover-card clickable h-100 animated-card" data-game="blackjack">
             <img src="{{ url_for('static', filename='img/blackjack.jpeg') }}" alt="Blackjack" class="game-image">
             <div class="card-body text-center game-content">
                 <h3 class="card-title game-title">Blackjack</h3>
@@ -26,7 +26,7 @@
 
     <!-- Ruleta -->
     <div class="col-12 col-lg-4 col-md-6">
-        <div class="card hover-card clickable h-100" data-game="ruleta">
+        <div class="card hover-card clickable h-100 animated-card" data-game="ruleta">
             <img src="{{ url_for('static', filename='img/ruleta.jpeg') }}" alt="Ruleta" class="game-image">
             <div class="card-body text-center game-content">
                 <h3 class="card-title game-title">Ruleta</h3>
@@ -39,7 +39,7 @@
 
     <!-- Coinflip -->
     <div class="col-12 col-lg-4 col-md-6">
-        <div class="card hover-card clickable h-100" data-game="coinflip">
+        <div class="card hover-card clickable h-100 animated-card" data-game="coinflip">
             <img src="{{ url_for('static', filename='img/coinflip.jpeg') }}" alt="Coinflip" class="game-image">
             <div class="card-body text-center game-content">
                 <h3 class="card-title game-title">Coinflip</h3>
@@ -52,7 +52,7 @@
 
     <!-- Poker -->
     <div class="col-12 col-lg-4 col-md-6">
-        <div class="card hover-card clickable h-100" data-game="poker">
+        <div class="card hover-card clickable h-100 animated-card" data-game="poker">
             <img src="{{ url_for('static', filename='img/poker.jpeg') }}" alt="Poker" class="game-image">
             <div class="card-body text-center game-content">
                 <h3 class="card-title game-title">Poker</h3>
@@ -65,7 +65,7 @@
 
     <!-- Carreras de Caballos -->
     <div class="col-12 col-lg-4 col-md-6">
-        <div class="card hover-card clickable h-100" data-game="horseracing">
+        <div class="card hover-card clickable h-100 animated-card" data-game="horseracing">
             <img src="{{ url_for('static', filename='img/caballos.jpeg') }}" alt="Carreras de Caballos" class="game-image">
             <div class="card-body text-center game-content">
                 <h3 class="card-title game-title">Carreras de Caballos</h3>
@@ -78,7 +78,7 @@
 
     <!-- Tragaperras -->
     <div class="col-12 col-lg-4 col-md-6">
-        <div class="card hover-card clickable h-100" data-game="slots">
+        <div class="card hover-card clickable h-100 animated-card" data-game="slots">
             <img src="{{ url_for('static', filename='img/slots.jpeg') }}" alt="Tragaperras" class="game-image">
             <div class="card-body text-center game-content">
                 <h3 class="card-title game-title">Tragaperras</h3>
@@ -141,6 +141,7 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="{{ url_for('static', filename='js/game_card_animation.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const gameModal = new bootstrap.Modal(document.getElementById('gameModal'));
