@@ -13,6 +13,7 @@
   --gradient-cyber: linear-gradient(135deg, var(--neon-cyan) 0%, var(--neon-purple) 50%, var(--neon-pink) 100%);
   --gradient-matrix: linear-gradient(135deg, var(--matrix-green), var(--neon-cyan));
   --gradient-sunset: linear-gradient(135deg, var(--neon-orange) 0%, var(--neon-pink) 50%, var(--neon-cyan) 100%);
+  --gradient-dark: linear-gradient(135deg, rgba(40, 40, 70, 0.8), rgba(25, 25, 50, 0.9));
 
   --glow-cyan: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan), 0 0 30px var(--neon-cyan);
   --glow-pink: 0 0 10px var(--neon-pink), 0 0 20px var(--neon-pink), 0 0 30px var(--neon-pink);
@@ -176,7 +177,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* === TARJETAS === */
 .card {
-  background: linear-gradient(135deg, rgba(40, 40, 70, 0.8), rgba(25, 25, 50, 0.9));
+  background: var(--gradient-dark);
   border: 1px solid var(--neon-cyan);
   border-radius: var(--border-radius-card);
   box-shadow: var(--shadow-hologram);
@@ -309,6 +310,28 @@ footer h5 {
   background: var(--gradient-cyber);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+/* === CUADROS DE DIÁLOGO MODALES === */
+.modal {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+.modal-content {
+  background: var(--gradient-dark);
+  border-radius: var(--border-radius-card);
+  border: 1px solid var(--neon-cyan);
+  box-shadow: var(--shadow-hologram);
+}
+.modal-title {
+  color: var(--neon-cyan);
+}
+.modal-description {
+  color: #b0b0ff;
+  line-height: 1.6;
+  font-size: 1rem;
+}
+.modal-header, .modal-body, .modal-footer {
+  padding: 1.2em;
 }
 
 /* === SCROLLBAR === */
