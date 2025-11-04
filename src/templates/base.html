@@ -34,7 +34,7 @@
                         <i class="fas fa-home me-1"></i>DASHBOARD
                     </a>
                     <a class="nav-link {{ 'active' if request.endpoint == 'estadisticas' }}" href="{{ url_for('estadisticas.home') }}">
-                        <i class="fas fa-chart-network me-1"></i>DATOS
+                        <i class="fas fa-chart-column me-1"></i>DATOS
                     </a>
                     <a class="nav-link {{ 'active' if request.endpoint == 'perfil' }}" href="{{ url_for('perfil.home') }}">
                         <i class="fas fa-user-astronaut me-1"></i>PERFIL
@@ -46,10 +46,10 @@
                 {% else %}
                 <div class="navbar-nav ms-auto">
                     <a class="nav-link {{ 'active' if request.endpoint == 'login' }}" href="{{ url_for('login.home') }}">
-                        <i class="fas fa-sign-in-alt me-1"></i>CONECTAR
+                        <i class="fas fa-sign-in-alt me-1"></i>INICIAR SESIÓN
                     </a>
                     <a class="nav-link {{ 'active' if request.endpoint == 'register' }}" href="{{ url_for('register.home') }}">
-                        <i class="fas fa-user-plus me-1"></i>REGISTRAR
+                        <i class="fas fa-user-plus me-1"></i>REGISTRARSE
                     </a>
                 </div>
                 {% endif %}
