@@ -520,32 +520,48 @@ document.getElementById('spinBtn').onclick = async () => {
     type: b.type, set: [...b.set], label: b.label, amount: b.amount
   }));
 
+  // 1) Enviar las apuestas y actualizar balance local (place)
   try{
     const placed = await apiPOST('/api/ruleta/place', { bets: placedBetsSnapshot, min_cell: 20 });
     bank = placed.balance; updateTotals();
-  }catch(e){}
+  }catch(e){ flash('Error al colocar apuestas'); return; }
 
-  const resultIdx = Math.floor(Math.random() * EURO_SEQ.length);
-  const resultNumber = EURO_SEQ[resultIdx];
+  // 2) Pedir al servidor que haga el giro y nos devuelva el número ganador
+  let spinResp;
+  try{
+    spinResp = await apiPOST('/api/ruleta/spin', { bets: placedBetsSnapshot });
+  }catch(e){ flash('Error al girar la ruleta'); return; }
 
+  // Resultado provisto por el servidor
+  let resultNumber = spinResp && typeof spinResp.result !== 'undefined' ? spinResp.result : null;
+  let resultIdx = (resultNumber !== null) ? EURO_SEQ.indexOf(resultNumber) : -1;
+  if (resultIdx < 0) resultIdx = Math.floor(Math.random() * EURO_SEQ.length);
+
+  // 3) Animar hacia el pocket que corresponde al número devuelto por el servidor
   spinning = true; setMode('spin');
   document.getElementById('spinBtn').disabled = true;
 
   if (instantMode) {
     alignToPocket(resultIdx);
-    settle(resultNumber);
   } else {
     await spinAnimTo(resultIdx);
-    settle(resultNumber);
   }
 
+  // 4) Actualizar UI con la respuesta del servidor (ya incluye balance y estadísticas)
   try{
-    const settled = await apiPOST('/api/ruleta/spin', {
-      bets: placedBetsSnapshot,
-      result: resultNumber
-    });
-    bank = settled.balance; updateTotals(); renderStats(settled.stats);
-  }catch(e){}
+    bank = spinResp.balance; updateTotals();
+    if (spinResp.stats) renderStats(spinResp.stats);
+    if (spinResp.mensaje) log(spinResp.mensaje);
+    else log(`<b>Sale ${resultNumber}</b>`);
+  }catch(e){ /* no-fatal */ }
+
+  // Limpieza local (las apuestas ya han sido procesadas por el servidor)
+  lastBets = cloneBets(bets);
+  bets = [];
+  showVisuals(); updateTotals();
+  spinning = false;
+  document.getElementById('spinBtn').disabled = false;
+  setMode('bet');
 };
 
 function spinAnimTo(resultIdx){

@@ -1,6 +1,7 @@
 from flask import request, jsonify, Blueprint
 from flask_login import login_required, current_user
 from models import db, Apuesta, Estadistica
+import random
 
 bp = Blueprint('api_ruleta', __name__, url_prefix='/api/ruleta')
 
@@ -88,7 +89,10 @@ def spin_ruleta():
     try:
         data = request.get_json()
         bets = data.get('bets', [])
-        result_number = data.get('result', 0)
+
+        # El servidor decide el número ganador para asegurar integridad.
+        # Ignoramos cualquier 'result' enviado por el cliente.
+        result_number = random.randint(0, 36)
 
         if not bets:
             return jsonify({'error': 'No hay apuestas para liquidar'}), 400
@@ -131,10 +135,16 @@ def spin_ruleta():
         total_bet_euros = total_bet_cents / 100
         total_win_euros = total_win_cents / 100
         total_returned_euros = total_returned_cents / 100
-        total_neto = total_win_euros + total_returned_euros - total_bet_euros
 
-        # Actualizar balance del usuario
-        current_user.balance += total_neto
+        # Cuando la apuesta ya se descontó en /place, aquí debemos devolver
+        # lo que corresponde: la ganancia bruta más lo devuelto (la propia apuesta).
+        # Antes se restaba de nuevo la apuesta (se duplicaba la resta) lo que
+        # provocaba que el usuario siempre perdiera la cantidad apostada.
+        total_payout_euros = total_win_euros + total_returned_euros
+
+        # Actualizar balance del usuario: añadimos únicamente lo que debe
+        # recibirse tras el giro (ganancias + devolución de la apuesta).
+        current_user.balance += total_payout_euros
 
         # Actualizar estadísticas globales
         stats = Estadistica.query.filter_by(user_id=current_user.id, juego="ruleta").first()
