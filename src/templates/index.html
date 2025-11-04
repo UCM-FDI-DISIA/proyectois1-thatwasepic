@@ -7,6 +7,9 @@
 <!-- Sección de juegos -->
 <div class="text-center">
     <h2 class="hero-title">Nuestros Juegos</h2>
+    <p class="hero-subtitle mt-4">
+        Explora todos los juegos que Logbait te ofrece.
+    </p>
 </div>
 
 <div class="row g-5 mt-3 mb-5">
@@ -92,13 +95,29 @@
 
 <!-- Sección de desafío -->
 <div class="card translucent-card">
+    {% if current_user.is_authenticated %}
+    <div class="card-body text-center p-5">
+        <h2>Comienza a jugar</h2>
+        <p class="hero-subtitle">
+            Ya te has unido a nuestra plataforma y estás a un paso de comenzar: entra en el Dashboard para jugar, o configura primero tus datos.
+        </p>
+        <div class="d-flex justify-content-center gap-4 mt-4">
+            <a href="{{ url_for('dashboard.home') }}" class="btn btn-primary btn-lg">Ir al Dashboard</a>
+            <a href="{{ url_for('perfil.home') }}" class="btn btn-outline-primary btn-lg">Configurar perfil</a>
+        </div>
+    </div>
+    {% else %}
     <div class="card-body text-center p-5">
         <h2>¿Desafías al azar?</h2>
         <p class="hero-subtitle">
             Únete a nuestra plataforma y descubre la emoción de nuestros juegos. Regístrate ahora y recibe crédito inicial para comenzar.
         </p>
-        <a href="{{ url_for('register.home') }}" class="btn btn-primary btn-lg">Registrarse Ahora</a>
+        <div class="mt-4">
+            <a href="{{ url_for('register.home') }}" class="btn btn-primary btn-lg">Registrarse Ahora</a>
+            <p class="mt-2 mb-0">¿Ya tienes cuenta? <a href="{{ url_for('login.home') }}">Inicia sesión</a></p>
+        </div>
     </div>
+    {% endif %}
 </div>
 
 <!-- Modal de descripción de juegos (Bootstrap) -->
