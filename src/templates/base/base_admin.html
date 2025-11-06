@@ -1,0 +1,210 @@
+{% extends "base/base.html" %}
+
+{% block navbar %}
+<a class="d-flex flex-column navbar-brand" href="{{ url_for('admin_panel.home') }}">
+    <span class="fw-bold" id="brand">
+        <i class="fas fa-brain me-2"></i>LogBait
+    </span>
+    <span class="fs-6" id="admin-panel-label">
+        Panel administrativo<i class="fas fa-shield icon-gradient mx-2"></i>
+    </span>
+</a>
+
+<button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+    <span class="navbar-toggler-icon"></span>
+</button>
+
+<div class="collapse navbar-collapse" id="navbarNav">
+    <div class="navbar-nav ms-auto align-items-center">
+        <a class="nav-link" href="{{ url_for('admin_usuarios.home') }}">
+            <i class="fas fa-users me-1"></i>Usuarios
+        </a>
+        <a class="nav-link" href="{{ url_for('admin_apuestas.home') }}">
+            <i class="fas fa-coins me-1"></i>Apuestas
+        </a>
+        <a class="nav-link" href="{{ url_for('admin_estadisticas.home') }}">
+            <i class="fas fa-chart-column me-1"></i>Estadísticas
+        </a>
+        <a class="nav-link" href="{{ url_for('logout.home') }}">
+            <i class="fas fa-power-off me-1"></i>Salir
+        </a>
+        <div class="vr mx-3"></div>
+        <a class="btn btn-outline-primary mr-4" href="{{ url_for('dashboard.home') }}">
+            <i class="fas fa-arrow-left me-1"></i>Volver al Casino
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block base_scripts %}
+<style>
+    body {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    }
+
+    #admin-panel-label, #admin-panel-label .icon-gradient {
+        color: var(--neon-green);
+        background: var(--gradient-matrix);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+</style>
+
+<style>
+    /* TODO: suprimir todos los estilos redundantes de esta sección */
+
+    .top-user {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        margin: 5px 0;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 8px;
+    }
+
+    .user-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .user-rank {
+        font-weight: bold;
+        color: #00f3ff;
+        margin-right: 10px;
+    }
+    
+    .user-balance {
+        font-weight: bold;
+    }
+    
+    .positive { color: #00ff88; }
+    .negative { color: #ff6b6b; }
+
+    .balance-positive { color: #00ff88; }
+    .balance-negative { color: #ff6b6b; }
+
+    .badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.8em;
+        font-weight: bold;
+    }
+    
+    .badge-success { background: #00ff88; color: black; }
+    .badge-danger { background: #ff6b6b; color: white; }
+    .badge-warning { background: #ffa500; color: black; }
+    
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    
+    .table th, .table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .table th {
+        background: rgba(0, 243, 255, 0.2);
+        color: #00f3ff;
+    }
+    
+    .table tr:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+    
+    .progress-bar {
+        width: 100%;
+        height: 20px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 5px 0;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(45deg, #00ff88, #00f3ff);
+        border-radius: 10px;
+        transition: width 0.3s ease;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+    }
+    
+    .stat-item {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 2.5em;
+        font-weight: bold;
+        margin: 10px 0;
+        background: linear-gradient(45deg, #00f3ff, #00ff88);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .games-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+    
+    .game-stat {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+    }
+    
+    .back-link {
+        display: inline-block;
+        margin-bottom: 20px;
+        color: #00f3ff;
+        text-decoration: none;
+        font-weight: bold;
+    }
+    
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 20px;
+    }
+    
+    .page-btn {
+        padding: 8px 12px;
+        background: rgba(0, 243, 255, 0.2);
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+    }
+    
+    .page-btn:hover {
+        background: rgba(0, 243, 255, 0.4);
+    }
+    
+    .page-btn.active {
+        background: #00f3ff;
+        color: black;
+    }
+</style>
+{% endblock %}

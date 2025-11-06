@@ -1,0 +1,43 @@
+{% extends "base/base.html" %}
+
+{% block navbar %}            
+<a class="navbar-brand fw-bold" id="brand" href="{{ url_for('index.home') }}">
+    <i class="fas fa-brain me-2"></i>LogBait
+</a>
+
+<button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+    <span class="navbar-toggler-icon"></span>
+</button>
+
+<div class="collapse navbar-collapse" id="navbarNav">
+    {% if current_user.is_authenticated %}
+    <div class="navbar-nav ms-auto align-items-center">
+        <span class="navbar-text me-3">
+            <i class="fas fa-bolt me-1"></i>
+            $<span id="balance">{{ "%.2f"|format(current_user.balance) }}</span>
+        </span>
+        <a class="nav-link {{ 'active' if request.endpoint == 'dashboard' }}" href="{{ url_for('dashboard.home') }}">
+            <i class="fas fa-home me-1"></i>DASHBOARD
+        </a>
+        <a class="nav-link {{ 'active' if request.endpoint == 'estadisticas' }}" href="{{ url_for('estadisticas.home') }}">
+            <i class="fas fa-chart-column me-1"></i>DATOS
+        </a>
+        <a class="nav-link {{ 'active' if request.endpoint == 'perfil' }}" href="{{ url_for('perfil.home') }}">
+            <i class="fas fa-user-astronaut me-1"></i>PERFIL
+        </a>
+        <a class="nav-link" href="{{ url_for('logout.home') }}">
+            <i class="fas fa-power-off me-1"></i>SALIR
+        </a>
+    </div>
+    {% else %}
+    <div class="navbar-nav ms-auto">
+        <a class="nav-link {{ 'active' if request.endpoint == 'login' }}" href="{{ url_for('login.home') }}">
+            <i class="fas fa-sign-in-alt me-1"></i>INICIAR SESIÓN
+        </a>
+        <a class="nav-link {{ 'active' if request.endpoint == 'register' }}" href="{{ url_for('register.home') }}">
+            <i class="fas fa-user-plus me-1"></i>REGISTRARSE
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
