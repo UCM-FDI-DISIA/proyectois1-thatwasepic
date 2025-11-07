@@ -14,10 +14,10 @@ class User(UserMixin, db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Relaciones
-    apuestas = db.relationship('Apuesta', backref='usuario', lazy=True)  # Cambiado de 'user' a 'usuario'
-    estadisticas = db.relationship('Estadistica', backref='usuario', lazy=True)  # Cambiado de 'user' a 'usuario'
-    salas_creadas = db.relationship('SalaMultijugador', backref='propietario', lazy=True)  # Cambiado de 'creador' a 'propietario'
-    salas_unidas = db.relationship('UsuarioSala', backref='jugador', lazy=True)  # Cambiado de 'usuario' a 'jugador'
+    apuestas = db.relationship('Apuesta', backref='user', lazy=True)
+    estadisticas = db.relationship('Estadistica', backref='user', lazy=True)
+    salas_creadas = db.relationship('SalaMultijugador', backref='owner', lazy=True)
+    salas_unidas = db.relationship('UsuarioSala', backref='player', lazy=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

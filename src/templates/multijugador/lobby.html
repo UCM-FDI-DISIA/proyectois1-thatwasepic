@@ -86,7 +86,7 @@
                                                 <i class="fas fa-coins me-1"></i>{{ sala.apuesta_minima }}€
                                             </span>
                                         </div>
-                                        <small class="text-muted">Creada por: {{ sala.propietario.username }}</small>
+                                        <small class="text-muted">Creada por: {{ sala.owner.username }}</small>
                                     </div>
                                     <div class="col-md-6 text-md-end">
                                         <a href="{{ url_for('multijugador.sala', sala_id=sala.id) }}" 
