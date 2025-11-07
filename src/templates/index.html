@@ -5,11 +5,16 @@
 <div class="simple-background"></div>
 
 <!-- Sección de juegos -->
+<div class="fade-out-gradient">
+    <div id="logo" class="mx-auto"></div>
+</div>
 <div class="text-center">
-    <h2 class="hero-title">Nuestros Juegos</h2>
-    <p class="hero-subtitle mt-4">
-        Explora todos los juegos que LogBait te ofrece.
-    </p>
+    <div>
+        <h2 class="hero-title">Nuestros Juegos</h2>
+        <p class="hero-subtitle mt-4">
+            Explora todos los juegos que LogBait te ofrece.
+        </p>
+    </div>
 </div>
 
 <div class="row g-4 mt-3 mb-5">
@@ -158,6 +163,30 @@
     z-index: -1;
     background: 
         linear-gradient(135deg, #0a0a0f 0%, #151520 50%, #1a1a2e 100%);
+}
+
+.fade-out-gradient {
+    mask-image: linear-gradient(rgb(0,0,0) 0%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0.0) 100%);
+}
+
+#logo {
+    max-width: min(30em, 80%);
+    background-image: var(--gradient-cyber);
+    mask-size: cover;
+    mask-repeat: no-repeat;
+    mask-position: top;
+    mask-mode: luminance;
+    height: 18em;
+    max-height: 25vh;
+    align-content: end;
+    mask-image: url({{ url_for('static', filename='img/logo.png') }});
+    filter: hue-rotate(-60deg);
+    animation: hueShift 4s linear infinite alternate;
+}
+
+@keyframes hueShift {
+    0% { filter: hue-rotate(-60deg); }
+    100% { filter: hue-rotate(60deg); }
 }
 
 .game-image {
