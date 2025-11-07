@@ -11,7 +11,7 @@
 <div class="row g-4 mt-4">
     <!-- Estadísticas Principales -->
     <div class="col-lg-3">
-        <div class="card animated-card h-100">
+        <div class="card animated-rotate h-100">
             <div class="card-body text-center">
                 <h4>👥 Total Usuarios</h4>
                 <div class="stat-number">{{ total_usuarios }}</div>
@@ -20,7 +20,7 @@
         </div>
     </div>
     <div class="col-lg-3">
-        <div class="card animated-card h-100">
+        <div class="card animated-rotate h-100">
             <div class="card-body text-center">
                 <h4>🎯 Total Apuestas</h4>
                 <div class="stat-number">{{ total_apuestas }}</div>
@@ -29,7 +29,7 @@
         </div>
     </div>
     <div class="col-lg-3">
-        <div class="card animated-card h-100">
+        <div class="card animated-rotate h-100">
             <div class="card-body text-center">
                 <h4>💰 Balance Total</h4>
                 <div class="stat-number">${{ "%.2f"|format(total_balance) }}</div>
@@ -38,7 +38,7 @@
         </div>
     </div>
     <div class="col-lg-3">
-        <div class="card animated-card h-100">
+        <div class="card animated-rotate h-100">
             <div class="card-body text-center">
                 <h4>📊 Total Apostado</h4>
                 <div class="stat-number">${{ "%.2f"|format(total_apostado) }}</div>
@@ -48,7 +48,7 @@
     </div>
 
     <div class="col-12">
-        <div class="card animated-card">
+        <div class="card animated-translateY">
             <div class="card-header">
                 🎮 Estadísticas por Juego
             </div>
@@ -70,7 +70,7 @@
 
     <!-- Usuarios Recientes -->
     <div class="col-lg-6">
-        <div class="card animated-card h-100">
+        <div class="card animated-translateY h-100">
             <div class="card-header">
                 👥 Usuarios Recientes
             </div>
@@ -103,7 +103,7 @@
 
     <!-- Apuestas Recientes -->
     <div class="col-lg-6">
-        <div class="card animated-card h-100">
+        <div class="card animated-translateY h-100">
             <div class="card-header">
                 📈 Apuestas Recientes
             </div>
@@ -136,8 +136,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/game_card_animation.js') }}"></script>
 {% endblock %}

@@ -21,11 +21,11 @@
 </div>
 
 <!-- Resumen General -->
-<div class="row mt-4">
+<div class="row mt-5">
     <div class="col-12">
-        <div class="card">
+        <div class="card animated-translateY">
             <div class="card-header">
-                <h5>📈 Resumen General</h5>
+                📈 Resumen General
             </div>
             <div class="card-body">
                 <div class="row text-center">
@@ -97,27 +97,27 @@
 </div>
 
 <!-- Estadísticas por Juego -->
-<div class="row mt-4">
+<div class="row">
     {% for stat in stats %}
     {% set neto_juego = (stat.ganancia_total - stat.apuesta_total) %}
-    <div class="col-md-6 col-lg-4 mb-4">
-        <div class="card h-100">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                    {% if stat.juego == 'blackjack' %}🎲 
-                    {% elif stat.juego == 'poker' %}🃏 
-                    {% elif stat.juego == 'coinflip' %}🪙
-                    {% elif stat.juego in ['tragaperras','slots'] %}🎰
-                    {% elif stat.juego == 'caballos' %}🏇
-                    {% elif stat.juego == 'ruleta' %}🎯
-                    {% endif %}
-                    {{ stat.juego|title }}
-                </h5>
-                <span class="badge {% if neto_juego >= 0 %}bg-success{% else %}bg-danger{% endif %}">
-                    ${{ "%.2f"|format(neto_juego) }}
-                </span>
-            </div>
+    <div class="col-md-6 col-lg-4 mt-4">
+        <div class="card animated-rotate h-100">
             <div class="card-body">
+                <div class="text-center d-flex flex-column align-items-center mb-3">
+                    <h4>
+                        {% if stat.juego == 'blackjack' %}🎲 
+                        {% elif stat.juego == 'poker' %}🃏 
+                        {% elif stat.juego == 'coinflip' %}🪙
+                        {% elif stat.juego in ['tragaperras','slots'] %}🎰
+                        {% elif stat.juego == 'caballos' %}🏇
+                        {% elif stat.juego == 'ruleta' %}🎯
+                        {% endif %}
+                        {{ stat.juego|title }}
+                    </h4>
+                    <span class="badge {% if neto_juego >= 0 %}bg-success{% else %}bg-danger{% endif %}">
+                        ${{ "%.2f"|format(neto_juego) }}
+                    </span>
+                </div>
                 <div class="row text-center">
                     <div class="col-6">
                         <small class="text-muted">Partidas</small>
@@ -164,9 +164,9 @@
 <!-- Gráfico de Distribución -->
 <div class="row mt-4">
     <div class="col-12">
-        <div class="card">
+        <div class="card animated-translateY">
             <div class="card-header">
-                <h5>📋 Distribución de Partidas por Juego</h5>
+                📋 Distribución de Partidas por Juego
             </div>
             <div class="card-body">
                 <div class="row">
@@ -196,9 +196,9 @@
 <!-- Historial de Apuestas -->
 <div class="row mt-4">
     <div class="col-12">
-        <div class="card">
+        <div class="card animated-translateY">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">🕐 Apuestas Recientes</h5>
+                <span>🕐 Apuestas Recientes</span>
                 <span class="badge bg-primary">{{ apuestas|length }}</span>
             </div>
             <div class="card-body">
@@ -270,9 +270,9 @@
 <!-- Resumen Financiero -->
 <div class="row mt-4">
     <div class="col-md-6">
-        <div class="card">
+        <div class="card animated-translateY">
             <div class="card-header">
-                <h6>💰 Resumen Financiero</h6>
+                💰 Resumen Financiero
             </div>
             <div class="card-body">
                 {# Totales en base al NETO por juego #}
@@ -315,9 +315,9 @@
     </div>
     
     <div class="col-md-6">
-        <div class="card">
+        <div class="card animated-translateY">
             <div class="card-header">
-                <h6>🎯 Juego Más Jugado</h6>
+                🎯 Juego Más Jugado
             </div>
             <div class="card-body">
                 {% set ns_juego = namespace(mas_jugado=None) %}
@@ -354,8 +354,6 @@
 
 {% block scripts %}
 <style>
-.card { transition: transform 0.2s; }
-.card:hover { transform: translateY(-2px); }
 .progress { background-color: #e9ecef; }
 .badge { font-size: 0.7em; }
 .table th { border-top: none; font-weight: 600; }

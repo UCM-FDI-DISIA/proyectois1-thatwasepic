@@ -16,7 +16,7 @@
 
     <!-- Blackjack -->
     <div class="col-12 col-lg-4 col-md-6">
-        <div class="card hover-card clickable h-100 animated-card" data-game="blackjack">
+        <div class="card hover-card clickable h-100 animated-rotate" data-game="blackjack">
             <img src="{{ url_for('static', filename='img/blackjack.jpeg') }}" alt="Blackjack" class="game-image">
             <div class="card-body text-center game-content">
                 <h3 class="card-title game-title">Blackjack</h3>
@@ -29,7 +29,7 @@
 
     <!-- Ruleta -->
     <div class="col-12 col-lg-4 col-md-6">
-        <div class="card hover-card clickable h-100 animated-card" data-game="ruleta">
+        <div class="card hover-card clickable h-100 animated-rotate" data-game="ruleta">
             <img src="{{ url_for('static', filename='img/ruleta.jpeg') }}" alt="Ruleta" class="game-image">
             <div class="card-body text-center game-content">
                 <h3 class="card-title game-title">Ruleta</h3>
@@ -42,7 +42,7 @@
 
     <!-- Coinflip -->
     <div class="col-12 col-lg-4 col-md-6">
-        <div class="card hover-card clickable h-100 animated-card" data-game="coinflip">
+        <div class="card hover-card clickable h-100 animated-rotate" data-game="coinflip">
             <img src="{{ url_for('static', filename='img/coinflip.jpeg') }}" alt="Coinflip" class="game-image">
             <div class="card-body text-center game-content">
                 <h3 class="card-title game-title">Coinflip</h3>
@@ -55,12 +55,12 @@
 
     <!-- Poker -->
     <div class="col-12 col-lg-4 col-md-6">
-        <div class="card hover-card clickable h-100 animated-card" data-game="poker">
+        <div class="card hover-card clickable h-100 animated-rotate" data-game="poker">
             <img src="{{ url_for('static', filename='img/poker.jpeg') }}" alt="Poker" class="game-image">
             <div class="card-body text-center game-content">
-                <h3 class="card-title game-title">Poker</h3>
+                <h3 class="card-title game-title">Póker</h3>
                 <p class="game-description">
-                    Poker: el legendario juego de estrategia, habilidad y nervios de acero. Forma la mejor mano posible, apuesta con inteligencia y lee a tus oponentes para llevarte el bote. Ideal para quienes disfrutan de la táctica y el desafío mental en cada ronda. ♣️♥️
+                    Póker: el legendario juego de estrategia, habilidad y nervios de acero. Forma la mejor mano posible, apuesta con inteligencia y lee a tus oponentes para llevarte el bote. Ideal para quienes disfrutan de la táctica y el desafío mental en cada ronda. ♣️♥️
                 </p>
             </div>
         </div>
@@ -68,12 +68,12 @@
 
     <!-- Carreras de Caballos -->
     <div class="col-12 col-lg-4 col-md-6">
-        <div class="card hover-card clickable h-100 animated-card" data-game="horseracing">
+        <div class="card hover-card clickable h-100 animated-rotate" data-game="horseracing">
             <img src="{{ url_for('static', filename='img/caballos.jpeg') }}" alt="Carreras de Caballos" class="game-image">
             <div class="card-body text-center game-content">
-                <h3 class="card-title game-title">Carreras de Caballos</h3>
+                <h3 class="card-title game-title">Carrera de caballos</h3>
                 <p class="game-description">
-                    Carrera de Caballos: vive la emoción de las pistas apostando por tu corcel favorito. Observa la intensidad de cada tramo, siente la adrenalina en la recta final y celebra la victoria cuando tu caballo cruza la meta. 🏇💨
+                    Carrera de caballos: vive la emoción de las pistas apostando por tu corcel favorito. Observa la intensidad de cada tramo, siente la adrenalina en la recta final y celebra la victoria cuando tu caballo cruza la meta. 🏇💨
                 </p>
             </div>
         </div>
@@ -81,7 +81,7 @@
 
     <!-- Tragaperras -->
     <div class="col-12 col-lg-4 col-md-6">
-        <div class="card hover-card clickable h-100 animated-card" data-game="slots">
+        <div class="card hover-card clickable h-100 animated-rotate" data-game="slots">
             <img src="{{ url_for('static', filename='img/slots.jpeg') }}" alt="Tragaperras" class="game-image">
             <div class="card-body text-center game-content">
                 <h3 class="card-title game-title">Tragaperras</h3>
@@ -94,26 +94,33 @@
 </div>
 
 <!-- Sección de desafío -->
-<div class="card translucent-card">
+<div class="card translucent-card animated-translateY">
     {% if current_user.is_authenticated %}
     <div class="card-body text-center p-5">
-        <h2>Comienza a jugar</h2>
-        <p class="hero-subtitle">
-            Ya te has unido a nuestra plataforma y estás a un paso de comenzar: entra en el Dashboard para jugar, o configura primero tus datos.
+        <h2 class="mb-3">Comienza a jugar</h2>
+        <p>
+            Ya te has unido a nuestra plataforma y estás a un paso de comenzar: entra en el Dashboard para jugar, revisa tu progreso o configura tus datos.
         </p>
-        <div class="d-flex justify-content-center gap-4 mt-4">
-            <a href="{{ url_for('dashboard.home') }}" class="btn btn-primary btn-lg">Ir al Dashboard</a>
-            <a href="{{ url_for('perfil.home') }}" class="btn btn-outline-primary btn-lg">Configurar perfil</a>
+        <div class="mt-4">
+            <a href="{{ url_for('dashboard.home') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-home me-2"></i>Ir al Dashboard
+            </a>
+            <div class="d-flex flex-md-row flex-column justify-content-center gap-3 mt-4">
+                <a href="{{ url_for('estadisticas.home') }}" class="btn btn-outline-primary">Ver mis estadísticas</a>
+                <a href="{{ url_for('perfil.home') }}" class="btn btn-outline-primary">Configurar perfil</a>
+            </div>
         </div>
     </div>
     {% else %}
     <div class="card-body text-center p-5">
-        <h2>¿Desafías al azar?</h2>
-        <p class="hero-subtitle">
+        <h2 class="mb-3">¿Desafías al azar?</h2>
+        <p>
             Únete a nuestra plataforma y descubre la emoción de nuestros juegos. Regístrate ahora y recibe crédito inicial para comenzar.
         </p>
         <div class="mt-4">
-            <a href="{{ url_for('register.home') }}" class="btn btn-primary btn-lg">Registrarse Ahora</a>
+            <a href="{{ url_for('register.home') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-user-plus me-2"></i>Registrarse Ahora
+            </a>
             <p class="mt-2 mb-0">¿Ya tienes cuenta? <a href="{{ url_for('login.home') }}">Inicia sesión</a></p>
         </div>
     </div>
@@ -163,7 +170,6 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/game_card_animation.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const gameModal = new bootstrap.Modal(document.getElementById('gameModal'));
@@ -175,8 +181,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'blackjack': 'Blackjack: el clásico juego de cartas donde el objetivo es alcanzar 21 sin pasarse. Demuestra tu estrategia y reta al crupier en cada mano. ♠️♦️',
         'ruleta': 'Ruleta: el icónico juego de casino donde la emoción gira sin parar. Apuesta a tu número, color o combinación favorita y mira cómo la bola recorre el tambor hasta decidir tu suerte. 🎡💫 Perfecta mezcla de azar y estrategia, ideal para quienes disfrutan la adrenalina de cada giro y la posibilidad de grandes premios en cada ronda. 🔴⚫💰',
         'coinflip': 'Coinflip: un juego rápido y emocionante donde apuestas por cara o cruz. Simple pero lleno de adrenalina: elige tu lado, mira girar la moneda y descubre si la suerte está de tu parte. Perfecto para quienes buscan acción instantánea y resultados al momento.',
-        'poker': 'Poker: el legendario juego de estrategia, habilidad y nervios de acero. Forma la mejor mano posible, apuesta con inteligencia y lee a tus oponentes para llevarte el bote. Ideal para quienes disfrutan de la táctica y el desafío mental en cada ronda. ♣️♥️',
-        'horseracing': 'Carrera de Caballos: vive la emoción de las pistas apostando por tu corcel favorito. Observa la intensidad de cada tramo, siente la adrenalina en la recta final y celebra la victoria cuando tu caballo cruza la meta. 🏇💨',
+        'poker': 'Póker: el legendario juego de estrategia, habilidad y nervios de acero. Forma la mejor mano posible, apuesta con inteligencia y lee a tus oponentes para llevarte el bote. Ideal para quienes disfrutan de la táctica y el desafío mental en cada ronda. ♣️♥️',
+        'horseracing': 'Carrera de caballos: vive la emoción de las pistas apostando por tu corcel favorito. Observa la intensidad de cada tramo, siente la adrenalina en la recta final y celebra la victoria cuando tu caballo cruza la meta. 🏇💨',
         'slots': 'Tragaperras: el clásico de los casinos reinventado. Gira los rodillos, combina símbolos y descubre premios sorprendentes. Colores, sonido y emoción en cada tirada… ¡la suerte podría cambiarte en un segundo! 🎰✨'
     };
 

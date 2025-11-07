@@ -414,10 +414,15 @@ html {
   background-size: 20px 20px;
 }
 
-.animated-card {
+.animated-rotate {
   opacity: 0;
   scale: 0.8; /* Requiere CSS Transforms Module Level 2, no queremos sobreescribir 'transform' */
   rotate: Y 180deg; /* Requiere CSS Transforms Module Level 2, no queremos sobreescribir 'transform' */
+}
+
+.animated-translateY {
+  opacity: 0;
+  translate: 0 50px;
 }
 
 .money-count {

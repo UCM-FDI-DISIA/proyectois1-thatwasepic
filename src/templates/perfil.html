@@ -23,50 +23,47 @@
 <div class="row g-4">
     <!-- Formulario de Edición -->
     <div class="col-lg-6">
-        <div class="card profile-card h-100">
+        <div class="card animated-translateY h-100">
             <div class="card-header">
                 <i class="fas fa-user-edit me-2"></i>
-                EDITAR PERFIL
+                Editar Perfil
             </div>
-            <div class="card-body">
-                <form method="POST" class="scanline">
-                    <div class="mb-4">
-                        <label for="username" class="form-label">
-                            <i class="fas fa-user me-2"></i>NOMBRE DE USUARIO
-                        </label>
-                        <input type="text" class="form-control" id="username" name="username" 
-                                value="{{ user.username }}" required>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label for="email" class="form-label">
-                            <i class="fas fa-envelope me-2"></i>EMAIL
-                        </label>
-                        <input type="email" class="form-control" id="email" name="email" 
-                                value="{{ user.email }}" required>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label for="password" class="form-label">
-                            <i class="fas fa-key me-2"></i>NUEVA CONTRASEÑA
-                        </label>
-                        <input type="password" class="form-control" id="password" name="password" 
-                                placeholder="Dejar vacío para no cambiar">
-                        <div class="form-text text-cyan">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Mínimo 6 caracteres
+            <div class="card-body p-sm-5 p-4">
+                <form method="POST" class="scanline d-flex flex-column justify-content-between gap-4 h-100">
+                    <div>
+                        <div class="mb-4">
+                            <label for="username" class="form-label">
+                                <i class="fas fa-user me-2"></i>NOMBRE DE USUARIO
+                            </label>
+                            <input type="text" class="form-control" id="username" name="username" 
+                                    value="{{ user.username }}" required>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="email" class="form-label">
+                                <i class="fas fa-envelope me-2"></i>EMAIL
+                            </label>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                    value="{{ user.email }}" required>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="password" class="form-label">
+                                <i class="fas fa-key me-2"></i>NUEVA CONTRASEÑA
+                            </label>
+                            <input type="password" class="form-control" id="password" name="password" 
+                                    placeholder="Dejar vacío para no cambiar">
+                            <div class="form-text text-cyan">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Mínimo 6 caracteres
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="d-grid gap-3">
+                    <div class="mx-auto">
                         <button type="submit" class="btn btn-primary btn-lg">
                             <i class="fas fa-sync-alt me-2"></i>
-                            ACTUALIZAR PERFIL
+                            Actualizar perfil
                         </button>
-                        <a href="{{ url_for('dashboard.home') }}" class="btn btn-outline-primary">
-                            <i class="fas fa-arrow-left me-2"></i>
-                            VOLVER AL DASHBOARD
-                        </a>
                     </div>
                 </form>
             </div>
@@ -75,12 +72,12 @@
 
     <!-- Gestión de Fondos -->
     <div class="col-lg-6">
-        <div class="card profile-card h-100">
+        <div class="card animated-translateY h-100">
             <div class="card-header">
                 <i class="fas fa-coins me-2"></i>
-                GESTIÓN DE FONDOS
+                Gestión de Fondos
             </div>
-            <div class="card-body">
+            <div class="card-body p-sm-5 p-4">
                 {% include "partials/agregar_fondos.html" %}
             </div>
         </div>
@@ -88,10 +85,10 @@
 
     <!-- Estadísticas Rápidas por Juego -->
     <div class="col-12">
-        <div class="card profile-card">
+        <div class="card animated-translateY">
             <div class="card-header">
                 <i class="fas fa-chart-column me-2"></i>
-                ESTADÍSTICAS POR JUEGO
+                Estadísticas por Juego
             </div>
             <div class="card-body">
                 <div class="row g-3">
@@ -124,66 +121,46 @@
     </div>
 </div>
 
-        {% if is_admin() %}
-        <hr class="mt-5 mb-5 w-50 mx-auto">
-        <div class="text-center">
-            <i class="fa-solid fa-unlock-keyhole fs-1 mb-2"></i>
-            <h3>Opciones de superusuario</h3>
-            <p>
-                Has iniciado sesión como <span class="font-monospace">{{ user.username }}</span>, que dispone de privilegios de superusuario.
-            </p>
-            <div class="d-flex justify-content-center">
-                <div class="alert alert-warning glass-effect w-75">
-                    Las herramientas mostradas a continuación pueden revelar y modificar datos sensibles, y deben usarse únicamente con fines de administración y moderación. Se <b>prohibe</b> su uso a toda persona ajena al equipo responsable de LogBait.
-                </div>
-            </div>
+{% if is_admin() %}
+<hr class="mt-5 mb-5 w-50 mx-auto">
+<div class="text-center animated-translateY">
+    <i class="fa-solid fa-unlock-keyhole fs-1 mb-2"></i>
+    <h3>Opciones de superusuario</h3>
+    <p>
+        Has iniciado sesión como <span class="font-monospace">{{ user.username }}</span>, que dispone de privilegios de superusuario.
+    </p>
+    <div class="d-flex justify-content-center">
+        <div class="alert alert-warning glass-effect w-75">
+            Las herramientas mostradas a continuación pueden revelar y modificar datos sensibles, y deben usarse únicamente con fines de administración y moderación. Se <b>prohibe</b> su uso a toda persona ajena al equipo responsable de LogBait.
         </div>
+    </div>
+</div>
 
-        <div class="col-12 mt-4">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex flex-sm-row flex-column gap-3 align-items-center justify-content-between">
-                        <div>
-                            <h4>Panel administrativo</h4>
-                            <span>
-                                Consulta y gestiona los datos almacenados en la plataforma.
-                            </span>
-                        </div>
-                        <a href="{{ url_for('admin_panel.home') }}" class="btn btn-success me-2">
-                            <i class="fas fa-shield me-2"></i>
-                            Acceder al panel administrativo
-                        </a>
-                    </div>
+<div class="col-12 mt-4">
+    <div class="card animated-translateY">
+        <div class="card-body">
+            <div class="d-flex flex-sm-row flex-column gap-3 align-items-center justify-content-between">
+                <div>
+                    <h4>Panel administrativo</h4>
+                    <span>
+                        Consulta y gestiona los datos almacenados en la plataforma.
+                    </span>
                 </div>
+                <a href="{{ url_for('admin_panel.home') }}" class="btn btn-success me-2">
+                    <i class="fas fa-shield me-2"></i>
+                    Acceder al panel administrativo
+                </a>
             </div>
         </div>
-        {% endif %}
+    </div>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}
-<script>
-// Efectos de entrada
-document.addEventListener('DOMContentLoaded', function() {
-    const cards = document.querySelectorAll('.card');
-    cards.forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(50px)';
-        setTimeout(() => {
-            card.style.transition = 'all 0.6s ease';
-            card.style.opacity = '1';
-            card.style.transform = 'translateY(0)';
-        }, index * 200);
-    });
-});
-</script>
-
 <style>
 .text-cyan { color: var(--neon-cyan); }
 .text-pink { color: var(--neon-pink); }
 .text-matrix { color: var(--matrix-green); }
-
-.profile-avatar {
-    background: var(--gradient-cyber);
-}
 </style>
 {% endblock %}

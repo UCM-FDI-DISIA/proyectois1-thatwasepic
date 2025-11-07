@@ -17,25 +17,25 @@
             $<span id="balance">{{ "%.2f"|format(current_user.balance) }}</span>
         </span>
         <a class="nav-link {{ 'active' if request.endpoint == 'dashboard' }}" href="{{ url_for('dashboard.home') }}">
-            <i class="fas fa-home me-1"></i>DASHBOARD
+            <i class="fas fa-home me-1"></i>Dashboard
         </a>
         <a class="nav-link {{ 'active' if request.endpoint == 'estadisticas' }}" href="{{ url_for('estadisticas.home') }}">
-            <i class="fas fa-chart-column me-1"></i>DATOS
+            <i class="fas fa-chart-column me-1"></i>Estadísticas
         </a>
         <a class="nav-link {{ 'active' if request.endpoint == 'perfil' }}" href="{{ url_for('perfil.home') }}">
-            <i class="fas fa-user-astronaut me-1"></i>PERFIL
+            <i class="fas fa-user-astronaut me-1"></i>Perfil
         </a>
         <a class="nav-link" href="{{ url_for('logout.home') }}">
-            <i class="fas fa-power-off me-1"></i>SALIR
+            <i class="fas fa-power-off me-1"></i>Salir
         </a>
     </div>
     {% else %}
     <div class="navbar-nav ms-auto">
         <a class="nav-link {{ 'active' if request.endpoint == 'login' }}" href="{{ url_for('login.home') }}">
-            <i class="fas fa-sign-in-alt me-1"></i>INICIAR SESIÓN
+            <i class="fas fa-sign-in-alt me-1"></i>Iniciar sesión
         </a>
         <a class="nav-link {{ 'active' if request.endpoint == 'register' }}" href="{{ url_for('register.home') }}">
-            <i class="fas fa-user-plus me-1"></i>REGISTRARSE
+            <i class="fas fa-user-plus me-1"></i>Registrarse
         </a>
     </div>
     {% endif %}
