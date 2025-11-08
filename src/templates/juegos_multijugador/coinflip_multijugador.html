@@ -1,0 +1,599 @@
+{% extends "base/base_casino.html" %}
+
+{% block content %}
+<div class="simple-background"></div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header de la Sala -->
+            <div class="card mb-4">
+                <div class="card-header text-center">
+                    <h2 class="mb-0">CoinFlip - {{ sala.nombre }}</h2>
+                    <div class="d-flex justify-content-center gap-3 mt-2">
+                        <span class="badge bg-primary">
+                            <i class="fas fa-users me-1"></i><span id="contador-jugadores">0</span>/{{ sala.capacidad }}
+                        </span>
+                        <span class="badge bg-warning text-dark">
+                            <i class="fas fa-coins me-1"></i>Apuesta mínima: {{ sala.apuesta_minima }}€
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Panel de Juego -->
+                <div class="col-md-8">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h4 class="mb-0"><i class="fas fa-gamepad me-2"></i>Juego</h4>
+                        </div>
+                        <div class="card-body text-center">
+                            <!-- Moneda -->
+                            <div class="coin-wrapper mb-4">
+                                <div id="moneda-multijugador" class="coin">
+                                    <div class="face front">
+                                        <div class="face-inner">
+                                            <div class="emoji">🪙</div>
+                                            <div class="label">CARA</div>
+                                        </div>
+                                    </div>
+                                    <div class="face back">
+                                        <div class="face-inner">
+                                            <div class="emoji">🌿</div>
+                                            <div class="label">CRUZ</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="estado-juego" class="alert alert-info">
+                                Esperando apuestas...
+                            </div>
+
+                            <!-- Controles de Apuesta -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Cantidad</label>
+                                    <input type="number" id="cantidad-apuesta" class="form-control" 
+                                           min="{{ sala.apuesta_minima }}" value="{{ sala.apuesta_minima }}">
+                                    <small class="text-muted">Tu balance: $<span id="balance-usuario">{{ "%.2f"|format(current_user.balance) }}</span></small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Elección</label>
+                                    <div>
+                                        <button id="btn-elegir-cara" class="btn btn-outline-danger me-2" 
+                                                onclick="elegirLado('cara')">
+                                            <i class="fas fa-crown me-1"></i>Cara
+                                        </button>
+                                        <button id="btn-elegir-cruz" class="btn btn-outline-success" 
+                                                onclick="elegirLado('cruz')">
+                                            <i class="fas fa-leaf me-1"></i>Cruz
+                                        </button>
+                                    </div>
+                                    <small id="eleccion-actual" class="text-muted mt-1 d-block">No has elegido</small>
+                                </div>
+                            </div>
+
+                            <!-- Botones de Acción -->
+                            <div class="d-flex gap-2 justify-content-center">
+                                <button id="btn-apostar" class="btn btn-primary" onclick="realizarApuesta()">
+                                    <i class="fas fa-coins me-1"></i>Apostar
+                                </button>
+                                {% if sala.creador_id == current_user.id %}
+                                <button id="btn-lanzar" class="btn btn-success" onclick="lanzarMoneda()" disabled>
+                                    <i class="fas fa-rocket me-1"></i>Lanzar Moneda
+                                </button>
+                                {% endif %}
+                                <button id="btn-reiniciar" class="btn btn-outline-secondary" onclick="reiniciarApuesta()" style="display: none;">
+                                    <i class="fas fa-redo me-1"></i>Nueva Apuesta
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Apuestas Actuales -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="mb-0"><i class="fas fa-list me-2"></i>Apuestas Actuales 
+                                <span class="badge bg-primary" id="contador-apuestas">0</span>
+                            </h4>
+                        </div>
+                        <div class="card-body">
+                            <div id="lista-apuestas">
+                                <div class="text-center text-muted">No hay apuestas aún</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel Lateral -->
+                <div class="col-md-4">
+                    <!-- Jugadores -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h4 class="mb-0"><i class="fas fa-users me-2"></i>Jugadores Conectados</h4>
+                        </div>
+                        <div class="card-body">
+                            <div id="lista-jugadores">
+                                <div class="text-center text-muted">Cargando jugadores...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="mb-0"><i class="fas fa-comments me-2"></i>Chat</h4>
+                        </div>
+                        <div class="card-body">
+                            <div id="chat-messages" style="height: 200px; overflow-y: auto; margin-bottom: 10px; border: 1px solid #dee2e6; border-radius: 5px; padding: 10px;">
+                                <div class="text-center text-muted">El chat está vacío</div>
+                            </div>
+                            <div class="input-group">
+                                <input type="text" id="chat-input" class="form-control" placeholder="Escribe un mensaje...">
+                                <button class="btn btn-primary" onclick="enviarMensajeChat()">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+const salaId = {{ sala.id }};
+const esCreador = {{ 'true' if sala.creador_id == current_user.id else 'false' }};
+const socket = io();
+
+console.log(`🎮 Inicializando CoinFlip Multijugador:
+- Sala ID: ${salaId}
+- Es Creador: ${esCreador}
+- Usuario: {{ current_user.username }}`);
+
+let ladoElegido = null;
+let apuestasActuales = [];
+let jugadoresConectados = [];
+let yaAposte = false;
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log(`🔗 Conectando a sala CoinFlip ${salaId}`);
+    
+    // Unirse a la sala de CoinFlip
+    socket.emit('join_coinflip_room', { sala_id: salaId });
+    
+    // Verificar conexión
+    socket.on('connect', () => {
+        console.log('✅ Conectado al servidor SocketIO');
+    });
+    
+    socket.on('disconnect', () => {
+        console.log('❌ Desconectado del servidor SocketIO');
+    });
+});
+
+// Socket Events - CON MÁS DEBUG
+socket.on('estado_sala_actualizado', (data) => {
+    console.log('🔄 Estado actualizado recibido:', data);
+    jugadoresConectados = data.jugadores || [];
+    apuestasActuales = data.apuestas || [];
+    
+    actualizarJugadores();
+    actualizarApuestas();
+    actualizarContadores();
+    actualizarBotones();
+});
+
+socket.on('user_joined_coinflip', (data) => {
+    console.log('👤 Usuario unido:', data);
+    agregarMensajeChat('Sistema', `${data.username} se unió al juego`, 'system');
+});
+
+socket.on('user_left_coinflip', (data) => {
+    console.log('👤 Usuario salió:', data);
+    agregarMensajeChat('Sistema', `${data.username} salió del juego`, 'system');
+});
+
+socket.on('nueva_apuesta_coinflip', (data) => {
+    console.log('💰 Nueva apuesta recibida:', data);
+    
+    // Actualizar lista de apuestas
+    const apuestaExistente = apuestasActuales.find(a => a.usuario_id === data.usuario_id);
+    if (apuestaExistente) {
+        Object.assign(apuestaExistente, data);
+    } else {
+        apuestasActuales.push(data);
+    }
+    
+    actualizarApuestas();
+    actualizarContadores();
+    actualizarBotones();
+    
+    if (data.usuario_id !== {{ current_user.id }}) {
+        agregarMensajeChat('Sistema', `${data.username} apostó $${data.cantidad} por ${data.eleccion}`, 'system');
+    }
+});
+
+socket.on('moneda_lanzada', (data) => {
+    console.log('🎯 Moneda lanzada recibida:', data);
+    document.getElementById('estado-juego').innerHTML = `
+        <div class="alert alert-warning">
+            <strong>¡Moneda en el aire!</strong><br>
+            Lanzada por: ${data.lanzador}<br>
+            <small>Resultado en 3 segundos...</small>
+        </div>
+    `;
+    
+    // Animación de la moneda
+    mostrarAnimacionMoneda(data.resultado);
+});
+
+socket.on('resultados_finales_coinflip', (data) => {
+    console.log('🏁 Resultados finales recibidos:', data);
+    mostrarResultadosFinales(data);
+});
+
+socket.on('new_coinflip_message', (data) => {
+    console.log('💬 Mensaje de chat recibido:', data);
+    agregarMensajeChat(data.username, data.message, 'user');
+});
+
+// Manejar errores
+socket.on('error_apuesta', (data) => {
+    console.log('❌ Error en apuesta:', data);
+    alert(`Error: ${data.message}`);
+});
+
+socket.on('error_lanzamiento', (data) => {
+    console.log('❌ Error en lanzamiento:', data);
+    alert(`Error: ${data.message}`);
+    // Rehabilitar botón de lanzar
+    if (esCreador) {
+        document.getElementById('btn-lanzar').disabled = false;
+        document.getElementById('btn-lanzar').innerHTML = '<i class="fas fa-rocket me-1"></i>Lanzar Moneda';
+    }
+});
+
+// Funciones del juego - ACTUALIZADAS
+function elegirLado(lado) {
+    if (yaAposte) {
+        alert('Ya has apostado en esta ronda. Espera al siguiente lanzamiento.');
+        return;
+    }
+    
+    ladoElegido = lado;
+    document.getElementById('btn-elegir-cara').classList.toggle('btn-danger', lado === 'cara');
+    document.getElementById('btn-elegir-cara').classList.toggle('btn-outline-danger', lado !== 'cara');
+    document.getElementById('btn-elegir-cruz').classList.toggle('btn-success', lado === 'cruz');
+    document.getElementById('btn-elegir-cruz').classList.toggle('btn-outline-success', lado !== 'cruz');
+    
+    document.getElementById('eleccion-actual').textContent = `Elegido: ${lado.toUpperCase()}`;
+    document.getElementById('eleccion-actual').className = `text-${lado === 'cara' ? 'danger' : 'success'} mt-1 d-block`;
+}
+
+function realizarApuesta() {
+    if (!ladoElegido) {
+        alert('Selecciona cara o cruz primero');
+        return;
+    }
+    
+    if (yaAposte) {
+        alert('Ya has apostado en esta ronda');
+        return;
+    }
+    
+    const cantidad = parseFloat(document.getElementById('cantidad-apuesta').value);
+    const balance = parseFloat(document.getElementById('balance-usuario').textContent);
+    
+    if (cantidad < {{ sala.apuesta_minima }}) {
+        alert(`La apuesta mínima es ${{ sala.apuesta_minima }}`);
+        return;
+    }
+    
+    if (cantidad > balance) {
+        alert('Fondos insuficientes');
+        return;
+    }
+    
+    console.log('📤 Enviando apuesta:', { sala_id: salaId, cantidad, eleccion: ladoElegido });
+    
+    // Enviar apuesta via SocketIO
+    socket.emit('coinflip_apostar', {
+        sala_id: salaId,
+        cantidad: cantidad,
+        eleccion: ladoElegido
+    });
+    
+    yaAposte = true;
+    document.getElementById('btn-apostar').disabled = true;
+    document.getElementById('btn-apostar').innerHTML = '<i class="fas fa-check me-1"></i>Apuesta Realizada';
+    
+    // Actualizar balance localmente
+    document.getElementById('balance-usuario').textContent = (balance - cantidad).toFixed(2);
+}
+
+function lanzarMoneda() {
+    if (!esCreador) return;
+    
+    if (apuestasActuales.length === 0) {
+        alert('No hay apuestas para lanzar la moneda');
+        return;
+    }
+    
+    console.log('📤 Enviando lanzamiento de moneda...');
+    
+    socket.emit('coinflip_lanzar', {
+        sala_id: salaId
+    });
+    
+    document.getElementById('btn-lanzar').disabled = true;
+    document.getElementById('btn-lanzar').innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Lanzando...';
+}
+
+function reiniciarApuesta() {
+    reiniciarJuego();
+}
+
+function mostrarAnimacionMoneda(resultado) {
+    const moneda = document.getElementById('moneda-multijugador');
+    moneda.style.transition = 'transform 2s ease-out';
+    
+    // Animación de giro
+    const giros = 5; // Número de giros completos
+    const gradosFinal = resultado === 'cara' ? 0 : 180;
+    const gradosTotales = (giros * 360) + gradosFinal;
+    
+    moneda.style.transform = `rotateY(${gradosTotales}deg)`;
+}
+
+function mostrarResultadosFinales(data) {
+    const resultadoDiv = document.createElement('div');
+    resultadoDiv.className = 'alert alert-info mt-3';
+    resultadoDiv.innerHTML = `<h5>Resultado: ${data.resultado_moneda.toUpperCase()}</h5>`;
+    
+    data.resultados.forEach(resultado => {
+        const esYo = resultado.usuario_id === {{ current_user.id }};
+        const resultadoItem = document.createElement('div');
+        resultadoItem.className = `d-flex justify-content-between align-items-center p-2 border rounded mb-2 ${esYo ? 'bg-light' : ''}`;
+        resultadoItem.innerHTML = `
+            <div>
+                <strong>${resultado.username}</strong>
+                ${esYo ? ' <small class="text-info">(Tú)</small>' : ''}
+                <br>
+                <small class="text-muted">Apostó: $${resultado.cantidad_apostada} por ${resultado.gano ? resultado.resultado_moneda : (resultado.resultado_moneda === 'cara' ? 'cruz' : 'cara')}</small>
+            </div>
+            <div class="text-${resultado.gano ? 'success' : 'danger'} fw-bold">
+                ${resultado.gano ? `+$${resultado.ganancia.toFixed(2)}` : `-$${resultado.cantidad_apostada.toFixed(2)}`}
+                <br>
+                <small class="text-muted">Nuevo: $${resultado.nuevo_balance.toFixed(2)}</small>
+            </div>
+        `;
+        resultadoDiv.appendChild(resultadoItem);
+        
+        // Actualizar mi balance si soy yo (ya se hace arriba, pero por si acaso)
+        if (esYo) {
+            document.getElementById('balance-usuario').textContent = resultado.nuevo_balance.toFixed(2);
+        }
+    });
+    
+    document.getElementById('estado-juego').innerHTML = '';
+    document.getElementById('estado-juego').appendChild(resultadoDiv);
+    
+    // Mostrar botón de reinicio
+    document.getElementById('btn-reiniciar').style.display = 'inline-block';
+    
+    // Resetear estado después de 8 segundos (más tiempo para leer resultados)
+    setTimeout(() => {
+        reiniciarJuego();
+        document.getElementById('estado-juego').innerHTML = '<div class="alert alert-info">Esperando apuestas...</div>';
+        document.getElementById('lista-apuestas').innerHTML = '<div class="text-center text-muted">No hay apuestas aún</div>';
+        apuestasActuales = [];
+        actualizarContadores();
+    }, 8000);
+}
+
+// NUEVA FUNCIÓN: Reiniciar completamente el juego
+function reiniciarJuego() {
+    console.log('🔄 Reiniciando juego para nueva ronda...');
+    
+    // Resetear variables
+    ladoElegido = null;
+    yaAposte = false;
+    apuestasActuales = [];
+    
+    // Resetear interfaz
+    document.getElementById('btn-elegir-cara').classList.replace('btn-danger', 'btn-outline-danger');
+    document.getElementById('btn-elegir-cruz').classList.replace('btn-success', 'btn-outline-success');
+    document.getElementById('eleccion-actual').textContent = 'No has elegido';
+    document.getElementById('eleccion-actual').className = 'text-muted mt-1 d-block';
+    
+    document.getElementById('btn-apostar').disabled = false;
+    document.getElementById('btn-apostar').innerHTML = '<i class="fas fa-coins me-1"></i>Apostar';
+    
+    if (esCreador) {
+        document.getElementById('btn-lanzar').disabled = true; // Empezar deshabilitado
+        document.getElementById('btn-lanzar').innerHTML = '<i class="fas fa-rocket me-1"></i>Lanzar Moneda';
+    }
+    
+    document.getElementById('btn-reiniciar').style.display = 'none';
+    
+    // Resetear moneda
+    const moneda = document.getElementById('moneda-multijugador');
+    moneda.style.transition = 'none';
+    moneda.style.transform = 'rotateY(0deg)';
+    
+    // Forzar reflow
+    void moneda.offsetWidth;
+    
+    // Restaurar transición suave
+    moneda.style.transition = 'transform 2s ease-out';
+    
+    // Resetear lista de apuestas
+    document.getElementById('lista-apuestas').innerHTML = '<div class="text-center text-muted">No hay apuestas aún</div>';
+    
+    // Resetear contadores
+    document.getElementById('contador-apuestas').textContent = '0';
+    
+    // Resetear estado del juego
+    document.getElementById('estado-juego').innerHTML = '<div class="alert alert-info">Esperando apuestas...</div>';
+    
+    console.log('✅ Juego reiniciado para nueva ronda');
+}
+
+function actualizarJugadores() {
+    const container = document.getElementById('lista-jugadores');
+    
+    if (jugadoresConectados.length === 0) {
+        container.innerHTML = '<div class="text-center text-muted">No hay jugadores conectados</div>';
+        return;
+    }
+    
+    container.innerHTML = jugadoresConectados.map(jugador => `
+        <div class="d-flex justify-content-between align-items-center p-2 border-bottom ${jugador.es_creador ? 'bg-primary bg-opacity-10' : ''}">
+            <div>
+                <i class="fas fa-user${jugador.es_creador ? '-crown text-warning' : ''} me-2"></i>
+                ${jugador.username}
+                ${jugador.es_creador ? '<small class="text-warning">(Creador)</small>' : ''}
+                ${jugador.id === {{ current_user.id }} ? '<small class="text-info">(Tú)</small>' : ''}
+            </div>
+            <div class="text-success">$${jugador.balance?.toFixed(2) || '0.00'}</div>
+        </div>
+    `).join('');
+}
+
+function actualizarApuestas() {
+    const container = document.getElementById('lista-apuestas');
+    
+    if (apuestasActuales.length === 0) {
+        container.innerHTML = '<div class="text-center text-muted">No hay apuestas aún</div>';
+        return;
+    }
+    
+    container.innerHTML = apuestasActuales.map(apuesta => `
+        <div class="d-flex justify-content-between align-items-center p-2 border rounded mb-2 ${apuesta.usuario_id === {{ current_user.id }} ? 'bg-info bg-opacity-10' : ''}">
+            <div>
+                <strong>${apuesta.username}</strong>
+                ${apuesta.usuario_id === {{ current_user.id }} ? '<small class="text-info">(Tú)</small>' : ''}
+                <span class="badge ${apuesta.eleccion === 'cara' ? 'bg-danger' : 'bg-success'}">
+                    ${apuesta.eleccion.toUpperCase()}
+                </span>
+            </div>
+            <div class="fw-bold">$${apuesta.cantidad}</div>
+        </div>
+    `).join('');
+}
+
+function actualizarContadores() {
+    document.getElementById('contador-jugadores').textContent = jugadoresConectados.length;
+    document.getElementById('contador-apuestas').textContent = apuestasActuales.length;
+}
+
+function actualizarBotones() {
+    // Habilitar botón de lanzar si hay apuestas y es el creador
+    if (esCreador) {
+        document.getElementById('btn-lanzar').disabled = apuestasActuales.length === 0;
+    }
+}
+
+function enviarMensajeChat() {
+    const input = document.getElementById('chat-input');
+    const message = input.value.trim();
+    
+    if (message) {
+        socket.emit('coinflip_chat_message', {
+            sala_id: salaId,
+            message: message
+        });
+        input.value = '';
+    }
+}
+
+function agregarMensajeChat(usuario, mensaje, tipo) {
+    const chat = document.getElementById('chat-messages');
+    
+    // Remover mensaje de "está vacío" si existe
+    if (chat.querySelector('.text-muted')) {
+        chat.innerHTML = '';
+    }
+    
+    const mensajeDiv = document.createElement('div');
+    mensajeDiv.className = `mb-2 ${tipo === 'system' ? 'text-info fst-italic' : ''}`;
+    mensajeDiv.innerHTML = `<strong>${usuario}:</strong> ${mensaje}`;
+    chat.appendChild(mensajeDiv);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+// Permitir enviar mensaje con Enter
+document.getElementById('chat-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        enviarMensajeChat();
+    }
+});
+</script>
+
+<style>
+.coin-wrapper {
+    width: 120px;
+    height: 120px;
+    perspective: 1000px;
+    margin: 0 auto;
+}
+
+.coin {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 2s ease-out;
+}
+
+.face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backface-visibility: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.face.front {
+    background: radial-gradient(circle at 30% 30%, #ffd54f, #d4af37);
+    color: #2b2b2b;
+}
+
+.face.back {
+    background: radial-gradient(circle at 30% 30%, #f3f4f6, #c0c0c0);
+    color: #1f1f1f;
+    transform: rotateY(180deg);
+}
+
+.face-inner {
+    text-align: center;
+}
+
+.emoji {
+    font-size: 2rem;
+    margin-bottom: 4px;
+}
+
+.label {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+}
+
+#chat-messages {
+    max-height: 200px;
+    overflow-y: auto;
+}
+</style>
+{% endblock %}

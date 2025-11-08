@@ -2,7 +2,8 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_required, current_user
 from models import db, SalaMultijugador, UsuarioSala
 
-bp = Blueprint('multijugador', __name__)
+# CAMBIAR NOMBRE DEL BLUEPRINT
+bp = Blueprint('salas_espera', __name__)
 
 # Lista de juegos permitidos con sus capacidades máximas
 JUEGOS_PERMITIDOS = {
@@ -12,14 +13,16 @@ JUEGOS_PERMITIDOS = {
     'carrera_caballos': {'nombre': 'Carrera de Caballos', 'max_jugadores': 4}
 }
 
-@bp.route('/multijugador')
+# CAMBIAR RUTA PRINCIPAL
+@bp.route('/salas-espera')
 @login_required
 def lobby():
-    """Página principal del lobby multijugador"""
+    """Página principal del lobby de salas de espera"""
     salas = SalaMultijugador.query.filter_by(estado='esperando').all()
-    return render_template('multijugador/lobby.html', salas=salas, juegos_permitidos=JUEGOS_PERMITIDOS)
+    return render_template('salas_espera/lobby.html', salas=salas, juegos_permitidos=JUEGOS_PERMITIDOS)
 
-@bp.route('/multijugador/crear-sala', methods=['POST'])
+# CAMBIAR RUTA
+@bp.route('/salas-espera/crear-sala', methods=['POST'])
 @login_required
 def crear_sala():
     """Crear una nueva sala de juego"""
@@ -31,18 +34,18 @@ def crear_sala():
     # Validaciones
     if not nombre or not juego:
         flash('Nombre y juego son requeridos', 'error')
-        return redirect(url_for('multijugador.lobby'))
+        return redirect(url_for('salas_espera.lobby'))  # CAMBIAR REFERENCIA
     
     # Validar que el juego esté permitido
     if juego not in JUEGOS_PERMITIDOS:
         flash('Juego no permitido', 'error')
-        return redirect(url_for('multijugador.lobby'))
+        return redirect(url_for('salas_espera.lobby'))  # CAMBIAR REFERENCIA
     
     # Validar capacidad según el juego
     max_jugadores = JUEGOS_PERMITIDOS[juego]['max_jugadores']
     if capacidad < 2 or capacidad > max_jugadores:
         flash(f'La capacidad para {JUEGOS_PERMITIDOS[juego]["nombre"]} debe ser entre 2 y {max_jugadores} jugadores', 'error')
-        return redirect(url_for('multijugador.lobby'))
+        return redirect(url_for('salas_espera.lobby'))  # CAMBIAR REFERENCIA
     
     # Crear sala
     nueva_sala = SalaMultijugador(
@@ -67,12 +70,13 @@ def crear_sala():
     db.session.commit()
     
     flash('¡Sala creada exitosamente!', 'success')
-    return redirect(url_for('multijugador.sala', sala_id=nueva_sala.id))
+    return redirect(url_for('salas_espera.sala', sala_id=nueva_sala.id))  # CAMBIAR REFERENCIA
 
-@bp.route('/multijugador/sala/<int:sala_id>')
+# CAMBIAR RUTA
+@bp.route('/salas-espera/sala/<int:sala_id>')
 @login_required
 def sala(sala_id):
-    """Página de una sala específica"""
+    """Página de una sala específica - REDIRECCIÓN AUTOMÁTICA"""
     sala = SalaMultijugador.query.get_or_404(sala_id)
     
     # Verificar si el usuario está en la sala
@@ -84,7 +88,7 @@ def sala(sala_id):
     if not usuario_en_sala:
         if sala.jugadores_actuales >= sala.capacidad:
             flash('La sala está llena', 'error')
-            return redirect(url_for('multijugador.lobby'))
+            return redirect(url_for('salas_espera.lobby'))  # CAMBIAR REFERENCIA
         
         # Unirse a la sala
         usuario_sala = UsuarioSala(
@@ -96,9 +100,17 @@ def sala(sala_id):
         sala.jugadores_actuales += 1
         db.session.commit()
     
-    return render_template(f'multijugador/sala_base.html', sala=sala)
+    # REDIRECCIÓN AUTOMÁTICA cuando la sala esté llena y el creador inicie
+    if sala.estado == 'jugando':
+        if sala.juego == 'coinflip':
+            return redirect(url_for('api_multijugador_coinflip.sala_coinflip', sala_id=sala_id))
+        # Aquí agregarías redirecciones para otros juegos
+    
+    # Si no está jugando, mostrar sala de espera
+    return render_template('salas_espera/sala_base.html', sala=sala)  # CAMBIAR RUTA TEMPLATE
 
-@bp.route('/multijugador/salir-sala/<int:sala_id>', methods=['POST'])
+# CAMBIAR RUTA
+@bp.route('/salas-espera/salir-sala/<int:sala_id>', methods=['POST'])
 @login_required
 def salir_sala(sala_id):
     """Salir de una sala"""
@@ -120,4 +132,4 @@ def salir_sala(sala_id):
         db.session.commit()
         flash('Has salido de la sala', 'info')
     
-    return redirect(url_for('multijugador.lobby'))
+    return redirect(url_for('salas_espera.lobby'))  # CAMBIAR REFERENCIA

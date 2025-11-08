@@ -2,6 +2,7 @@ from flask import request
 from flask_login import current_user
 from flask_socketio import join_room, leave_room, emit
 from models import db, SalaMultijugador, UsuarioSala
+from datetime import datetime
 import json
 
 def register_socketio_handlers(socketio):
@@ -9,7 +10,7 @@ def register_socketio_handlers(socketio):
     @socketio.on('connect')
     def handle_connect():
         if current_user.is_authenticated:
-            print(f"✅ Usuario {current_user.username} conectado")
+            print(f"✅ Usuario {current_user.username} conectado a SocketIO")
             emit('connection_status', {'status': 'connected', 'user': current_user.username})
         else:
             return False
@@ -66,6 +67,24 @@ def register_socketio_handlers(socketio):
                 'juego': sala.juego
             }, room=f'sala_{sala_id}')
 
+    # ⚠️ CORREGIR: El handler del chat de sala de espera
+    @socketio.on('chat_message')
+    def handle_chat_message(data):
+        if not current_user.is_authenticated:
+            return
+            
+        sala_id = data.get('sala_id')
+        message = data.get('message')
+        
+        print(f"💬 Chat sala {sala_id}: {current_user.username}: {message}")
+        
+        emit('new_message', {
+            'user_id': current_user.id,
+            'username': current_user.username,
+            'message': message,
+            'timestamp': datetime.utcnow().isoformat()
+        }, room=f'sala_{sala_id}')  # ⚠️ Asegúrate de que es 'sala_{sala_id}'
+
     @socketio.on('game_action')
     def handle_game_action(data):
         sala_id = data.get('sala_id')
@@ -75,17 +94,5 @@ def register_socketio_handlers(socketio):
             'user_id': current_user.id,
             'username': current_user.username,
             'action': action,
-            'timestamp': data.get('timestamp')
-        }, room=f'sala_{sala_id}')
-
-    @socketio.on('chat_message')
-    def handle_chat_message(data):
-        sala_id = data.get('sala_id')
-        message = data.get('message')
-        
-        emit('new_message', {
-            'user_id': current_user.id,
-            'username': current_user.username,
-            'message': message,
             'timestamp': data.get('timestamp')
         }, room=f'sala_{sala_id}')

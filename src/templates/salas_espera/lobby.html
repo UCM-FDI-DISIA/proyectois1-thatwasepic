@@ -4,7 +4,7 @@
 <div class="simple-background"></div>
 
 <div class="text-center mb-5">
-    <h1 class="hero-title">Modo Multijugador</h1>
+    <h1 class="hero-title">Salas de Espera</h1>  
     <p class="hero-subtitle mt-4">
         Crea o únete a salas para jugar con otros usuarios en tiempo real
     </p>
@@ -18,7 +18,7 @@
                 <h4 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Crear Sala</h4>
             </div>
             <div class="card-body">
-                <form method="POST" action="{{ url_for('multijugador.crear_sala') }}">
+                <form method="POST" action="{{ url_for('salas_espera.crear_sala') }}">
                     <div class="mb-3">
                         <label class="form-label">Nombre de la Sala</label>
                         <input type="text" class="form-control" name="nombre" required 
@@ -85,10 +85,10 @@
                                                 <i class="fas fa-coins me-1"></i>{{ sala.apuesta_minima }}€
                                             </span>
                                         </div>
-                                        <small class="text-muted">Creada por: {{ sala.propietario.username }}</small>
+                                        <small class="text-muted">Creada por: {{ sala.owner.username }}</small>
                                     </div>
                                     <div class="col-md-6 text-md-end">
-                                        <a href="{{ url_for('salas_multijugador_bp.sala', sala_id=sala.id) }}" class="btn btn-primary">
+                                        <a href="{{ url_for('salas_espera.sala', sala_id=sala.id) }}" class="btn btn-primary">
                                             <i class="fas fa-door-open me-2"></i>Unirse
                                         </a>
                                     </div>
@@ -117,6 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const socket = io();
     
     function actualizarSalas() {
+        // ✅ CORREGIDO: usar api_multijugador en lugar de api_salas_espera
         fetch('{{ url_for("api_multijugador.obtener_salas") }}')
             .then(response => response.json())
             .then(salas => {
@@ -153,7 +154,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                         <small class="text-muted">Creada por: ${sala.creador}</small>
                                     </div>
                                     <div class="col-md-6 text-md-end">
-                                        <a href="/multijugador/sala/${sala.id}" class="btn btn-primary">
+                                        <!-- ✅ CORREGIDO: mantener la ruta correcta -->
+                                        <a href="/salas-espera/sala/${sala.id}" class="btn btn-primary">
                                             <i class="fas fa-door-open me-2"></i>Unirse
                                         </a>
                                     </div>

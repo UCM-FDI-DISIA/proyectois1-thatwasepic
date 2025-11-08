@@ -27,15 +27,13 @@ def load_user(user_id):
 # Registrar todos los blueprints del paquete endpoints
 register_blueprints(app)
 
-# Importar y registrar handlers de SocketIO - CORREGIDO
+# Importar y registrar handlers de SocketIO
 try:
-    # Intenta importar desde el mismo directorio
     from socketio_handlers import register_socketio_handlers
     register_socketio_handlers(socketio)
     print("✅ Handlers de SocketIO registrados")
-except ImportError:
-    print("⚠️  No se pudieron cargar los handlers de SocketIO")
-    print("ℹ️  El modo multijugador funcionará sin tiempo real")
+except ImportError as e:
+    print(f"⚠️  No se pudieron cargar los handlers de SocketIO: {e}")
 
 # Inicializar DB
 with app.app_context():

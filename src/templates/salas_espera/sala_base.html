@@ -70,7 +70,7 @@
                         </div>
                     {% endif %}
                     
-                    <form method="POST" action="{{ url_for('multijugador.salir_sala', sala_id=sala.id) }}" class="d-inline">
+                    <form method="POST" action="{{ url_for('salas_espera.salir_sala', sala_id=sala.id) }}" class="d-inline">
                         <button type="submit" class="btn btn-outline-primary">
                             <i class="fas fa-sign-out-alt me-2"></i>Salir de la Sala
                         </button>
@@ -159,6 +159,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const message = input.value.trim();
         
         if (message) {
+            console.log('📤 Enviando mensaje de chat:', message);
             socket.emit('chat_message', {
                 sala_id: salaId,
                 message: message,
@@ -167,7 +168,9 @@ document.addEventListener('DOMContentLoaded', function() {
             input.value = '';
         }
     }
-
+    socket.on('new_message', (data) => {
+        agregarMensajeChat(data.username, data.message, 'user');
+    });
     // Eventos de SocketIO - MEJORADO
     socket.on('user_joined', (data) => {
         console.log('Usuario se unió:', data);
@@ -193,13 +196,16 @@ document.addEventListener('DOMContentLoaded', function() {
         actualizarEstadoSala();
     });
 
-    socket.on('new_message', (data) => {
-        agregarMensajeChat(data.username, data.message, 'user');
-    });
-
     socket.on('game_started', (data) => {
-        alert('¡La partida ha comenzado!');
+    console.log('Juego iniciado:', data);
+    
+    // Redirigir según el tipo de juego
+    if (data.juego === 'coinflip') {
+        window.location.href = `/api/multijugador/coinflip/sala/${data.sala_id}`;
+    } else {
+        // Para otros juegos, mantener la ruta original
         window.location.href = `/multijugador/partida/${data.juego}/${data.sala_id}`;
+    }
     });
 
     function agregarMensajeChat(usuario, mensaje, tipo) {
