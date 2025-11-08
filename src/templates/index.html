@@ -5,7 +5,7 @@
 <div class="simple-background"></div>
 
 <!-- Sección de juegos -->
-<div class="fade-out-gradient">
+<div class="fade-out-gradient animated-translateY">
     <div id="logo" class="mx-auto"></div>
 </div>
 <div class="text-center">
@@ -181,7 +181,7 @@
     align-content: end;
     mask-image: url({{ url_for('static', filename='img/logo.png') }});
     filter: hue-rotate(-60deg) brightness(125%);
-    animation: hueShift 4s linear infinite alternate;
+    animation: hueShift 3s linear infinite alternate;
 }
 
 @keyframes hueShift {

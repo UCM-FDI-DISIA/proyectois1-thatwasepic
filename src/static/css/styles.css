@@ -411,7 +411,7 @@ html {
 .cyber-grid {
   background:
     linear-gradient(90deg, rgba(0, 243, 255, 0.1) 1px, transparent 1px),
-    linear-gradient(180deg, rgba(0, 243, 255, 0.1) 1px, transparent 1px);
+    linear-gradient(180deg, rgba(0, 243, 255, 0.1) 1px, var(--deep-space) 1px);
   background-size: 20px 20px;
 }
 
@@ -441,10 +441,6 @@ html {
 
   .navbar-nav {
     text-align: center;
-  }
-
-  .card {
-    margin-bottom: 1.5rem;
   }
 }
 
