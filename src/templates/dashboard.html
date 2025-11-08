@@ -26,150 +26,183 @@
 </div>
 
 <!-- Panel de Juegos Holográfico -->
-<div class="row g-4">
-    <!-- Blackjack -->
-    <div class="col-xl-3 col-lg-4 col-md-6">
-        <div class="card animated-rotate matrix-rain">
-            <div class="card-body text-center p-4">
-                <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">🎲</div>
-                <h3 class="card-title">Blackjack</h3>
-                <p class="card-text mb-4">
-                    Algoritmo de 21 puntos. Enfrenta a la IA central en duelo probabilístico.
-                </p>
-                <a href="{{ url_for('blackjack.home') }}" class="btn btn-primary btn-lg w-100">
-                    <i class="fas fa-brain me-2"></i>Jugar ya
-                </a>
-            </div>
+<div class="row g-md-5 g-4">
+    <div class="col-12 col-md-8">
+        <div class="animated-translateY">
+            <h2>Un jugador</h2>
+            <p>Juega individualmente.</p>
         </div>
-    </div>
-    <!-- Ruleta Europea -->
-    <div class="col-xl-3 col-lg-4 col-md-6">
-        <div class="card animated-rotate matrix-rain">
-            <div class="card-body text-center p-4">
-                <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">🎯</div>
-                <h3 class="card-title">Ruleta europea</h3>
-                <p class="card-text mb-4">
-                    Apuesta a pleno, caballos, calles, esquinas y exteriores.
-                </p>
-                <!-- TODO: enlazar a ruleta.home cuando esté implementada -->
-                <a href="{{ url_for('ruleta.home') }}" class="btn btn-primary btn-lg w-100">
-                    <i class="fas fa-bullseye me-2"></i>Iniciar Ruleta
-                </a>
+
+        <div class="row g-4">
+            <!-- Blackjack -->
+            <div class="col-xl-4 col-sm-6 col-12">
+                <div class="card animated-rotate matrix-rain">
+                    <div class="card-body text-center p-4">
+                        <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">🎲</div>
+                        <h3 class="card-title">Blackjack</h3>
+                        <p class="card-text mb-4">
+                            Algoritmo de 21 puntos. Enfrenta a la IA central en duelo probabilístico.
+                        </p>
+                        <a href="{{ url_for('blackjack.home') }}" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-brain me-2"></i>Jugar ya
+                        </a>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-    <!-- Poker -->
-    <div class="col-xl-3 col-lg-4 col-md-6">
-        <div class="card animated-rotate matrix-rain">
-            <div class="card-body text-center p-4">
-                <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">🃏</div>
-                <h3 class="card-title">Póker</h3>
-                <p class="card-text mb-4">
-                    Sistema de manos probabilísticas. Optimiza tu estrategia de combinaciones.
-                </p>
-                <a href="{{ url_for('poker.home') }}" class="btn btn-primary btn-lg w-100">
-                    <i class="fas fa-chess-queen me-2"></i>Retar a la IA
-                </a>
+            <!-- Ruleta Europea -->
+            <div class="col-xl-4 col-sm-6 col-12">
+                <div class="card animated-rotate matrix-rain">
+                    <div class="card-body text-center p-4">
+                        <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">🎯</div>
+                        <h3 class="card-title">Ruleta europea</h3>
+                        <p class="card-text mb-4">
+                            Apuesta a pleno, caballos, calles, esquinas y exteriores.
+                        </p>
+                        <!-- TODO: enlazar a ruleta.home cuando esté implementada -->
+                        <a href="{{ url_for('ruleta.home') }}" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-bullseye me-2"></i>Iniciar Ruleta
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <!-- Poker -->
+            <div class="col-xl-4 col-sm-6 col-12">
+                <div class="card animated-rotate matrix-rain">
+                    <div class="card-body text-center p-4">
+                        <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">🃏</div>
+                        <h3 class="card-title">Póker</h3>
+                        <p class="card-text mb-4">
+                            Sistema de manos probabilísticas. Optimiza tu estrategia de combinaciones.
+                        </p>
+                        <a href="{{ url_for('poker.home') }}" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-chess-queen me-2"></i>Retar a la IA
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cara o Cruz -->
+            <div class="col-xl-4 col-sm-6 col-12">
+                <div class="card animated-rotate matrix-rain">
+                    <div class="card-body text-center p-4">
+                        <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">🪙</div>
+                        <h3 class="card-title">Coinflip</h3>
+                        <p class="card-text mb-4">
+                            Todo o nada: lanza una moneda como experimento de probabilidad 50/50.
+                        </p>
+                        <a href="{{ url_for('coinflip.home') }}" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-dice me-2"></i>Todo o nada
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tragaperras -->
+            <div class="col-xl-4 col-sm-6 col-12">
+                <div class="card animated-rotate matrix-rain">
+                    <div class="card-body text-center p-4">
+                        <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">🎰</div>
+                        <h3 class="card-title">Tragaperras</h3>
+                        <p class="card-text mb-4">
+                            Gira los rodillos, combina símbolos y descubre premios.
+                        </p>
+                        <a href="{{ url_for('tragaperras.home') }}" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-cogs me-2"></i>Girar
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Carrera de Caballos -->
+            <div class="col-xl-4 col-sm-6 col-12">
+                <div class="card animated-rotate matrix-rain">
+                    <div class="card-body text-center p-4">
+                        <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">🏇</div>
+                        <h3 class="card-title">Carrera de caballos</h3>
+                        <p class="card-text mb-4">
+                            Simulador de carreras de caballos, apostando por tu corcel favorito.
+                        </p>
+                        <a href="{{ url_for('caballos.home') }}" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-horse me-2"></i>Iniciar carrera
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Cara o Cruz -->
-    <div class="col-xl-3 col-lg-4 col-md-6">
-        <div class="card animated-rotate matrix-rain">
-            <div class="card-body text-center p-4">
-                <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">🪙</div>
-                <h3 class="card-title">Coinflip</h3>
-                <p class="card-text mb-4">
-                    Todo o nada: lanza una moneda como experimento de probabilidad 50/50.
-                </p>
-                <a href="{{ url_for('coinflip.home') }}" class="btn btn-primary btn-lg w-100">
-                    <i class="fas fa-dice me-2"></i>Todo o nada
-                </a>
+    <div class="col-12 col-md-4 mh-100">
+        <div class="animated-translateY">
+            <h2>Multijugador</h2>
+            <p>Juega con otros usuarios.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="card animated-translateY matrix-rain">
+                    <div class="card-body p-4">
+                        <div class="text-center">
+                            <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">👥</div>
+                            <h3 class="card-title">Salas Multijugador</h3>
+                            <p class="card-text mb-4">
+                                Juega con otros usuarios en tiempo real. Crea salas y desafía a amigos.
+                            </p>
+                        </div>
+                        <div class="mb-4">
+                            {% with compact_view = true %}
+                                {% include "multijugador/lista_salas.html" %}
+                            {% endwith %}
+                        </div>
+                        <a href="{{ url_for('salas_espera.lobby') }}" class="btn btn-outline-primary btn-lg w-100">
+                            <i class="fas fa-users me-2"></i>VER TODO
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Tragaperras -->
-    <div class="col-xl-3 col-lg-4 col-md-6">
-        <div class="card animated-rotate matrix-rain">
-            <div class="card-body text-center p-4">
-                <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">🎰</div>
-                <h3 class="card-title">Tragaperras</h3>
-                <p class="card-text mb-4">
-                    Gira los rodillos, combina símbolos y descubre premios.
-                </p>
-                <a href="{{ url_for('tragaperras.home') }}" class="btn btn-primary btn-lg w-100">
-                    <i class="fas fa-cogs me-2"></i>Girar
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Carrera de Caballos -->
-    <div class="col-xl-3 col-lg-4 col-md-6">
-        <div class="card animated-rotate matrix-rain">
-            <div class="card-body text-center p-4">
-                <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">🏇</div>
-                <h3 class="card-title">Carrera de caballos</h3>
-                <p class="card-text mb-4">
-                    Simulador de carreras de caballos, apostando por tu corcel favorito.
-                </p>
-                <a href="{{ url_for('caballos.home') }}" class="btn btn-primary btn-lg w-100">
-                    <i class="fas fa-horse me-2"></i>Iniciar carrera
-                </a>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Multijugador -->
-    <div class="col-xl-3 col-lg-4 col-md-6">
-        <div class="card animated-rotate matrix-rain">
-            <div class="card-body text-center p-4">
-                <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">👥</div>
-                <h3 class="card-title">Modo Multijugador</h3>
-                <p class="card-text mb-4">
-                    Juega con otros usuarios en tiempo real. Crea salas y desafía a amigos.
-                </p>
-                <a href="{{ url_for('salas_espera.lobby') }}" class="btn btn-primary btn-lg w-100">
-                    <i class="fas fa-users me-2"></i>Unirse
-                </a>
-            </div>
-        </div>
-    </div>
-    
     <!-- Estadísticas -->
-    <div class="col-xl-3 col-lg-4 col-md-6">
-        <div class="card animated-rotate matrix-rain">
-            <div class="card-body text-center p-4">
-                <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">📊</div>
-                <h3 class="card-title">Panel de estadísticas</h3>
-                <p class="card-text mb-4">
-                    Centro de análisis. Monitoriza tu progreso y métricas.
-                </p>
-                <a href="{{ url_for('estadisticas.home') }}" class="btn btn-outline-primary btn-lg w-100">
-                    <i class="fas fa-chart-bar me-2"></i>Ver estadísticas
-                </a>
-            </div>
+    <div class="col-12 mt-5">
+        <div class="animated-translateY">
+            <h1>Otras opciones</h1>
+            <p>Gestiona tus datos y estadísticas.</p>
         </div>
-    </div>
 
-    <!-- Perfil -->
-    <div class="col-xl-3 col-lg-4 col-md-6">
-        <div class="card animated-rotate matrix-rain">
-            <div class="card-body text-center p-4">
-                <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">👤</div>
-                <h3 class="card-title">Perfil de usuario</h3>
-                <p class="card-text mb-4">
-                    Configuración de identidad digital. Gestiona tu presencia en el sistema.
-                </p>
-                <div class="d-flex flex-column gap-3">
-                    <a href="{{ url_for('perfil.home') }}" class="btn btn-outline-primary btn-lg w-100">
-                        <i class="fas fa-user-cog me-2"></i>Configurar perfil
-                    </a>
-                    <a href="{{ url_for('logout.home') }}" class="btn btn-danger w-100">
-                        <i class="fas fa-power-off me-2"></i>Salir
-                    </a>
+        <div class="row g-4">
+            <div class="col-sm-6 col-12">
+                <div class="card animated-rotate matrix-rain">
+                    <div class="card-body text-center p-4">
+                        <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">📊</div>
+                        <h3 class="card-title">Panel de estadísticas</h3>
+                        <p class="card-text mb-4">
+                            Centro de análisis. Monitoriza tu progreso y métricas.
+                        </p>
+                        <a href="{{ url_for('estadisticas.home') }}" class="btn btn-outline-primary btn-lg w-100">
+                            <i class="fas fa-chart-bar me-2"></i>Ver estadísticas
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Perfil -->
+            <div class="col-sm-6 col-12">
+                <div class="card animated-rotate matrix-rain">
+                    <div class="card-body text-center p-4">
+                        <div class="display-1 text-gradient mb-4" style="font-size: 4rem;">👤</div>
+                        <h3 class="card-title">Perfil de usuario</h3>
+                        <p class="card-text mb-4">
+                            Configuración de identidad digital. Gestiona tu presencia en el sistema.
+                        </p>
+                        <div class="d-flex flex-column gap-3">
+                            <a href="{{ url_for('perfil.home') }}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="fas fa-user-cog me-2"></i>Configurar perfil
+                            </a>
+                            <a href="{{ url_for('logout.home') }}" class="btn btn-danger w-100">
+                                <i class="fas fa-power-off me-2"></i>Salir
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

@@ -65,46 +65,7 @@
                 <h4 class="mb-0"><i class="fas fa-list me-2"></i>Salas Disponibles</h4>
             </div>
             <div class="card-body">
-                {% if salas %}
-                <div class="row g-3" id="salas-container">
-                    {% for sala in salas %}
-                    <div class="col-12">
-                        <div class="card hover-card translucent-card">
-                            <div class="card-body">
-                                <div class="row align-items-center">
-                                    <div class="col-md-6">
-                                        <h5 class="card-title">{{ sala.nombre }}</h5>
-                                        <div class="d-flex gap-3 mt-2">
-                                            <span class="badge" style="background: var(--gradient-cyber);">
-                                                <i class="fas fa-gamepad me-1"></i>{{ sala.juego|title }}
-                                            </span>
-                                            <span class="badge" style="background: var(--gradient-matrix); color: black;">
-                                                <i class="fas fa-users me-1"></i>{{ sala.jugadores_actuales }}/{{ sala.capacidad }}
-                                            </span>
-                                            <span class="badge" style="background: var(--gradient-sunset);">
-                                                <i class="fas fa-coins me-1"></i>{{ sala.apuesta_minima }}€
-                                            </span>
-                                        </div>
-                                        <small class="text-muted">Creada por: {{ sala.owner.username }}</small>
-                                    </div>
-                                    <div class="col-md-6 text-md-end">
-                                        <a href="{{ url_for('salas_espera.sala', sala_id=sala.id) }}" class="btn btn-primary">
-                                            <i class="fas fa-door-open me-2"></i>Unirse
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <div class="text-center py-4">
-                    <i class="fas fa-door-closed fa-3x mb-3" style="color: var(--neon-cyan);"></i>
-                    <h5>No hay salas disponibles</h5>
-                    <p class="text-muted">Sé el primero en crear una sala y desafiar a otros jugadores</p>
-                </div>
-                {% endif %}
+                {% include "multijugador/lista_salas.html" %}
             </div>
         </div>
     </div>

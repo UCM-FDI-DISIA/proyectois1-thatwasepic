@@ -1,0 +1,86 @@
+{% set compact_view = compact_view or false %}
+
+{% if salas.items %}
+<div class="row g-3" id="salas-container">
+    {% for sala in salas.items %}
+    <div class="col-12">
+        <div class="card hover-card translucent-card">
+            <div class="card-body">
+                <div class="d-flex {% if not compact_view %}flex-sm-row{% endif %} flex-column gap-3 justify-content-between">
+                    <div>
+                        <div class="d-flex flex-row flex-wrap column-gap-2 align-items-end">
+                            <h5 class="card-title mb-0">{{ sala.nombre }}</h5>
+                            <small class="text-muted mb-0">Creada por: {{ sala.owner.username }}</small>
+                        </div>
+                        <div class="d-flex flex-row flex-wrap gap-2 mt-2">
+                            <span class="badge" style="background: var(--gradient-cyber);">
+                                <i class="fas fa-gamepad me-1"></i>{{ sala.juego|title }}
+                            </span>
+                            <span class="badge" style="background: var(--gradient-matrix); color: black;">
+                                <i class="fas fa-users me-1"></i>{{ sala.jugadores_actuales }}/{{ sala.capacidad }}
+                            </span>
+                            <span class="badge" style="background: var(--gradient-sunset);">
+                                <i class="fas fa-coins me-1"></i>{{ sala.apuesta_minima }}€
+                            </span>
+                        </div>
+                    </div>
+                    <div class="mx-auto">
+                        <a href="{{ url_for('salas_espera.sala', sala_id=sala.id) }}" 
+                            class="btn btn-primary">
+                            <i class="fas fa-door-open me-2"></i>Unirse
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Paginación Bootstrap -->
+{% if salas.pages > 1 %}
+<nav aria-label="Paginación de salas" class="mt-3">
+  <ul class="pagination justify-content-center mb-0">
+
+    <!-- Botón anterior -->
+    <li class="page-item {% if not salas.has_prev %}disabled{% endif %}">
+      <a class="page-link" 
+         href="?page={{ salas.prev_num if salas.has_prev else 1 }}"
+         aria-label="Anterior">
+        &laquo;
+      </a>
+    </li>
+
+    <!-- Números de página -->
+    {% for page_num in salas.iter_pages(left_edge=1, left_current=2, right_current=2, right_edge=1) %}
+      {% if page_num %}
+        <li class="page-item {% if page_num == salas.page %}active{% endif %}">
+          <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled">
+          <span class="page-link">…</span>
+        </li>
+      {% endif %}
+    {% endfor %}
+
+    <!-- Botón siguiente -->
+    <li class="page-item {% if not salas.has_next %}disabled{% endif %}">
+      <a class="page-link"
+         href="?page={{ salas.next_num if salas.has_next else salas.pages }}"
+         aria-label="Siguiente">
+        &raquo;
+      </a>
+    </li>
+
+  </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="text-center py-4">
+    <i class="fas fa-door-closed fa-3x mb-3" style="color: var(--neon-cyan);"></i>
+    <h5>No hay salas disponibles</h5>
+    <p class="text-muted">Sé el primero en crear una sala y desafiar a otros jugadores</p>
+</div>
+{% endif %}

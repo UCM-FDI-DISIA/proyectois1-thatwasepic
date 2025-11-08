@@ -18,8 +18,9 @@ JUEGOS_PERMITIDOS = {
 @login_required
 def lobby():
     """Página principal del lobby de salas de espera"""
-    salas = SalaMultijugador.query.filter_by(estado='esperando').all()
-    return render_template('salas_espera/lobby.html', salas=salas, juegos_permitidos=JUEGOS_PERMITIDOS)
+    page = request.args.get("page", 1, type=int)
+    salas_pag = SalaMultijugador.query.paginate(page=page, per_page=8)
+    return render_template('salas_espera/lobby.html', salas=salas_pag, juegos_permitidos=JUEGOS_PERMITIDOS)
 
 # CAMBIAR RUTA
 @bp.route('/salas-espera/crear-sala', methods=['POST'])
