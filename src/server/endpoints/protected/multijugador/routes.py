@@ -4,12 +4,20 @@ from models import db, SalaMultijugador, UsuarioSala
 
 bp = Blueprint('multijugador', __name__)
 
+# Lista de juegos permitidos con sus capacidades máximas
+JUEGOS_PERMITIDOS = {
+    'blackjack': {'nombre': 'Blackjack', 'max_jugadores': 4},
+    'ruleta': {'nombre': 'Ruleta', 'max_jugadores': 4},
+    'coinflip': {'nombre': 'Coinflip', 'max_jugadores': 2},
+    'carrera_caballos': {'nombre': 'Carrera de Caballos', 'max_jugadores': 4}
+}
+
 @bp.route('/multijugador')
 @login_required
 def lobby():
     """Página principal del lobby multijugador"""
     salas = SalaMultijugador.query.filter_by(estado='esperando').all()
-    return render_template('multijugador/lobby.html', salas=salas)
+    return render_template('multijugador/lobby.html', salas=salas, juegos_permitidos=JUEGOS_PERMITIDOS)
 
 @bp.route('/multijugador/crear-sala', methods=['POST'])
 @login_required
@@ -25,8 +33,15 @@ def crear_sala():
         flash('Nombre y juego son requeridos', 'error')
         return redirect(url_for('multijugador.lobby'))
     
-    if capacidad < 2 or capacidad > 8:
-        flash('La capacidad debe ser entre 2 y 8 jugadores', 'error')
+    # Validar que el juego esté permitido
+    if juego not in JUEGOS_PERMITIDOS:
+        flash('Juego no permitido', 'error')
+        return redirect(url_for('multijugador.lobby'))
+    
+    # Validar capacidad según el juego
+    max_jugadores = JUEGOS_PERMITIDOS[juego]['max_jugadores']
+    if capacidad < 2 or capacidad > max_jugadores:
+        flash(f'La capacidad para {JUEGOS_PERMITIDOS[juego]["nombre"]} debe ser entre 2 y {max_jugadores} jugadores', 'error')
         return redirect(url_for('multijugador.lobby'))
     
     # Crear sala

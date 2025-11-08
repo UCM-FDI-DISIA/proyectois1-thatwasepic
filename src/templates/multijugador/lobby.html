@@ -27,21 +27,20 @@
                     
                     <div class="mb-3">
                         <label class="form-label">Juego</label>
-                        <select class="form-select" name="juego" required>
+                        <select class="form-select" name="juego" required id="select-juego" onchange="actualizarCapacidad()">
                             <option value="">Selecciona un juego</option>
-                            <option value="blackjack">Blackjack</option>
-                            <option value="coinflip">Coinflip</option>
-                            <option value="poker">Póker</option>
+                            <option value="coinflip">Coinflip (2 jugadores)</option>
+                            <option value="caballos">Carrera de Caballos (4 jugadores)</option>
+                            <option value="blackjack">Blackjack (4 jugadores)</option>
+                            <option value="poker">Póker (4 jugadores)</option>
+                            <option value="ruleta">Ruleta (4 jugadores)</option>
                         </select>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label class="form-label">Capacidad</label>
-                        <select class="form-select" name="capacidad">
-                            <option value="2">2 Jugadores</option>
-                            <option value="4" selected>4 Jugadores</option>
-                            <option value="6">6 Jugadores</option>
-                            <option value="8">8 Jugadores</option>
+                        <select class="form-select" name="capacidad" id="select-capacidad">
+                            <!-- Se actualizará dinámicamente -->
                         </select>
                     </div>
                     
@@ -86,11 +85,10 @@
                                                 <i class="fas fa-coins me-1"></i>{{ sala.apuesta_minima }}€
                                             </span>
                                         </div>
-                                        <small class="text-muted">Creada por: {{ sala.owner.username }}</small>
+                                        <small class="text-muted">Creada por: {{ sala.propietario.username }}</small>
                                     </div>
                                     <div class="col-md-6 text-md-end">
-                                        <a href="{{ url_for('multijugador.sala', sala_id=sala.id) }}" 
-                                           class="btn btn-primary">
+                                        <a href="{{ url_for('salas_multijugador_bp.sala', sala_id=sala.id) }}" class="btn btn-primary">
                                             <i class="fas fa-door-open me-2"></i>Unirse
                                         </a>
                                     </div>
@@ -182,6 +180,50 @@ document.addEventListener('DOMContentLoaded', function() {
     // Actualizar cada 5 segundos
     setInterval(actualizarSalas, 5000);
     actualizarSalas(); // Carga inicial
+});
+</script>
+<script>
+function actualizarCapacidad() {
+    const juegoSelect = document.getElementById('select-juego');
+    const capacidadSelect = document.getElementById('select-capacidad');
+    const juego = juegoSelect.value;
+    
+    // Limpiar opciones actuales
+    capacidadSelect.innerHTML = '';
+    
+    // Definir capacidades por juego
+    let capacidades = [];
+    switch(juego) {
+        case 'coinflip':
+            capacidades = [2];
+            break;
+        case 'caballos':
+            capacidades = [4];
+            break;
+        case 'blackjack':
+        case 'poker':
+        case 'ruleta':
+            capacidades = [2, 3, 4];
+            break;
+        default:
+            capacidades = [2, 3, 4];
+    }
+    
+    // Añadir opciones
+    capacidades.forEach(cap => {
+        const option = document.createElement('option');
+        option.value = cap;
+        option.textContent = `${cap} Jugadores`;
+        if (cap === Math.max(...capacidades)) {
+            option.selected = true;
+        }
+        capacidadSelect.appendChild(option);
+    });
+}
+
+// Inicializar al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    actualizarCapacidad();
 });
 </script>
 {% endblock %}
