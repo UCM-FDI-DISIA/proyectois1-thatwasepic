@@ -24,6 +24,7 @@
                 </div>
             </div>
 
+            <!-- Resto del código se mantiene igual -->
             <!-- Lista de Jugadores -->
             <div class="card mb-4">
                 <div class="card-header">
@@ -69,7 +70,7 @@
                         </div>
                     {% endif %}
                     
-                    <form method="POST" action="{{ url_for('salas_espera.salir_sala', sala_id=sala.id) }}" class="d-inline">
+                    <form method="POST" action="{{ url_for('multijugador.salir_sala', sala_id=sala.id) }}" class="d-inline">
                         <button type="submit" class="btn btn-outline-primary">
                             <i class="fas fa-sign-out-alt me-2"></i>Salir de la Sala
                         </button>
@@ -119,21 +120,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (btnIniciar) {
                     btnIniciar.disabled = data.sala.jugadores_actuales < 2;
                     
-                    // REDIRECCIÓN AUTOMÁTICA si el juego ya está en progreso
                     if (data.sala.estado === 'jugando') {
-                        console.log('🔄 Redirigiendo automáticamente a juego en progreso');
-                        // Usar las mismas rutas que en el backend
-                        if (data.sala.juego === 'coinflip') {
-                            window.location.href = `/api/multijugador/coinflip/sala/${salaId}`;
-                        } else if (data.sala.juego === 'blackjack') {
-                            window.location.href = `/blackjack/sala/${salaId}`;
-                        } else if (data.sala.juego === 'ruleta') {
-                            window.location.href = `/ruleta/sala/${salaId}`;
-                        } else if (data.sala.juego === 'caballos') {
-                            window.location.href = `/caballos/sala/${salaId}`;
-                        } else {
-                            window.location.href = `/multijugador/partida/${data.sala.juego}/${salaId}`;
-                        }
+                        // Redirigir al juego correspondiente
+                        window.location.href = `/multijugador/partida/${data.sala.juego}/${salaId}`;
                     }
                 }
             })
@@ -152,29 +141,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnIniciar = document.getElementById('btn-iniciar');
     if (btnIniciar) {
         btnIniciar.addEventListener('click', function() {
-            console.log('🎮 Iniciando partida...');
-            socket.emit('start_game', { sala_id: salaId });
+            fetch(`/api/multijugador/iniciar-partida/${salaId}`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        socket.emit('start_game', { sala_id: salaId });
+                    } else {
+                        alert(data.error);
+                    }
+                });
         });
     }
-
-    // MANEJAR INICIO DE JUEGO VIA SOCKET - REDIRECCIÓN PARA TODOS
-    socket.on('game_started', (data) => {
-        console.log('🎮✅ Juego iniciado recibido:', data);
-        
-        // Mostrar mensaje de redirección
-        alert(`¡El juego ha comenzado! Redirigiendo a ${data.juego}...`);
-        
-        // Redirigir a todos los jugadores después de 2 segundos
-        setTimeout(() => {
-            console.log('🔄 Redirigiendo a:', data.redirect_url);
-            window.location.href = data.redirect_url;
-        }, 2000);
-    });
-
-    socket.on('game_start_failed', (data) => {
-        console.error('❌ Error al iniciar juego:', data.error);
-        alert('Error: ' + data.error);
-    });
 
     // Chat
     function enviarMensaje() {
@@ -182,7 +159,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const message = input.value.trim();
         
         if (message) {
-            console.log('📤 Enviando mensaje de chat:', message);
             socket.emit('chat_message', {
                 sala_id: salaId,
                 message: message,
@@ -192,21 +168,38 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    socket.on('new_message', (data) => {
-        agregarMensajeChat(data.username, data.message, 'user');
-    });
-
-    // Eventos de SocketIO
+    // Eventos de SocketIO - MEJORADO
     socket.on('user_joined', (data) => {
         console.log('Usuario se unió:', data);
+        // Forzar actualización inmediata del estado
         actualizarEstadoSala();
         agregarMensajeChat('Sistema', `${data.username} se unió a la sala`, 'system');
     });
 
     socket.on('user_left', (data) => {
         console.log('Usuario salió:', data);
+        // Forzar actualización inmediata del estado
         actualizarEstadoSala();
         agregarMensajeChat('Sistema', `${data.username} salió de la sala`, 'system');
+    });
+
+    socket.on('room_updated', (data) => {
+        console.log('Sala actualizada:', data);
+        // Actualizar solo el contador si es necesario
+        if (data.jugadores_actuales !== undefined) {
+            actualizarContadorJugadores(data.jugadores_actuales, data.capacidad || {{ sala.capacidad }});
+        }
+        // Actualizar estado completo si hay cambios
+        actualizarEstadoSala();
+    });
+
+    socket.on('new_message', (data) => {
+        agregarMensajeChat(data.username, data.message, 'user');
+    });
+
+    socket.on('game_started', (data) => {
+        alert('¡La partida ha comenzado!');
+        window.location.href = `/multijugador/partida/${data.juego}/${data.sala_id}`;
     });
 
     function agregarMensajeChat(usuario, mensaje, tipo) {

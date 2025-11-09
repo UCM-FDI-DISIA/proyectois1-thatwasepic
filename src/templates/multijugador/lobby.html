@@ -1,0 +1,187 @@
+{% extends "base/base_casino.html" %}
+
+{% block content %}
+<div class="simple-background"></div>
+
+<div class="text-center mb-5">
+    <h1 class="hero-title">Modo Multijugador</h1>
+    <p class="hero-subtitle mt-4">
+        Crea o únete a salas para jugar con otros usuarios en tiempo real
+    </p>
+</div>
+
+<div class="row">
+    <!-- Panel de Crear Sala -->
+    <div class="col-md-4 mb-4">
+        <div class="card hover-card">
+            <div class="card-header">
+                <h4 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Crear Sala</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('multijugador.crear_sala') }}">
+                    <div class="mb-3">
+                        <label class="form-label">Nombre de la Sala</label>
+                        <input type="text" class="form-control" name="nombre" required 
+                               placeholder="Ej: Torneo Blackjack Pro">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Juego</label>
+                        <select class="form-select" name="juego" required>
+                            <option value="">Selecciona un juego</option>
+                            <option value="blackjack">Blackjack</option>
+                            <option value="coinflip">Coinflip</option>
+                            <option value="poker">Póker</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Capacidad</label>
+                        <select class="form-select" name="capacidad">
+                            <option value="2">2 Jugadores</option>
+                            <option value="4" selected>4 Jugadores</option>
+                            <option value="6">6 Jugadores</option>
+                            <option value="8">8 Jugadores</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Apuesta Mínima</label>
+                        <input type="number" class="form-control" name="apuesta_minima" 
+                               value="10.0" min="1" step="0.5" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-gamepad me-2"></i>Crear Sala
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Salas Disponibles -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0"><i class="fas fa-list me-2"></i>Salas Disponibles</h4>
+            </div>
+            <div class="card-body">
+                {% if salas %}
+                <div class="row g-3" id="salas-container">
+                    {% for sala in salas %}
+                    <div class="col-12">
+                        <div class="card hover-card translucent-card">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-md-6">
+                                        <h5 class="card-title">{{ sala.nombre }}</h5>
+                                        <div class="d-flex gap-3 mt-2">
+                                            <span class="badge" style="background: var(--gradient-cyber);">
+                                                <i class="fas fa-gamepad me-1"></i>{{ sala.juego|title }}
+                                            </span>
+                                            <span class="badge" style="background: var(--gradient-matrix); color: black;">
+                                                <i class="fas fa-users me-1"></i>{{ sala.jugadores_actuales }}/{{ sala.capacidad }}
+                                            </span>
+                                            <span class="badge" style="background: var(--gradient-sunset);">
+                                                <i class="fas fa-coins me-1"></i>{{ sala.apuesta_minima }}€
+                                            </span>
+                                        </div>
+                                        <small class="text-muted">Creada por: {{ sala.propietario.username }}</small>
+                                    </div>
+                                    <div class="col-md-6 text-md-end">
+                                        <a href="{{ url_for('multijugador.sala', sala_id=sala.id) }}" 
+                                           class="btn btn-primary">
+                                            <i class="fas fa-door-open me-2"></i>Unirse
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-door-closed fa-3x mb-3" style="color: var(--neon-cyan);"></i>
+                    <h5>No hay salas disponibles</h5>
+                    <p class="text-muted">Sé el primero en crear una sala y desafiar a otros jugadores</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Actualización automática de salas -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const socket = io();
+    
+    function actualizarSalas() {
+        fetch('{{ url_for("api_multijugador.obtener_salas") }}')
+            .then(response => response.json())
+            .then(salas => {
+                const container = document.getElementById('salas-container');
+                if (salas.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-4">
+                            <i class="fas fa-door-closed fa-3x mb-3" style="color: var(--neon-cyan);"></i>
+                            <h5>No hay salas disponibles</h5>
+                            <p class="text-muted">Sé el primero en crear una sala</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = salas.map(sala => `
+                    <div class="col-12">
+                        <div class="card hover-card translucent-card">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-md-6">
+                                        <h5 class="card-title">${sala.nombre}</h5>
+                                        <div class="d-flex gap-3 mt-2">
+                                            <span class="badge" style="background: var(--gradient-cyber);">
+                                                <i class="fas fa-gamepad me-1"></i>${sala.juego}
+                                            </span>
+                                            <span class="badge" style="background: var(--gradient-matrix); color: black;">
+                                                <i class="fas fa-users me-1"></i>${sala.jugadores_actuales}/${sala.capacidad}
+                                            </span>
+                                            <span class="badge" style="background: var(--gradient-sunset);">
+                                                <i class="fas fa-coins me-1"></i>${sala.apuesta_minima}€
+                                            </span>
+                                        </div>
+                                        <small class="text-muted">Creada por: ${sala.creador}</small>
+                                    </div>
+                                    <div class="col-md-6 text-md-end">
+                                        <a href="/multijugador/sala/${sala.id}" class="btn btn-primary">
+                                            <i class="fas fa-door-open me-2"></i>Unirse
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            })
+            .catch(error => console.error('Error actualizando salas:', error));
+    }
+
+    // Escuchar eventos de SocketIO para actualizaciones en tiempo real
+    socket.on('user_joined', (data) => {
+        console.log('Usuario se unió:', data);
+        actualizarSalas();
+    });
+
+    socket.on('user_left', (data) => {
+        console.log('Usuario salió:', data);
+        actualizarSalas();
+    });
+
+    // Actualizar cada 5 segundos
+    setInterval(actualizarSalas, 5000);
+    actualizarSalas(); // Carga inicial
+});
+</script>
+{% endblock %}

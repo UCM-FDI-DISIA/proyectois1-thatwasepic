@@ -1,0 +1,108 @@
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
+from flask_login import login_required, current_user
+from models import db, SalaMultijugador, UsuarioSala
+
+bp = Blueprint('multijugador', __name__)
+
+@bp.route('/multijugador')
+@login_required
+def lobby():
+    """Página principal del lobby multijugador"""
+    salas = SalaMultijugador.query.filter_by(estado='esperando').all()
+    return render_template('multijugador/lobby.html', salas=salas)
+
+@bp.route('/multijugador/crear-sala', methods=['POST'])
+@login_required
+def crear_sala():
+    """Crear una nueva sala de juego"""
+    nombre = request.form.get('nombre')
+    juego = request.form.get('juego')
+    capacidad = int(request.form.get('capacidad', 4))
+    apuesta_minima = float(request.form.get('apuesta_minima', 10.0))
+    
+    # Validaciones
+    if not nombre or not juego:
+        flash('Nombre y juego son requeridos', 'error')
+        return redirect(url_for('multijugador.lobby'))
+    
+    if capacidad < 2 or capacidad > 8:
+        flash('La capacidad debe ser entre 2 y 8 jugadores', 'error')
+        return redirect(url_for('multijugador.lobby'))
+    
+    # Crear sala
+    nueva_sala = SalaMultijugador(
+        nombre=nombre,
+        juego=juego,
+        capacidad=capacidad,
+        apuesta_minima=apuesta_minima,
+        creador_id=current_user.id
+    )
+    
+    db.session.add(nueva_sala)
+    db.session.commit()
+    
+    # El creador se une automáticamente
+    usuario_sala = UsuarioSala(
+        usuario_id=current_user.id,
+        sala_id=nueva_sala.id,
+        posicion=0
+    )
+    db.session.add(usuario_sala)
+    nueva_sala.jugadores_actuales = 1
+    db.session.commit()
+    
+    flash('¡Sala creada exitosamente!', 'success')
+    return redirect(url_for('multijugador.sala', sala_id=nueva_sala.id))
+
+@bp.route('/multijugador/sala/<int:sala_id>')
+@login_required
+def sala(sala_id):
+    """Página de una sala específica"""
+    sala = SalaMultijugador.query.get_or_404(sala_id)
+    
+    # Verificar si el usuario está en la sala
+    usuario_en_sala = UsuarioSala.query.filter_by(
+        usuario_id=current_user.id, 
+        sala_id=sala_id
+    ).first()
+    
+    if not usuario_en_sala:
+        if sala.jugadores_actuales >= sala.capacidad:
+            flash('La sala está llena', 'error')
+            return redirect(url_for('multijugador.lobby'))
+        
+        # Unirse a la sala
+        usuario_sala = UsuarioSala(
+            usuario_id=current_user.id,
+            sala_id=sala_id,
+            posicion=sala.jugadores_actuales
+        )
+        db.session.add(usuario_sala)
+        sala.jugadores_actuales += 1
+        db.session.commit()
+    
+    return render_template(f'multijugador/sala_base.html', sala=sala)
+
+@bp.route('/multijugador/salir-sala/<int:sala_id>', methods=['POST'])
+@login_required
+def salir_sala(sala_id):
+    """Salir de una sala"""
+    usuario_sala = UsuarioSala.query.filter_by(
+        usuario_id=current_user.id, 
+        sala_id=sala_id
+    ).first()
+    
+    if usuario_sala:
+        sala = SalaMultijugador.query.get(sala_id)
+        sala.jugadores_actuales -= 1
+        
+        # Si no quedan jugadores, eliminar la sala
+        if sala.jugadores_actuales == 0:
+            db.session.delete(sala)
+        else:
+            db.session.delete(usuario_sala)
+        
+        db.session.commit()
+        flash('Has salido de la sala', 'info')
+    
+    return redirect(url_for('multijugador.lobby'))

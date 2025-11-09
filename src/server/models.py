@@ -53,26 +53,26 @@ class Estadistica(db.Model):
 class SalaMultijugador(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False)
-    juego = db.Column(db.String(50), nullable=False)  # 'blackjack', 'poker', 'coinflip'
+    juego = db.Column(db.String(50), nullable=False)
     capacidad = db.Column(db.Integer, default=4)
     jugadores_actuales = db.Column(db.Integer, default=0)
-    estado = db.Column(db.String(20), default='esperando')  # esperando, jugando, terminada
+    estado = db.Column(db.String(20), default='esperando')  # esperando, jugando, terminada, eliminada
     creador_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     apuesta_minima = db.Column(db.Float, default=10.0)
     fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
     
-    # Relaciones - CORREGIDO: nombres únicos
-    jugadores = db.relationship('UsuarioSala', backref='sala_juego', lazy=True, cascade='all, delete-orphan')  # Cambiado de 'sala' a 'sala_juego'
-    # 'propietario' está definido en User.salas_creadas
-    partidas = db.relationship('PartidaMultijugador', backref='partida_sala', lazy=True)  # Cambiado de 'sala' a 'partida_sala'
+    # Relaciones
+    jugadores = db.relationship('UsuarioSala', backref='sala_juego', lazy=True, cascade='all, delete-orphan')
+    partidas = db.relationship('PartidaMultijugador', backref='partida_sala', lazy=True)
 
 class UsuarioSala(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     usuario_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     sala_id = db.Column(db.Integer, db.ForeignKey('sala_multijugador.id'))
-    posicion = db.Column(db.Integer)  # Posición en la mesa
-    estado = db.Column(db.String(20), default='conectado')
+    posicion = db.Column(db.Integer)
+    estado = db.Column(db.String(20), default='conectado')  # conectado, desconectado
     fecha_union = db.Column(db.DateTime, default=datetime.utcnow)
+    ultima_conexion = db.Column(db.DateTime, default=datetime.utcnow)
     
     # 'jugador' está definido en User.salas_unidas
     # 'sala_juego' está definido en SalaMultijugador.jugadores
