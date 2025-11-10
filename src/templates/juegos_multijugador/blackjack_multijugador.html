@@ -211,6 +211,18 @@
     lastState = st;
     render(st);
     startCountdown(st);
+      socket.on('estado_blackjack', (st) => {
+    lastState = st;
+    render(st);
+    startCountdown(st);
+
+    // === Actualiza el saldo del header en tiempo real ===
+    const meId = "{{ user.id }}";
+    if (st.jugadores[meId] && typeof window.updateHeaderBalance === 'function') {
+      window.updateHeaderBalance(st.jugadores[meId].balance);
+    }
+  });
+
   });
 
   // ====== Botones ======
