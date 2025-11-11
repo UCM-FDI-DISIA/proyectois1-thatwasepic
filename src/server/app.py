@@ -1,8 +1,10 @@
-from flask import Flask
+from flask import Flask, render_template
+from flask_flatpages import FlatPages
 from flask_login import LoginManager
 from flask_socketio import SocketIO
 from models import db, User
 from endpoints import register_blueprints
+from utils.flatpage_helpers import markdown_renderer, get_headings
 
 app = Flask(__name__,
             template_folder='../templates',
@@ -10,8 +12,14 @@ app = Flask(__name__,
 
 # Configuración básica
 app.config['SECRET_KEY'] = 'clave-secreta-casino-educativo-2024'
+app.config["FLATPAGES_ROOT"] = "../flatpages"
+app.config["FLATPAGES_EXTENSION"] = ".md"
+app.config['FLATPAGES_HTML_RENDERER'] = markdown_renderer
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///casino.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Registrar el helper en el entorno Jinja
+app.jinja_env.globals["get_headings"] = get_headings
 
 # Inicializar extensiones
 db.init_app(app)
@@ -34,6 +42,19 @@ try:
     print("✅ Handlers de SocketIO registrados")
 except ImportError as e:
     print(f"⚠️  No se pudieron cargar los handlers de SocketIO: {e}")
+
+# Registrar flatpages
+pages = FlatPages(app)
+
+print("📄 FlatPages encontrados:")
+for p in pages:
+    print(" -", p.path)
+
+@app.route('/<path:path>/')
+def flatpage(path):
+    page = pages.get_or_404(path)
+    template = page.meta.get('template', 'flatpage/flatpage.html')
+    return render_template(template, page=page)
 
 # Inicializar DB
 with app.app_context():
