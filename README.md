@@ -57,23 +57,6 @@ Incluye las funcionalidades mínimas necesarias para que un usuario pueda:
 - Visualización de resultados recientes.  
 - Historial básico de depósitos y pérdidas.
 
-### 🎰 Ruleta Multijugador
-- **Juego en tiempo real** con otros jugadores usando WebSockets (Socket.IO).
-- **Apuestas secretas**: cada jugador coloca sus apuestas de forma privada (no se revelan a otros jugadores).
-- **Sincronización automática**: la ruleta gira cuando todos los jugadores han confirmado sus apuestas o después de 30 segundos.
-- **Interfaz idéntica al juego individual**: cada jugador dispone de su propio tablero con chips arrastrables.
-- **Múltiples tipos de apuestas**: pleno, caballo, calle, cuadro, línea, docena, columna, rojo/negro, par/impar, 1-18, 19-36.
-- **Chat en tiempo real**: comunicación entre jugadores durante la partida.
-- **Estadísticas en vivo**: visualización del saldo y estado de los jugadores.
-
-Para más información, consulta:
-- 📋 [RULETA_MULTIJUGADOR_RESUMEN.md](./RULETA_MULTIJUGADOR_RESUMEN.md) — Resumen arquitectónico
-- 📘 [QUICK_START_RULETA.md](./QUICK_START_RULETA.md) — Guía rápida para desarrolladores
-- 📗 [IMPLEMENTACION_RULETA_MULTIJUGADOR.md](./IMPLEMENTACION_RULETA_MULTIJUGADOR.md) — Documentación técnica
-
----
-
-
 ## 📆 Metodología de desarrollo
 
 El proyecto se ha desarrollado aplicando **métodos ágiles**, priorizando la entrega temprana de valor y la iteración constante.  
@@ -84,7 +67,7 @@ Las historias de usuario se gestionan en distribuidas en sprints con prioridades
 ## 💡 Próximos pasos
 
 Las futuras iteraciones del proyecto incluirán:
-- Más modalidades de juegos multijugador (Póker, Blackjack, Carrera de Caballos multijugador).  
+- Más modalidades de juegos multijugador (Póker, Carrera de Caballos multijugador).  
 - Sistema de recompensas y promociones con logros.  
 - Mejora del sistema de chat (emojis, reacciones, mutes).  
 - Estadísticas avanzadas de rendimiento y actividad con gráficos.  
