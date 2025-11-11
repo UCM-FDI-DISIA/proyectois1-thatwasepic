@@ -11,50 +11,57 @@
     }
     *{box-sizing:border-box} html,body{height:100%}
     body{margin:0; font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif; background: radial-gradient(900px 600px at 60% 30%, #0f1330, var(--felt-dark)); color:var(--text); display:flex; flex-direction:column; gap:10px;}
-    header{ padding:12px 16px; color:var(--cream); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap;}
-    .pill{background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15); padding:6px 10px; border-radius:999px; font-size:12px;}
+    header{ padding:12px 16px; color:var(--cream); display:flex; align-items:center; justify-content:space-between; }
+    .pill{background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15); padding:6px 10px; border-radius:999px}
     main{display:grid; gap:18px; padding:0 16px 16px; max-width:1400px; width:100%; margin:0 auto; grid-template-columns: 380px 1fr;}
     .panel{background:linear-gradient(180deg, var(--felt), var(--felt-dark)); border:2px solid rgba(255,255,255,.12); border-radius:18px; padding:14px; box-shadow:var(--shadow)}
     .wheel-wrap{display:grid; place-items:center}
     .controls{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; align-items:center; justify-content:center}
     .btn{appearance:none; border:none; padding:10px 14px; border-radius:12px; background:var(--gold); color:#1a1a1a; font-weight:700; cursor:pointer; box-shadow:var(--shadow)}
-    .btn:disabled{opacity:0.5; cursor:not-allowed;}
     .btn.secondary{background:#e5e7ff; color:#10121f}
-    .wheel-wrap svg{ width:100%; height:auto; display:block; max-width:460px; }
+  .wheel-wrap svg{ width:100%; height:auto; display:block; max-width:460px; }
+  /* Ensure SVG groups use the SVG transform box so transform-origin is accurate */
+  #ballGroup{ transform-box: fill-box; transform-origin: 50% 50%; }
     .table{display:grid; grid-template-columns: 90px repeat(12, 1fr) 140px 140px; gap:5px; padding:10px; background:var(--felt); border-radius:14px; border:1px solid rgba(255,255,255,.15)}
     .cell{position:relative; background:var(--tile); border:1px solid rgba(0,0,0,.35); color:#fafafa; text-align:center; padding:22px 8px; border-radius:10px; user-select:none; font-size:28px; font-weight:900}
     .cell.zero{grid-row: 1 / span 3; background:#1d6f3e; display:flex; align-items:center; justify-content:center}
     .cell.red{background:#9e1f24} .cell.black{background:#0b0b0b}
     .cell.preview{ outline:3px solid rgba(255,215,0,0.85); box-shadow:0 6px 18px rgba(255,215,0,0.12) }
     .outside{ background:var(--tile-outer); font-weight:800; font-size:18px }
-    .bet-badge{position:absolute; right:8px; bottom:8px; background:var(--badge-bg); color:var(--badge-fg); padding:2px 8px; border-radius:999px; font-size:13px; font-weight:900}
-    .chips{display:flex; gap:10px; flex-wrap:wrap; align-items:center; padding:10px}
     .chip{width:56px; height:56px; border-radius:50%; display:grid; place-items:center; font-weight:900; box-shadow:var(--shadow); border:6px dotted rgba(0,0,0,.25); cursor:grab; color:#000}
+  .chip.selected{outline:3px solid rgba(255,255,255,0.9); transform:translateY(-4px)}
+  .chips{display:flex; gap:10px; flex-wrap:wrap; align-items:center; padding:10px}
+  /* owner specific small badges inside a cell when multiple players bet the same spot */
+  .owner-badges{position:absolute; left:6px; top:6px; display:flex; gap:6px; flex-direction:column; align-items:flex-start; z-index:30}
+  .owner-badge{background:rgba(255,255,255,0.95); color:#111; padding:4px 6px; border-radius:8px; font-size:12px; display:flex; gap:6px; align-items:center}
+  .owner-chip{width:16px; height:16px; border-radius:50%; border:2px solid rgba(0,0,0,0.15)}
     .group{background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.15); border-radius:14px; padding:10px; margin-top:12px}
-    .log{height:150px; overflow:auto; background:#0f1535; color:#eafdf0; padding:10px; border-radius:12px; font-family:ui-monospace,Consolas,monospace; font-size:11px;}
-    .right-panel{display:flex; flex-direction:column; gap:10px;}
-    .room-info{display:flex; gap:10px; flex-wrap:wrap; margin:10px 0;}
-    .players-list{background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.15); border-radius:12px; padding:10px; max-height:150px; overflow-y:auto;}
-    .player-item{padding:6px; background:rgba(255,255,255,.03); border-radius:8px; border-left:3px solid var(--gold); margin:4px 0; font-size:12px;}
-    .player-item.ready{border-left-color:#81c784;}
-    .chat-box{display:flex; flex-direction:column; gap:6px;}
-    .chat-messages{background:#0f1535; border-radius:10px; padding:8px; max-height:120px; overflow-y:auto; font-size:11px; color:#eafdf0;}
-    .chat-msg{margin:2px 0; padding:2px 0; border-bottom:1px solid rgba(255,255,255,.08);}
-    .chat-system{color:#b3e5fc; font-style:italic;}
-    .chat-input-row{display:flex; gap:4px;}
-    .chat-input-row input{flex:1; padding:6px; border-radius:6px; border:1px solid rgba(255,255,255,.15); background:rgba(0,0,0,.3); color:var(--cream); font-size:11px;}
-    .chat-input-row button{padding:6px 12px; background:var(--gold); color:#000; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-size:10px;}
-    .countdown{font-size:18px; font-weight:900; color:var(--gold); text-align:center; padding:8px; background:rgba(0,0,0,.3); border-radius:8px; margin:10px 0;}
+    .log{height:200px; overflow:auto; background:#0f1535; color:#eafdf0; padding:10px; border-radius:12px; font-family:ui-monospace,Consolas,monospace}
+    .side-panel{display:flex; flex-direction:column; gap:10px; min-width:300px}
+    .logo-link{display:inline-block; margin-left:12px; padding:8px 16px; border-radius:999px; text-decoration:none; text-transform:uppercase; letter-spacing:.08em; font-weight:800; color:#e8ecff; border:1px solid rgba(255,255,255,.18); background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); box-shadow:0 6px 18px rgba(0,0,0,.22), inset 0 0 0 1px rgba(255,255,255,.06); backdrop-filter: blur(2px);}
+    .logo-link:hover{ border-color:rgba(255,255,255,.35); transform:translateY(-1px); }
+    .exit-btn{background:#e74c3c; color:white; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:700; font-size:12px;}
+    .exit-btn:hover{background:#c0392b;}
+    .players-list{background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.15); border-radius:10px; padding:10px; max-height:150px; overflow-y:auto; font-size:12px;}
+    .player-item{padding:6px; display:flex; align-items:center; gap:8px; border-left:3px solid var(--gold);}
+    .color-dot{width:12px; height:12px; border-radius:50%; border:2px solid rgba(255,255,255,.3);}
+    .stats-panel{background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.15); border-radius:10px; padding:10px; font-size:11px;}
+    .stat-row{display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid rgba(255,255,255,.08);}
+    .stat-row:last-child{border-bottom:none;}
+    .color-picker{display:flex; gap:6px; flex-wrap:wrap; margin:8px 0;}
+    .color-btn{width:30px; height:30px; border-radius:50%; border:2px solid transparent; cursor:pointer;}
+    .color-btn.selected{border-color:white; box-shadow:0 0 8px rgba(255,255,255,0.5);}
+    .color-btn:disabled{opacity:0.4; cursor:not-allowed;}
   </style>
 </head>
 <body data-mode="bet">
   <header>
-    <div style="font-weight:800; font-size:18px">🎯 Ruleta Multijugador</div>
-    <div class="room-info">
-      <span class="pill">Sala: <b id="room-name">—</b></span>
-      <span class="pill">Jugadores: <b id="players-count">0</b>/<span id="room-capacity">2</span></span>
-      <span class="pill">Banco: <b id="balance-user">0.00</b>€</span>
-      <span class="pill">Apuesta: <b id="betTotal">0</b>¢</span>
+    <div style="font-weight:800; font-size:18px">🎯 {{ sala.nombre }}</div>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <a href="/dashboard" class="logo-link">LOGBAIT</a>
+      <span class="pill">Banco: <b id="bank">0,00€</b></span>
+      <span class="pill">Apuesta: <b id="betTotal">0,00€</b></span>
+      <button id="exitBtn" class="exit-btn">Salir</button>
     </div>
   </header>
 
@@ -72,593 +79,947 @@
         <g id="numbers"></g>
         <circle r="110" fill="#2f7a3d"/>
         <circle r="20" fill="#1a4a25"/>
-        <circle id="ball" r="6" fill="#f3efe2" cx="0" cy="-170"/>
+        <g id="ballGroup" style="transform-origin:50% 50%;">
+          <circle id="ball" r="6" fill="#f3efe2" cx="0" cy="-170"/>
+        </g>
       </svg>
       <div class="controls">
-        <button id="spinBtn" class="btn" disabled>Girar</button>
-        <button id="clearBtn" class="btn secondary">Borrar jugada</button>
+        <button id="spinBtn" class="btn">Girar</button>
+        <button id="confirmBtn" class="btn">Confirmar apuesta</button>
         <button id="undoBtn" class="btn secondary">Deshacer</button>
-        <button id="confirmBetBtn" class="btn">Confirmar apuesta</button>
+        <button id="clearBtn" class="btn secondary">Borrar</button>
+        <button id="dupBtn" class="btn">Doblar jugada</button>
+        <button id="repeatBtn" class="btn">Última jugada</button>
       </div>
-      <div class="countdown" id="countdown-display" style="display:none;">
-        Tiempo: <span id="countdown-timer">30</span>s
+      <div style="text-align:center; margin-top:8px;"><span class="pill">Tiempo: <b id="spinTimer">—</b></span></div>
+    </section>
+
+    <section class="panel">
+      <div class="chips" id="chips">
+        <div class="chip" draggable="true" data-value="20">0,20€</div>
+        <div class="chip" draggable="true" data-value="50">0,50€</div>
+        <div class="chip" draggable="true" data-value="100">1€</div>
+        <div class="chip" draggable="true" data-value="200">2€</div>
+        <div class="chip" draggable="true" data-value="500">5€</div>
+        <div class="chip" draggable="true" data-value="1000">10€</div>
+      </div>
+
+      <div style="display:flex; gap:8px; margin:8px 0;">
+        <button class="btn" id="voisinsBtn">Vecinos 0</button>
+        <button class="btn" id="tiersBtn">Tiers</button>
+        <button class="btn" id="orphBtn">Huérfanos</button>
+      </div>
+
+      <div class="table" id="layout"></div>
+
+      <div class="group">
+        <h3 style="margin:6px 6px 10px;">Apuestas exteriores</h3>
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:6px;">
+          <button class="btn" data-out="red">Rojo</button>
+          <button class="btn" data-out="black">Negro</button>
+          <button class="btn" data-out="even">Par</button>
+          <button class="btn" data-out="odd">Impar</button>
+          <button class="btn" data-out="low">1–18</button>
+          <button class="btn" data-out="high">19–36</button>
+        </div>
+      </div>
+
+      <div class="log" id="log"></div>
+      <div style="margin-top:8px; display:flex; gap:6px; align-items:center;">
+        <input id="chat-input" type="text" placeholder="Escribe un mensaje..." style="flex:1; padding:8px; border-radius:8px; border:1px solid rgba(255,255,255,.08); background:rgba(0,0,0,.2); color:var(--text)">
+        <button id="chat-send" class="btn">Enviar</button>
       </div>
     </section>
 
-    <div class="right-panel">
+    <div class="side-panel">
+      <!-- Removed separate 'Mi Color' panel. Colors are shown in the Jugadores list. -->
+
       <section class="panel">
-        <div class="chips" id="chips">
-          <div class="chip" draggable="true" data-value="20">0,20€</div>
-          <div class="chip" draggable="true" data-value="50">0,50€</div>
-          <div class="chip" draggable="true" data-value="100">1€</div>
-          <div class="chip" draggable="true" data-value="200">2€</div>
-          <div class="chip" draggable="true" data-value="500">5€</div>
-          <div class="chip" draggable="true" data-value="1000">10€</div>
-        </div>
-
-        <div class="bets-buttons" style="margin:8px 0 4px;">
-          <button class="btn" id="voisinsBtn">Vecinos 0</button>
-          <button class="btn" id="tiersBtn">Tiers</button>
-          <button class="btn" id="orphBtn">Huérfanos</button>
-        </div>
-
-        <div class="table" id="layout"></div>
-
-        <div class="group">
-          <h3 style="margin:6px 6px 10px;">Apuestas exteriores</h3>
-          <div class="bets-buttons">
-            <button class="btn" data-out="red">Rojo</button>
-            <button class="btn" data-out="black">Negro</button>
-            <button class="btn" data-out="even">Par</button>
-            <button class="btn" data-out="odd">Impar</button>
-            <button class="btn" data-out="low">1–18</button>
-            <button class="btn" data-out="high">19–36</button>
-            <button class="btn" data-out="d1">1ª Docena</button>
-            <button class="btn" data-out="d2">2ª Docena</button>
-            <button class="btn" data-out="d3">3ª Docena</button>
-            <button class="btn" data-out="c1">Columna 1</button>
-            <button class="btn" data-out="c2">Columna 2</button>
-            <button class="btn" data-out="c3">Columna 3</button>
-          </div>
-        </div>
-
-        <div class="log" id="log"></div>
+        <h3 style="margin:0 0 10px;">👥 Jugadores</h3>
+        <div class="players-list" id="playersList"></div>
       </section>
 
-      <section class="panel">
-        <h3 style="margin:0 0 10px;">Jugadores</h3>
-        <div class="players-list" id="players-list"></div>
-      </section>
-
-      <section class="panel">
-        <h3 style="margin:0 0 8px;">Chat</h3>
-        <div class="chat-box">
-          <div class="chat-messages" id="chat-messages"></div>
-          <div class="chat-input-row">
-            <input type="text" id="chat-input" placeholder="Mensaje..." />
-            <button id="chat-send">Enviar</button>
-          </div>
+      <section class="panel stats-panel">
+        <h3 style="margin:0 0 8px; font-size:13px;">📊 Mis Estadísticas</h3>
+        <div class="stat-row"><span>Ganado:</span><span id="wonTotal" style="color:#81c784;">0€</span></div>
+        <div class="stat-row"><span>Perdido:</span><span id="lostTotal" style="color:#ff6b6b;">0€</span></div>
+        <div class="stat-row"><span>Neto:</span><span id="netTotal">0€</span></div>
+        <div style="margin-top:8px">
+          <h4 style="margin:6px 0 6px; font-size:12px">Apuestas recientes</h4>
+          <div id="recentBets" style="max-height:140px; overflow:auto; font-size:12px"></div>
         </div>
       </section>
     </div>
   </main>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+  <footer>
+    <small style="opacity:.8;padding:10px 16px;display:block">Ruleta Multijugador | Mínimo: 0,20€</small>
+  </footer>
 
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 <script>
-/* ================== CONFIG ================== */
 const EURO_SEQ = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
 const REDS = new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
 const ALL = Array.from({length:36},(_,i)=>i+1);
 const PAYOUT = { straight:35, split:17, street:11, corner:8, line:5, dozen:2, column:2, even:1 };
-const CHIP_COLORS=new Map([[20,'#ffd54f'],[50,'#4fc3f7'],[100,'#81c784'],[200,'#ba68c8'],[500,'#ff8a65'],[1000,'#e57373']]);
+// Colores más diferenciados para jugadores
+const PLAYER_COLORS = [
+  "#FF3B30", // rojo intenso
+  "#007AFF", // azul fuerte
+  "#34C759", // verde brillante
+  "#FF9500", // naranja
+  "#AF52DE", // violeta
+  "#FFD60A", // amarillo fuerte
+  "#5AC8FA", // celeste
+  "#FF2D55"  // rosa fuerte
+];
+const CHIP_COLORS = new Map([[20,"#ffd54f"],[50,"#4fc3f7"],[100,"#81c784"],[200,"#ba68c8"],[500,"#ff8a65"],[1000,"#e57373"]]);
 
-/* ================== STATE ================== */
-const salaId = {{ sala.id|tojson }};
-const userId = {{ current_user.id|tojson }};
-let myBalance = {{ current_user.balance|tojson|int }} * 100; // convertir a centavos
+// mapeo de nombres legibles para colores conocidos (hex -> nombre corto)
+const COLOR_NAME_MAP = {
+  '#FF3B30': 'Rojo', '#007AFF': 'Azul', '#34C759': 'Verde', '#FF9500': 'Naranja', '#AF52DE': 'Violeta', '#FFD60A': 'Amarillo', '#5AC8FA': 'Celeste', '#FF2D55': 'Rosa',
+  '#FF6B6B': 'Rojo', '#4ECDC4': 'Turquesa', '#FFE66D': 'Amarillo', '#95E1D3': 'Menta', '#F38181': 'Salmon', '#A8EDEA': 'Lila'
+};
 
-let bets = []; 
+const bankEl = document.getElementById("bank");
+const betTotalEl = document.getElementById("betTotal");
+const logEl = document.getElementById("log");
+
+function centsToEuro(c){ return (c/100).toLocaleString('es-ES',{style:'currency',currency:'EUR'}); }
+
+let bank = parseInt("{{ user.balance * 100 }}") || 0;
+let bets = [];
 let history = [];
 let lastBets = [];
+let remoteBets = []; // bets received from other players (real-time visualizations)
 let spinning = false;
-let countdownInterval = null;
-let countdownRemaining = 30;
-let serverSpinning = false;
+let myUserId = parseInt("{{ user.id }}");
+let myColor = null;
+let myUsername = "{{ user.username }}";
+let colorMap = {};
+let usedColors = new Set();
+let stats = { won: 0, lost: 0 };
+let salaId = parseInt("{{ sala.id }}");
+let recentBets = []; // {usuario_id, username, labels, amount_cents, resolved:false, payout_euros?, win_euros?}
 
-const socket = io();
-
-/* ================== LOG & FORMAT ================== */
-function centsToEuro(c){ return (c/100).toLocaleString('es-ES',{style:'currency',currency:'EUR'}); }
-function log(t){ const p=document.createElement('div'); p.innerHTML=t; document.getElementById('log').prepend(p); }
-function pickChipColor(v){ if(CHIP_COLORS.has(v)) return CHIP_COLORS.get(v); if(v<50)return'#ffd54f'; if(v<100)return'#4fc3f7'; if(v<200)return'#81c784'; if(v<500)return'#ba68c8'; if(v<1000)return'#ff8a65'; return'#e57373';}
-
-/* ================== SVG RUEDA ================== */
 function initWheel(){
-  const gNums=document.getElementById('numbers');
-  EURO_SEQ.forEach((n,idx)=>{
-    const a0=(2*Math.PI/EURO_SEQ.length)*idx-Math.PI/2;
-    const a1=(2*Math.PI/EURO_SEQ.length)*(idx+1)-Math.PI/2;
-    const R_OUT=190;
-    const x0=R_OUT*Math.cos(a0), y0=R_OUT*Math.sin(a0);
-    const x1=R_OUT*Math.cos(a1), y1=R_OUT*Math.sin(a1);
-    const p=document.createElementNS('http://www.w3.org/2000/svg','path');
-    p.setAttribute('d',`M ${x0.toFixed(2)} ${y0.toFixed(2)} A ${R_OUT} ${R_OUT} 0 0 1 ${x1.toFixed(2)} ${y1.toFixed(2)} L ${(R_OUT-40)*Math.cos(a1).toFixed(2)} ${(R_OUT-40)*Math.sin(a1).toFixed(2)} A ${R_OUT-40} ${R_OUT-40} 0 0 0 ${(R_OUT-40)*Math.cos(a0).toFixed(2)} ${(R_OUT-40)*Math.sin(a0).toFixed(2)} Z`);
-    p.setAttribute('fill', n===0?'#0a9a4a':(REDS.has(n)?'#b72025':'#111')); 
-    p.setAttribute('stroke','#222'); 
-    p.setAttribute('stroke-width','1'); 
+  const gNums = document.getElementById('numbers');
+  const ball = document.getElementById('ball');
+  const R_OUT = 190, R_TEXT = 165;
+  EURO_SEQ.forEach((n, idx) => {
+    const a0 = (2 * Math.PI / EURO_SEQ.length) * idx - Math.PI/2;
+    const a1 = (2 * Math.PI / EURO_SEQ.length) * (idx + 1) - Math.PI/2;
+    const x0 = R_OUT * Math.cos(a0), y0 = R_OUT * Math.sin(a0);
+    const x1 = R_OUT * Math.cos(a1), y1 = R_OUT * Math.sin(a1);
+    const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    p.setAttribute('d', `M ${x0.toFixed(2)} ${y0.toFixed(2)} A ${R_OUT} ${R_OUT} 0 0 1 ${x1.toFixed(2)} ${y1.toFixed(2)} L ${(R_OUT-40)*Math.cos(a1).toFixed(2)} ${(R_OUT-40)*Math.sin(a1).toFixed(2)} A ${R_OUT-40} ${R_OUT-40} 0 0 0 ${(R_OUT-40)*Math.cos(a0).toFixed(2)} ${(R_OUT-40)*Math.sin(a0).toFixed(2)} Z`);
+    p.setAttribute('fill', n===0 ? '#0a9a4a' : (REDS.has(n) ? '#b72025' : '#111'));
+    p.setAttribute('stroke', '#222'); p.setAttribute('stroke-width', '1');
     gNums.appendChild(p);
-    const label=document.createElementNS('http://www.w3.org/2000/svg','text');
-    const ang=(a0+a1)/2;
-    const R_TEXT=165;
-    label.setAttribute('x',(R_TEXT*Math.cos(ang)).toFixed(2)); 
-    label.setAttribute('y',(R_TEXT*Math.sin(ang)).toFixed(2));
-    label.setAttribute('fill','#fff'); 
-    label.setAttribute('font-size','14'); 
-    label.setAttribute('text-anchor','middle'); 
-    label.setAttribute('dominant-baseline','middle'); 
-    label.textContent=String(n); 
+
+    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    const ang = (a0 + a1) / 2;
+    label.setAttribute('x', (R_TEXT * Math.cos(ang)).toFixed(2));
+    label.setAttribute('y', (R_TEXT * Math.sin(ang)).toFixed(2));
+    label.setAttribute('fill', '#fff');
+    label.setAttribute('font-size', '14');
+    label.setAttribute('text-anchor', 'middle');
+    label.setAttribute('dominant-baseline', 'middle');
+    label.textContent = String(n);
     gNums.appendChild(label);
   });
 }
 
-/* ================== TABLERO ================== */
-const indexToCell={};
+const indexToCell = {};
 function initTable(){
-  const layout=document.getElementById('layout');
-  const zero = cell('0','zero'); 
-  zero.style.gridRow='1 / span 3'; 
-  zero.style.gridColumn='1 / 2'; 
+  const layout = document.getElementById("layout");
+  const zero = cell("0", "zero");
+  zero.style.gridRow = "1 / span 3";
+  zero.style.gridColumn = "1 / 2";
   layout.appendChild(zero);
   indexToCell[0] = zero;
-  
-  for(let r=0;r<3;r++){
-    for(let c=0;c<12;c++){
-      const n=3*c+(3-r);
-      const col=REDS.has(n)?'red':'black';
-      const d=cell(String(n),col);
-      d.dataset.kind='straight';
-      d.dataset.cover=JSON.stringify([n]);
-      d.dataset.label=`${n}`;
-      d.dataset.number=String(n);
+
+  for(let r=0; r<3; r++){
+    for(let c=0; c<12; c++){
+      const n = 3*c + (3-r);
+      const col = REDS.has(n) ? "red" : "black";
+      const d = cell(String(n), col);
+      d.dataset.kind = "straight";
+      d.dataset.cover = JSON.stringify([n]);
+      d.dataset.label = String(n);
+      d.dataset.number = String(n);
       layout.appendChild(d);
-      indexToCell[n]=d;
+      indexToCell[n] = d;
     }
   }
 
-  const d1=outsideCell('1ª Docena','dozen',ALL.filter(n=>n<=12));
-  const d2=outsideCell('2ª Docena','dozen',ALL.filter(n=>n>=13&&n<=24));
-  const d3=outsideCell('3ª Docena','dozen',ALL.filter(n=>n>=25));
-  d1.style.gridColumn='14 / 15'; d2.style.gridColumn='15 / 16'; d3.style.gridColumn='16 / 17';
-  d1.style.gridRow=d2.style.gridRow=d3.style.gridRow='1 / span 3';
+  const d1 = outsideCell("1ª Docena", "dozen", ALL.filter(n=>n<=12));
+  const d2 = outsideCell("2ª Docena", "dozen", ALL.filter(n=>n>=13&&n<=24));
+  const d3 = outsideCell("3ª Docena", "dozen", ALL.filter(n=>n>=25));
+  d1.style.gridColumn="14 / 15"; d2.style.gridColumn="15 / 16"; d3.style.gridColumn="16 / 17";
+  d1.style.gridRow=d2.style.gridRow=d3.style.gridRow="1 / span 3";
   layout.appendChild(d1); layout.appendChild(d2); layout.appendChild(d3);
 
-  const c1=outsideCell('Columna 1','column',ALL.filter(n=>n%3===1));
-  const c2=outsideCell('Columna 2','column',ALL.filter(n=>n%3===2));
-  const c3=outsideCell('Columna 3','column',ALL.filter(n=>n%3===0));
-  c1.style.gridColumn='2 / 14'; c1.style.gridRow='4 / 5';
-  c2.style.gridColumn='2 / 14'; c2.style.gridRow='5 / 6';
-  c3.style.gridColumn='2 / 14'; c3.style.gridRow='6 / 7';
+  const c1 = outsideCell("Columna 1", "column", ALL.filter(n=>n%3===1));
+  const c2 = outsideCell("Columna 2", "column", ALL.filter(n=>n%3===2));
+  const c3 = outsideCell("Columna 3", "column", ALL.filter(n=>n%3===0));
+  c1.style.gridColumn="2 / 14"; c1.style.gridRow="4 / 5";
+  c2.style.gridColumn="2 / 14"; c2.style.gridRow="5 / 6";
+  c3.style.gridColumn="2 / 14"; c3.style.gridRow="6 / 7";
   layout.appendChild(c1); layout.appendChild(c2); layout.appendChild(c3);
 
-  const simpleRow=document.createElement('div');
-  simpleRow.style.gridColumn='14 / 17'; simpleRow.style.gridRow='4 / 7';
-  simpleRow.style.display='grid'; simpleRow.style.gridTemplateColumns='repeat(2, 1fr)'; simpleRow.style.gap='6px';
-  ['Rojo','Negro','Par','Impar','1–18','19–36'].forEach(lbl=>{
+  const simpleRow = document.createElement("div");
+  simpleRow.style.gridColumn="14 / 17"; simpleRow.style.gridRow="4 / 7";
+  simpleRow.style.display="grid"; simpleRow.style.gridTemplateColumns="repeat(2, 1fr)"; simpleRow.style.gap="6px";
+  ["Rojo","Negro","Par","Impar","1–18","19–36"].forEach(lbl=>{
     const map = {
-      'Rojo':{kind:'even', set:ALL.filter(n=>REDS.has(n))},
-      'Negro':{kind:'even', set:ALL.filter(n=>!REDS.has(n)&&n!==0)},
-      'Par':{kind:'even', set:ALL.filter(n=>n%2===0&&n!==0)},
-      'Impar':{kind:'even', set:ALL.filter(n=>n%2===1)},
-      '1–18':{kind:'even', set:ALL.filter(n=>n>=1&&n<=18)},
-      '19–36':{kind:'even', set:ALL.filter(n=>n>=19)}
+      "Rojo":{kind:"even", set:ALL.filter(n=>REDS.has(n))},
+      "Negro":{kind:"even", set:ALL.filter(n=>!REDS.has(n)&&n!==0)},
+      "Par":{kind:"even", set:ALL.filter(n=>n%2===0&&n!==0)},
+      "Impar":{kind:"even", set:ALL.filter(n=>n%2===1)},
+      "1–18":{kind:"even", set:ALL.filter(n=>n>=1&&n<=18)},
+      "19–36":{kind:"even", set:ALL.filter(n=>n>=19)}
     };
-    const v=map[lbl];
-    const el=outsideCell(lbl,v.kind,v.set); 
-    el.style.minHeight='48px'; 
+    const v = map[lbl];
+    const el = outsideCell(lbl, v.kind, v.set);
+    el.style.minHeight = "48px";
     simpleRow.appendChild(el);
   });
   layout.appendChild(simpleRow);
 }
 
-function cell(text, extra=''){ 
-  const d=document.createElement('div'); 
-  d.className=`cell ${extra}`.trim(); 
-  d.textContent=text; 
-  enableDrop(d); 
-  return d; 
+function cell(text, extra=""){
+  const d = document.createElement("div");
+  d.className = `cell ${extra}`.trim();
+  d.textContent = text;
+  enableDrop(d);
+  return d;
 }
 
-function outsideCell(text, kind, set){ 
-  const d=cell(text,'outside'); 
-  d.dataset.kind=kind; 
-  d.dataset.cover=JSON.stringify(set); 
-  d.dataset.label=text; 
-  return d; 
+function outsideCell(text, kind, set){
+  const d = cell(text, "outside");
+  d.dataset.kind = kind;
+  d.dataset.cover = JSON.stringify(set);
+  d.dataset.label = text;
+  // register in outsideMap for quick lookup when anchoring bets
+  try{ outsideMap.set(text, d); }catch(e){}
+  return d;
 }
-
-/* ================== DRAG & DROP ================== */
-let droppedSomewhere = false;
 
 function enableDrop(el){
-  el.ondragover=(e)=>{
+  el.ondragover = (e) => {
     e.preventDefault();
     try{
-      const rect=el.getBoundingClientRect();
-      const x=(e.clientX-rect.left)/rect.width; 
-      const y=(e.clientY-rect.top)/rect.height;
-      const num=Number(el.dataset.number||'0');
-      const target = computeTargetFromPosition(num,x,y);
+      const rect = el.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
+      const num = Number(el.dataset.number || "0");
+      const target = computeTargetFromPosition(num, x, y);
       clearPreview();
       if(target) highlightPreview(target);
     }catch(err){}
   };
-  el.ondragleave = (e)=>{ clearPreview(); };
-  el.ondrop=(e)=>{
-    e.preventDefault(); 
-    droppedSomewhere=true;
-    const kind=el.dataset.kind||'straight';
-    const chipVal=e.dataTransfer.getData('chip');
-    if(kind!=='straight'){
-      const set=new Set(JSON.parse(el.dataset.cover||'[]'));
-      const target={type:kind,set,label:el.dataset.label||el.textContent};
-      if(chipVal){ placeBet(target, Number(chipVal)); }
+  el.ondragleave = () => clearPreview();
+  el.ondrop = (e) => {
+    e.preventDefault();
+    const kind = el.dataset.kind || "straight";
+    const chipVal = e.dataTransfer.getData("chip");
+    if(!chipVal) return;
+    const value = Number(chipVal);
+
+    if(kind !== "straight"){
+      const set = new Set(JSON.parse(el.dataset.cover || "[]"));
+      placeBet({type: kind, set, label: el.dataset.label}, value);
       return;
     }
-    const rect=el.getBoundingClientRect();
-    const x=(e.clientX-rect.left)/rect.width;
-    const y=(e.clientY-rect.top)/rect.height;
-    const num=Number(el.dataset.number||'0');
-    const target = computeTargetFromPosition(num,x,y); 
+
+    const rect = el.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    const num = Number(el.dataset.number || "0");
+    const target = computeTargetFromPosition(num, x, y);
     if(!target) return;
-    if(chipVal){ placeBet(target, Number(chipVal)); }
+    placeBet(target, value);
   };
 }
 
-function getRC(n){ const c=Math.ceil(n/3)-1; const r=3-((n-1)%3)-1; return {r,c}; }
-function numAt(r,c){ if(r<0||r>2||c<0||c>11) return null; return 3*c + (3-r); }
-
-function computeTargetFromPosition(n,x,y){
-  const {r,c}=getRC(n);
+function computeTargetFromPosition(n, x, y){
+  const c = Math.ceil(n/3) - 1;
+  const r = 3 - ((n-1)%3) - 1;
   const centerMin = 0.25, centerMax = 0.75;
   const cornerThreshold = 0.18;
 
   if(x >= centerMin && x <= centerMax && y >= centerMin && y <= centerMax){
-    return {type:'straight', set:new Set([n]), label:String(n)};
+    return {type:"straight", set:new Set([n]), label:String(n)};
   }
 
-  const nearLeftCorner = x < cornerThreshold, nearRightCorner = x > 1 - cornerThreshold;
-  const nearTopCorner = y < cornerThreshold, nearBottomCorner = y > 1 - cornerThreshold;
-  if(nearLeftCorner && nearTopCorner){ const a=n,b=numAt(r,c-1),c2=numAt(r-1,c),d=numAt(r-1,c-1); if(b&&c2&&d) return {type:'corner', set:new Set([a,b,c2,d]), label:`${a}-${b}-${c2}-${d}`}; }
-  if(nearRightCorner && nearTopCorner){ const a=n,b=numAt(r,c+1),c2=numAt(r-1,c),d=numAt(r-1,c+1); if(b&&c2&&d) return {type:'corner', set:new Set([a,b,c2,d]), label:`${a}-${b}-${c2}-${d}`}; }
-  if(nearLeftCorner && nearBottomCorner){ const a=n,b=numAt(r,c-1),c2=numAt(r+1,c),d=numAt(r+1,c-1); if(b&&c2&&d) return {type:'corner', set:new Set([a,b,c2,d]), label:`${a}-${b}-${c2}-${d}`}; }
-  if(nearRightCorner && nearBottomCorner){ const a=n,b=numAt(r,c+1),c2=numAt(r+1,c),d=numAt(r+1,c+1); if(b&&c2&&d) return {type:'corner', set:new Set([a,b,c2,d]), label:`${a}-${b}-${c2}-${d}`}; }
+  const nearLeft = x < cornerThreshold, nearRight = x > 1-cornerThreshold;
+  const nearTop = y < cornerThreshold, nearBottom = y > 1-cornerThreshold;
 
-  const centerBandX = x >= centerMin && x <= centerMax;
-  const centerBandY = y >= centerMin && y <= centerMax;
-  if(x < centerMin && centerBandY){ const b = numAt(r, c-1); if(b) return {type:'split', set:new Set([n,b]), label:`${n}-${b}`}; }
-  if(x > centerMax && centerBandY){ const b = numAt(r, c+1); if(b) return {type:'split', set:new Set([n,b]), label:`${n}-${b}`}; }
-  if(y < centerMin && centerBandX){ const b = numAt(r-1, c); if(b) return {type:'split', set:new Set([n,b]), label:`${n}-${b}`}; }
-  if(y > centerMax && centerBandX){ const b = numAt(r+1, c); if(b) return {type:'split', set:new Set([n,b]), label:`${n}-${b}`}; }
+  const getN = (r2, c2) => { if(r2<0||r2>2||c2<0||c2>11) return null; return 3*c2 + (3-r2); };
 
-  if(centerBandX && y < centerMin){ const a=numAt(0,c), b=numAt(1,c), d=numAt(2,c); if(a&&b&&d) return {type:'street', set:new Set([a,b,d]), label:`${a}-${b}-${d}`}; }
-  if(centerBandX && y > centerMax){ const a=numAt(0,c), b=numAt(1,c), d=numAt(2,c); if(a&&b&&d) return {type:'street', set:new Set([a,b,d]), label:`${a}-${b}-${d}`}; }
+  if(nearLeft && nearTop){ const b=getN(r,c-1), d=getN(r-1,c-1), c2=getN(r-1,c); if(b&&d&&c2) return {type:"corner", set:new Set([n,b,c2,d]), label:`${n}-${b}-${c2}-${d}`}; }
+  if(nearRight && nearTop){ const b=getN(r,c+1), d=getN(r-1,c+1), c2=getN(r-1,c); if(b&&d&&c2) return {type:"corner", set:new Set([n,b,c2,d]), label:`${n}-${b}-${c2}-${d}`}; }
+  if(nearLeft && nearBottom){ const b=getN(r,c-1), d=getN(r+1,c-1), c2=getN(r+1,c); if(b&&d&&c2) return {type:"corner", set:new Set([n,b,c2,d]), label:`${n}-${b}-${c2}-${d}`}; }
+  if(nearRight && nearBottom){ const b=getN(r,c+1), d=getN(r+1,c+1), c2=getN(r+1,c); if(b&&d&&c2) return {type:"corner", set:new Set([n,b,c2,d]), label:`${n}-${b}-${c2}-${d}`}; }
 
-  return {type:'straight', set:new Set([n]), label:String(n)};
+  const centerX = x >= centerMin && x <= centerMax;
+  const centerY = y >= centerMin && y <= centerMax;
+  if(x < centerMin && centerY){ const b=getN(r,c-1); if(b) return {type:"split", set:new Set([n,b]), label:`${n}-${b}`}; }
+  if(x > centerMax && centerY){ const b=getN(r,c+1); if(b) return {type:"split", set:new Set([n,b]), label:`${n}-${b}`}; }
+  if(y < centerMin && centerX){ const b=getN(r-1,c); if(b) return {type:"split", set:new Set([n,b]), label:`${n}-${b}`}; }
+  if(y > centerMax && centerX){ const b=getN(r+1,c); if(b) return {type:"split", set:new Set([n,b]), label:`${n}-${b}`}; }
+
+  if(centerX && y < centerMin){ const a=getN(0,c), b=getN(1,c), d=getN(2,c); if(a&&b&&d) return {type:"street", set:new Set([a,b,d]), label:`${a}-${b}-${d}`}; }
+  if(centerX && y > centerMax){ const a=getN(0,c), b=getN(1,c), d=getN(2,c); if(a&&b&&d) return {type:"street", set:new Set([a,b,d]), label:`${a}-${b}-${d}`}; }
+
+  return {type:"straight", set:new Set([n]), label:String(n)};
 }
 
-function clearPreview(){ 
-  document.querySelectorAll('.cell.preview').forEach(el=>el.classList.remove('preview')); 
+function clearPreview(){ document.querySelectorAll(".cell.preview").forEach(el=>el.classList.remove("preview")); }
+function highlightPreview(target){
+  [...target.set].forEach(n => {
+    const el = indexToCell[n];
+    if(el) el.classList.add("preview");
+  });
 }
 
-function highlightPreview(target){ 
-  try{
-    const nums = [...target.set]; 
-    nums.forEach(n=>{ const el = indexToCell[n]; if(el) el.classList.add('preview'); });
-  }catch(e){}
+function setupChips(){
+  document.querySelectorAll(".chip").forEach(ch => {
+    const v = +ch.dataset.value || 0;
+    ch.style.background = CHIP_COLORS.has(v) ? CHIP_COLORS.get(v) : "#ffd54f";
+    ch.style.color = "#000";
+    ch.ondragstart = (e) => {
+      e.dataTransfer.effectAllowed = "copy";
+      e.dataTransfer.setData("chip", ch.dataset.value);
+    };
+    // allow clicking a chip to select it for quick bets (buttons)
+    ch.onclick = () => {
+      document.querySelectorAll('.chip').forEach(x=>x.classList.remove('selected'));
+      ch.classList.add('selected');
+      selectedChipValue = +ch.dataset.value || 0;
+    };
+  });
 }
 
-/* ================== BETS ================== */
-function placeBet(target, chipValue){
-  const bet = {
-    type: target.type,
-    set: [...target.set],
-    label: target.label,
-    amount: chipValue
+// selected chip for button-based bets (in cents). Default 1€
+let selectedChipValue = 100;
+function currentChipValue(){ return selectedChipValue || 100; }
+
+// Maintain a mapping for outside cells (dozens/columns/external bets)
+const outsideMap = new Map();
+
+function placeBet(target, amount, silent=false){
+  amount = Number(amount || 0);
+  if(amount<=0) return;
+  if(amount<20){ log('Apuesta mínima por casilla: 0,20€'); return; }
+  if(bank<amount){ log('Fondos insuficientes'); return; }
+
+  // Si no ha elegido color, no dejar apostar
+  // color is assigned by server; don't block bets if it's not yet available
+
+  bank -= amount;
+  const key=(s)=>[...s].sort((a,b)=>a-b).join('-');
+  const k=key(target.set);
+  const idx=bets.findIndex(b=> b.type===target.type && key(b.set)===k);
+  if(idx>=0){
+    bets[idx].amount += amount;
+    bets[idx].maxChip = Math.max(bets[idx].maxChip||0, amount);
+    (bets[idx].chips||=[]).push({amount: amount, color: myColor, usuario_id: myUserId});
+  } else {
+    bets.push({type:target.type, set:new Set(target.set), amount, label:target.label, maxChip:amount, chips:[{amount: amount, color: myColor, usuario_id: myUserId}], color:myColor, usuario_id: myUserId});
+  }
+  history.push({type:'bet', payload:{...target, amount}});
+  showVisuals(); updateTotals();
+  if(!silent) log(`Apuestas ${centsToEuro(amount)} a ${target.label}`);
+  // Emitir apuesta en tiempo real a otros jugadores
+  socket.emit("ruleta_bet_placed", { 
+    sala_id: salaId, 
+    usuario_id: myUserId,
+    target: {...target, set: [...target.set]}, 
+    amount: amount,
+    color: myColor
+  });
+}
+
+function cloneBets(arr){ return arr.map(b=>({type:b.type,set:new Set(b.set),amount:b.amount,label:b.label,maxChip:b.maxChip,chips:[...(b.chips||[])], usuario_id: b.usuario_id || myUserId, color: b.color})); }
+
+function transferChip(fromBet, target, amount){
+  // support chips stored as objects {amount,color,usuario_id} or raw numbers
+  const chipsArr = fromBet.chips || [];
+  const amounts = chipsArr.map(c => (typeof c === 'object' && c.amount !== undefined) ? c.amount : c);
+  const idx = amounts.lastIndexOf(amount);
+  if(idx<0) return;
+  fromBet.chips.splice(idx,1); fromBet.amount -= amount;
+  if(fromBet.amount<=0){ const i=bets.indexOf(fromBet); if(i>=0) bets.splice(i,1); }
+  else { const vals = fromBet.chips.map(c => (typeof c === 'object' && c.amount !== undefined) ? c.amount : c); fromBet.maxChip = vals.length ? Math.max(...vals) : 0; }
+
+  const key=(s)=>[...s].sort((a,b)=>a-b).join('-'); const k=key(target.set);
+  const j=bets.findIndex(b=> b.type===target.type && key(b.set)===k);
+  if(j>=0){ bets[j].amount += amount; (bets[j].chips||=[]).push({amount: amount, color: myColor, usuario_id: myUserId}); const vals = bets[j].chips.map(c => (typeof c === 'object' && c.amount !== undefined) ? c.amount : c); bets[j].maxChip = vals.length ? Math.max(...vals) : 0; }
+  else { bets.push({type:target.type,set:new Set(target.set),amount:amount,label:target.label,maxChip:amount,chips:[{amount: amount, color: myColor, usuario_id: myUserId}]}); }
+  showVisuals(); updateTotals();
+}
+
+function ensureBadge(el){
+  if(!el) return {badge:null,dot:null,stack:null};
+  let badge=el.querySelector('.bet-badge'); if(!badge){ badge=document.createElement('div'); badge.className='bet-badge'; el.appendChild(badge);} 
+  let dot=el.querySelector('.color-dot'); if(!dot){ dot=document.createElement('div'); dot.className='color-dot'; el.appendChild(dot);} 
+  let stack=el.querySelector('.stack'); if(!stack){ stack=document.createElement('div'); stack.className='stack'; el.appendChild(stack);} 
+  return {badge,dot,stack};
+}
+function renderStack(container, chips, key){
+  container.innerHTML='';
+  const maxShow=6; const show=chips.slice(-maxShow); const baseOffset=3;
+  show.forEach((v,i)=>{
+    const c=document.createElement('div'); c.className='mini-chip';
+    // support chip entries that may include owner color: {amount: 100, color: '#ff0'} or raw numeric values
+    const amount = (typeof v === 'object' && v.amount !== undefined) ? v.amount : v;
+    const ownerColor = (typeof v === 'object' && v.color) ? v.color : null;
+    c.style.background = ownerColor || pickChipColor(amount);
+    c.style.transform=`translate(${-i*baseOffset}px, ${-i*baseOffset}px)`;
+    c.draggable=true; c.dataset.move = JSON.stringify({key, amount:v});
+    c.addEventListener('dragstart', (e)=>{ e.dataTransfer.setData('chip_move', c.dataset.move); e.dataTransfer.effectAllowed='move'; });
+    container.appendChild(c);
+  });
+  if(chips.length>maxShow){
+    const more=document.createElement('div'); more.className='mini-chip';
+    more.style.background='#fff'; more.style.transform=`translate(${-maxShow*baseOffset}px, ${-maxShow*baseOffset}px)`; more.style.fontSize='9px';
+    more.textContent='+'+(chips.length-maxShow); container.appendChild(more);
+  }
+}
+function anchorElForBet(b){
+  if(b.type==='straight'&&b.set.size===1){ return indexToCell[[...b.set][0]]; }
+  if(b.type==='dozen'||b.type==='column'||b.type==='even'){ return outsideMap.get(b.label); }
+  const nums=[...b.set].sort((a,b)=>a-b);
+  return indexToCell[nums[0]];
+}
+function showVisuals(){
+  // remove previous visual markers
+  document.querySelectorAll('.bet-badge,.color-dot,.stack,.owner-badges').forEach(n=>n.remove());
+
+  // Map each anchor element to an entry containing per-owner breakdown
+  const agg = new Map(); // elKey -> {el, owners: { ownerId: {amount, color, chips:[]}, ...} }
+
+  const pushChipToEntry = (el, ownerId, ownerColor, amount, username) => {
+    if(!el) return;
+    const elKey = el.__ruleta_key || (el.__ruleta_key = Math.random().toString(36).slice(2));
+    let entry = agg.get(elKey);
+    if(!entry){ entry = { el, owners: {} }; agg.set(elKey, entry); }
+    const o = entry.owners[ownerId] || { amount: 0, color: ownerColor || '#888', chips: [], username: username || '' };
+    o.amount += (amount || 0);
+    o.chips.push({ amount: amount || 0, color: ownerColor || '#888', usuario_id: ownerId });
+    entry.owners[ownerId] = o;
   };
-  bets.push(bet);
-  history.push({bets: JSON.parse(JSON.stringify(bets))});
-  updateBetsDisplay();
-  clearPreview();
-}
 
-function updateBetsDisplay(){
-  let total = 0;
-  bets.forEach(b => total += b.amount);
-  document.getElementById('betTotal').textContent = total;
-  bets.forEach(bet => {
-    const nums = bet.set;
-    nums.forEach(n => {
-      const el = indexToCell[n];
-      if (el) {
-        let badge = el.querySelector('.bet-badge');
-        if (!badge) {
-          badge = document.createElement('div');
-          badge.className = 'bet-badge';
-          el.appendChild(badge);
-        }
-        badge.textContent = (bet.amount / 100).toFixed(2) + '€';
-      }
+  // process local bets (bets array). Each bet may contain chips as objects
+  bets.forEach(b => {
+    const el = anchorElForBet(b);
+    const ownerId = b.usuario_id || myUserId;
+    const ownerColor = b.color || myColor || '#888';
+    const chipsArr = (b.chips && b.chips.length) ? b.chips : [{ amount: b.amount || 0 }];
+    chipsArr.forEach(ch => {
+      const amt = (typeof ch === 'object' && ch.amount !== undefined) ? ch.amount : ch;
+      const ccol = (typeof ch === 'object' && ch.color) ? ch.color : ownerColor;
+      pushChipToEntry(el, ownerId, ccol, amt, myUsername);
     });
   });
+
+  // process remote bets
+  remoteBets.forEach(rb => {
+    const b = { type: rb.target.type, set: new Set(rb.target.set || []), label: rb.target.label };
+    const el = anchorElForBet(b);
+    pushChipToEntry(el, rb.usuario_id, rb.color || '#888', rb.amount || 0, rb.username || '');
+  });
+
+  // render per-anchor per-owner badges
+  agg.forEach(({el, owners}) => {
+    const {badge,dot,stack} = ensureBadge(el);
+    // owner badges container
+    let ownersWrap = el.querySelector('.owner-badges');
+    if(ownersWrap) ownersWrap.remove();
+    ownersWrap = document.createElement('div'); ownersWrap.className = 'owner-badges'; el.appendChild(ownersWrap);
+
+    Object.keys(owners).forEach(oid => {
+      const info = owners[oid];
+      const ob = document.createElement('div'); ob.className = 'owner-badge';
+      const chipDot = document.createElement('div'); chipDot.className = 'owner-chip'; chipDot.style.background = info.color || '#888';
+      const amt = document.createElement('div'); amt.className = 'owner-amount'; amt.textContent = centsToEuro(info.amount || 0);
+      ob.appendChild(chipDot); ob.appendChild(amt);
+      ownersWrap.appendChild(ob);
+    });
+
+    // update dot color to first owner's color for quick visual
+    const firstColor = Object.keys(owners).length ? owners[Object.keys(owners)[0]].color : null;
+    if(dot) dot.style.background = firstColor || '#888';
+
+    // create combined stack for chips (preserve renderStack usage) by flattening chips
+    if(stack){
+      const combined = [];
+      Object.keys(owners).forEach(oid => { owners[oid].chips.forEach(c => combined.push({ amount: c.amount, color: c.color })); });
+      renderStack(stack, combined, el.__ruleta_key);
+    }
+  });
 }
 
-/* ================== SOCKET EVENTS ================== */
-socket.on('connect', () => {
-  console.log('✅ Socket conectado');
-  socket.emit('join_ruleta_room', { sala_id: salaId });
+function totalStake(){ return bets.reduce((a,b)=>a+(b.amount||0),0); }
+function updateTotals(){ betTotalEl.textContent = centsToEuro(totalStake()); bankEl.textContent = centsToEuro(bank); }
+function clearBets(){ const refund=totalStake(); bank+=refund; bets=[]; updateTotals(); showVisuals(); log(`Borras jugada (${centsToEuro(refund)})`); history.push({type:'clear',amount:refund});
+  // notify other players so they clear visual remote bets (if they were mirroring)
+  try{ socket.emit('ruleta_clear_bets', { sala_id: salaId, usuario_id: myUserId }); }catch(e){}
+}
+
+// Reinicia el tablero tras concluir una tirada: BORRA las apuestas locales y remotas
+// pero NO devuelve el dinero (las ganancias/pérdidas ya se aplican desde el servidor)
+function resetAfterSpin(){
+  bets = [];
+  remoteBets = [];
+  // mantener lastBets si lo deseamos
+  updateTotals();
+  showVisuals();
+}
+
+function undoBet(){ const prev = history.pop(); if(!prev) return; if(prev.type==='bet'){ const {type,set,label,amount} = prev.payload; const key=(s)=>[...s].sort((a,b)=>a-b).join('-'); const k=key(set); const idx=bets.findIndex(b=> b.type===type && key(b.set)===k); if(idx>=0){ bets[idx].amount -= amount; if(bets[idx].chips){ const i=bets[idx].chips.lastIndexOf(amount); if(i>=0) bets[idx].chips.splice(i,1);} if(bets[idx].amount<=0) bets.splice(idx,1);} bank += amount; showVisuals(); updateTotals(); log(`Deshaces ${centsToEuro(amount)} en ${label}`);} else if(prev.type==='clear'){ const amt = Math.min(bank, prev.amount); bank -= amt; updateTotals(); log('Deshacer borrar (no exacto)'); } }
+
+document.getElementById('clearBtn').addEventListener('click', clearBets);
+
+// Duplicate and repeat logic
+function duplicateBets(){
+  const need=totalStake(); if(need===0) return log('Nada que duplicar');
+  if(bank<need) return log('Fondos insuficientes para doblar');
+  // snapshot original bets to emit the additional placed chips to other clients
+  const original = cloneBets(bets);
+  bets.forEach(b=>{ bank -= b.amount; b.chips = [...(b.chips||[]), ...(b.chips||[])]; b.amount = (b.amount||0)*2; b.maxChip = Math.max(b.maxChip||0, ...(b.chips||[])); });
+  updateTotals(); showVisuals(); log('🔁 Apuesta doblada');
+  // emit ruleta_bet_placed for each original bet so other clients see the added chips
+  original.forEach(b => {
+    socket.emit('ruleta_bet_placed', { sala_id: salaId, usuario_id: myUserId, username: myUsername, target: { type: b.type, set: Array.from(b.set||[]), label: b.label }, amount: b.amount || 0, color: myColor });
+  });
+}
+
+function repeatLast(){
+  if(!lastBets || lastBets.length===0) return log('No hay última jugada');
+  const total = lastBets.reduce((s,b)=>s + (b.amount||0),0);
+  if(bank < total) return log('Fondos insuficientes para repetir');
+  bets = cloneBets(lastBets); bank -= total; updateTotals(); showVisuals(); log('🔁 Última jugada repetida');
+  // notify other players visually about these chips
+  lastBets.forEach(b => {
+    socket.emit('ruleta_bet_placed', { sala_id: salaId, usuario_id: myUserId, username: myUsername, target: { type: b.type, set: Array.from(b.set||[]), label: b.label }, amount: b.amount || 0, color: myColor });
+  });
+}
+
+document.getElementById('dupBtn').addEventListener('click', duplicateBets);
+document.getElementById('repeatBtn').addEventListener('click', repeatLast);
+
+function setupColorPicker(){
+  const picker = document.getElementById("colorPicker");
+  PLAYER_COLORS.forEach((color, idx) => {
+    const btn = document.createElement("button");
+    btn.className = "color-btn";
+    btn.style.background = color;
+    btn.dataset.color = color;
+    // disable manual picking — colors are server-assigned
+    btn.onclick = () => { log('El color es asignado automáticamente por la sala'); };
+    btn.disabled = true;
+    picker.appendChild(btn);
+  });
+}
+
+function selectColor(color, btn){
+  if(usedColors.has(color) && myColor !== color){
+    log("❌ Color ya en uso");
+    return;
+  }
+  myColor = color;
+  colorMap[myUserId] = color;
+  
+  // Actualizar color de todas las apuestas locales
+  bets.forEach(b => b.color = color);
+  showVisuals();
+  
+  document.querySelectorAll(".color-btn").forEach(b => b.classList.remove("selected"));
+  btn.classList.add("selected");
+  // update readonly display if present
+  const sw = document.getElementById('myColorSwatch');
+  const nameEl = document.getElementById('myColorName');
+  if(sw) sw.style.background = color;
+  if(nameEl) nameEl.textContent = COLOR_NAME_MAP[color] || color;
+  socket.emit("cambiar_color", { sala_id: salaId, color: color });
+}
+
+function log(html){ const p=document.createElement("div"); p.innerHTML=html; logEl.prepend(p); }
+
+// Connect using default namespace so server-side handlers (registered globally) receive events
+const socket = io({ reconnection: true });
+
+socket.on("connect", () => {
+  log("✅ Conectado");
+  socket.emit("join_ruleta_room", { sala_id: salaId });
 });
 
-socket.on('estado_sala_actualizado', (data) => {
-  if (!data || data.sala_id !== salaId) return;
-  document.getElementById('room-name').textContent = data.room_name || 'Sala';
-  document.getElementById('players-count').textContent = data.jugadores ? data.jugadores.length : 0;
-  document.getElementById('room-capacity').textContent = data.capacity || 2;
-  
+socket.on("estado_sala_actualizado", (data) => {
+  if(!data) return;
   updatePlayersList(data.jugadores || []);
-  
-  if (data.apuestas_count > 0 && !countdownInterval) {
-    startCountdown();
+});
+
+socket.on("players_colors_update", (data) => {
+  if(!data) return;
+  usedColors.clear();
+  (data.colors || []).forEach(item => {
+    colorMap[item.usuario_id] = item.color;
+    usedColors.add(item.color);
+  });
+  updateColorPickerState();
+  // server assigns colors: pick mine from the map and lock the picker
+  if(colorMap[myUserId]){
+    myColor = colorMap[myUserId];
+    // update readonly swatch and name
+    const sw = document.getElementById('myColorSwatch');
+    const nameEl = document.getElementById('myColorName');
+    if(sw) sw.style.background = myColor;
+    if(nameEl) nameEl.textContent = COLOR_NAME_MAP[myColor] || myColor;
+    // apply color to local bets and refresh visuals
+    bets.forEach(b => b.color = myColor);
+    showVisuals();
   }
+  updatePlayersList(data.jugadores || []);
 });
 
-socket.on('apuesta_recibida', (data) => {
-  if (!data || data.sala_id !== salaId) return;
-  log(`<span style="color:#b3e5fc;font-style:italic;">✅ Apuesta recibida y guardada de forma privada</span>`);
+socket.on("ruleta_bet_placed", (data) => {
+  if(!data) return;
+  if(data.usuario_id === myUserId) return; // No procesar si es mi propia apuesta
+  // Guardar la apuesta remota para visualización
+  const amount = parseInt(data.amount) || 0;
+  remoteBets.push({ usuario_id: data.usuario_id, username: data.username, target: data.target, amount: amount, color: data.color });
+  // Mostrar apuesta del otro jugador en el log con nombre, números y cantidad
+  const color = data.color || "#888";
+  const label = data.target ? data.target.label : "?";
+  log(`<span style="color:${color};font-weight:bold;">👤 ${data.username}: ${centsToEuro(amount)} a ${label}</span>`);
+  showVisuals();
 });
 
-socket.on('spin_ack', (data) => {
-  if (!data) return;
-  if (data.spun === false) {
-    log(`<span style="color:#ff9800;">⏳ Esperando: ${data.players_ready}/${data.players_needed}</span>`);
-    document.getElementById('spinBtn').disabled = false;
+// When another player clears their local visual bets
+socket.on('ruleta_clear_bets', (data) => {
+  if(!data) return;
+  try{
+    const uid = data.usuario_id;
+    if(!uid) return;
+    // remove remote bets for that user
+    remoteBets = remoteBets.filter(rb => rb.usuario_id !== uid);
+    showVisuals();
+    log(`<small style="opacity:.8">Usuario ${uid} ha borrado sus apuestas (visual)</small>`);
+  }catch(e){ console.error('Error handling ruleta_clear_bets', e); }
+});
+
+socket.on("apuesta_recibida", (data) => {
+  if(!data) return;
+  const isMe = data.user_id === myUserId;
+  const color = colorMap[data.user_id] || "#888";
+  // Si el servidor envía resumen, mostrar números y total (solo para otros, para evitar duplicar logs)
+  if(!isMe){
+    if(data.summary){
+      const labels = (data.summary.labels || []).join(', ');
+      log(`<span style="color:${color};font-weight:bold;">✅ ${data.username} confirmó: ${labels} — ${centsToEuro(data.summary.amount_cents || 0)}</span>`);
+    } else {
+      log(`<span style="color:${color};font-weight:bold;">✅ ${data.username} confirmó apuesta</span>`);
+    }
   }
+
+  // add or update recent bets list (try to correlate with an existing local entry)
+  try{
+    const labels = (data.summary && data.summary.labels) ? data.summary.labels : [];
+    const amount_cents = data.summary ? data.summary.amount_cents : 0;
+    // try to find an unresolved recent bet from the same user with same amount and labels
+    let found = recentBets.find(r => r.usuario_id === data.user_id && !r.resolved && r.amount_cents === amount_cents && JSON.stringify(r.labels||[]) === JSON.stringify(labels));
+    if(found){
+      // attach bet_id if provided
+      if(data.bet_id) found.bet_id = data.bet_id;
+      // refresh username in case
+      found.username = data.username;
+    } else {
+      // push new entry
+      recentBets.unshift({ usuario_id: data.user_id, username: data.username, labels: labels, amount_cents: amount_cents, resolved: false, bet_id: data.bet_id || null });
+      if(recentBets.length>20) recentBets.pop();
+    }
+    updateRecentBetsUI();
+  }catch(e){ console.error('apuesta_recibida updateRecentBets error', e); }
 });
 
-socket.on('ruleta_girada', (data) => {
-  console.log('🎰 Ruleta girada:', data);
-  stopCountdown();
-  clearBets();
+socket.on("ruleta_girada", (data) => {
+  if(!data) return;
   spinning = false;
-  document.getElementById('spinBtn').disabled = false;
-  
-  if (data && data.result !== undefined) {
-    animateSpin(data.result);
-    log(`<span style="color:#81c784;font-weight:bold;">🎲 Resultado: ${data.result}</span>`);
-    
-    if (data.results && Array.isArray(data.results)) {
-      const my = data.results.find(r => r.usuario_id == userId);
-      if (my) {
-        myBalance = Math.round(my.nuevo_balance * 100);
-        document.getElementById('balance-user').textContent = (my.nuevo_balance).toFixed(2);
-        const winMsg = my.win_euros > 0 ? `✅ ¡Ganancia: ${my.win_euros.toFixed(2)}€!` : `❌ Pérdida: ${Math.abs(my.win_euros).toFixed(2)}€`;
-        log(`<span style="color:#b3e5fc;">${winMsg}</span>`);
-      }
-      data.results.forEach(r => {
-        if (r.usuario_id !== userId) {
-          log(`<span style="color:#90caf9;">${r.username || r.usuario_id}: ${(r.payout_euros).toFixed(2)}€ payout</span>`);
+  document.getElementById("spinBtn").disabled = false;
+  if(data.result !== undefined){
+    // animate spin (returns a promise)
+    try{
+      spinAnimTo(data.result).then(()=>{
+        // After animation completes, show result & per-player summaries
+        log(`🎲 Resultado: <b>${data.result}</b>`);
+        const tEl = document.getElementById('spinTimer'); if(tEl) tEl.textContent = '—';
+
+        // Mostrar las ganancias/pérdidas por jugador en el log (y actualizar mi balance local si aparece)
+        if(data.results && Array.isArray(data.results)){
+          data.results.forEach(r => {
+            const name = r.username || (`Usuario ${r.usuario_id}`);
+            const bet_total = Number(r.bet_total_euros || 0);
+            const payout = Number(r.payout_euros || 0);
+            const lost = Math.max(0, bet_total - payout);
+            const newbal = r.nuevo_balance;
+            const color = colorMap[r.usuario_id] || '#888';
+            const colorLabel = COLOR_NAME_MAP[color] || color;
+            const initial = (colorLabel && colorLabel[0]) ? colorLabel[0].toUpperCase() : '';
+            const badge = `<span style="display:inline-flex;align-items:center;gap:8px;margin-right:6px"><span style="width:18px;height:18px;border-radius:50%;background:${color};display:inline-flex;align-items:center;justify-content:center;color:#000;font-weight:700;font-size:12px">${initial}</span></span>`;
+            if(payout > bet_total){
+              const netWin = payout - bet_total;
+              log(`${badge}<span style=\"color:#81c784;font-weight:bold;\">${name} ganó ${netWin.toFixed(2)}€ (recibió ${payout.toFixed(2)}€)</span>`);
+            } else if(payout === bet_total){
+              log(`${badge}<span style=\"color:#e0b14a;\">${name} empató/recibió ${payout.toFixed(2)}€</span>`);
+            } else {
+              log(`${badge}<span style=\"color:#ff6b6b;\">${name} perdió ${lost.toFixed(2)}€ (apostó ${bet_total.toFixed(2)}€)</span>`);
+            }
+            if(r.usuario_id == myUserId && newbal !== undefined && newbal !== null){
+              // servidor devuelve balance en euros float
+              bank = Math.round(Number(newbal) * 100);
+              bankEl.textContent = centsToEuro(bank);
+            }
+          });
+          // actualizar estadísticas locales del cliente: sumar win/lost según payload
+          const my = data.results.find(r => r.usuario_id == myUserId);
+          if(my){
+            const bet_total = Number(my.bet_total_euros || 0);
+            const payout = Number(my.payout_euros || 0);
+            const lost = Math.max(0, bet_total - payout);
+            const netWin = Math.max(0, payout - bet_total);
+            if(netWin > 0) stats.won += netWin;
+            if(lost > 0) stats.lost += lost;
+            updateStats();
+          }
+
         }
-      });
-    }
+
+        // Reiniciar visuales (no devolver fondos, el servidor ya actualizó balances)
+        resetAfterSpin();
+      }).catch(e=>{ console.error('spinAnimTo error', e); resetAfterSpin(); });
+    }catch(e){ console.error(e); }
   }
 });
 
+// Mostrar cuenta regresiva para el giro
+socket.on('spin_countdown', (data) => {
+  try{
+    const el = document.getElementById('spinTimer');
+    if(!el) return;
+    if(!data || data.seconds_remaining === undefined){ el.textContent = '—'; return; }
+    const s = parseInt(data.seconds_remaining);
+    if(s > 0) el.textContent = `${s}s`;
+    else el.textContent = 'Girando...';
+  }catch(e){ console.error('spin_countdown handler error', e); }
+});
+
+// Mostrar mensajes de chat entrantes
 socket.on('new_ruleta_message', (data) => {
-  if (!data) return;
-  addChatMessage(data.username || data.user_id, data.message, 'user');
+  if(!data) return;
+  const ts = data.timestamp ? new Date(data.timestamp).toLocaleTimeString() : '';
+  log(`<small style="color:var(--badge-fg)">[${ts}]</small> <b>${data.username}</b>: ${data.message}`);
 });
 
-/* ================== COUNTDOWN ================== */
-function startCountdown(){
-  if (countdownInterval) return;
-  countdownRemaining = 30;
-  document.getElementById('countdown-display').style.display = 'block';
-  updateCountdownDisplay();
-  
-  countdownInterval = setInterval(() => {
-    countdownRemaining--;
-    if (countdownRemaining < 0) countdownRemaining = 0;
-    updateCountdownDisplay();
-    
-    if (countdownRemaining === 0) {
-      clearInterval(countdownInterval);
-      countdownInterval = null;
-      log(`<span style="color:#ff6b6b;font-weight:bold;">⏰ 30s alcanzados - Giro automático</span>`);
-      socket.emit('ruleta_spin', { sala_id: salaId });
-    }
-  }, 1000);
-}
-
-function stopCountdown(){
-  if (countdownInterval) {
-    clearInterval(countdownInterval);
-    countdownInterval = null;
-  }
-  document.getElementById('countdown-display').style.display = 'none';
-}
-
-function updateCountdownDisplay(){
-  document.getElementById('countdown-timer').textContent = countdownRemaining;
-}
-
-/* ================== ANIMATIONS ================== */
-function animateSpin(result){
-  const wheel = document.getElementById('wheel');
-  const ball = document.getElementById('ball');
-  const idx = EURO_SEQ.indexOf(result);
-  const angle = (360 / EURO_SEQ.length) * idx;
-  wheel.style.transition = 'none';
-  wheel.style.transform = 'rotate(0deg)';
-  
-  setTimeout(() => {
-    wheel.style.transition = 'transform 4s cubic-bezier(0.25, 0.1, 0.25, 1)';
-    wheel.style.transform = `rotate(${-angle - 1800}deg)`;
-  }, 50);
-}
-
-/* ================== UI HANDLERS ================== */
-document.getElementById('clearBtn').addEventListener('click', () => {
-  clearBets();
-});
-
-document.getElementById('undoBtn').addEventListener('click', () => {
-  if (history.length > 0) {
-    history.pop();
-    bets = history.length > 0 ? JSON.parse(JSON.stringify(history[history.length - 1].bets)) : [];
-    updateBetsDisplay();
-  }
-});
-
-document.getElementById('confirmBetBtn').addEventListener('click', () => {
-  if (bets.length === 0) {
-    alert('Coloca al menos una apuesta');
-    return;
-  }
-  const totalBet = bets.reduce((sum, b) => sum + b.amount, 0);
-  if (totalBet > myBalance) {
-    alert('Saldo insuficiente');
-    return;
-  }
-  
-  myBalance -= totalBet;
-  document.getElementById('balance-user').textContent = (myBalance / 100).toFixed(2);
-  
-  const betSnapshot = bets.map(b => ({
-    type: b.type,
-    set: b.set,
-    label: b.label,
-    amount: b.amount
-  }));
-  
-  socket.emit('ruleta_place_bet', { 
-    sala_id: salaId, 
-    bets: betSnapshot
-  });
-  
-  log(`<span style="color:#ffd54f;font-weight:bold;">💰 Apuesta de ${(totalBet / 100).toFixed(2)}€ enviada (privada)</span>`);
-  lastBets = JSON.parse(JSON.stringify(bets));
-  clearBets();
-  
-  document.getElementById('spinBtn').disabled = false;
-  startCountdown();
-});
-
-document.getElementById('spinBtn').addEventListener('click', () => {
-  if (bets.length > 0) {
-    alert('Confirma tu apuesta primero');
-    return;
-  }
-  spinning = true;
-  document.getElementById('spinBtn').disabled = true;
-  log(`<span style="color:#ffd54f;">🎯 Presionaste Girar...</span>`);
-  socket.emit('ruleta_spin', { sala_id: salaId });
-});
-
-document.getElementById('voisinsBtn').addEventListener('click', () => {
-  const neighbours = [26, 0, 32, 15, 19];
-  neighbours.forEach(n => placeBet({type: 'straight', set: [n], label: String(n)}, 200));
-});
-
-document.getElementById('tiersBtn').addEventListener('click', () => {
-  const tiers = [27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33];
-  tiers.forEach((n, i) => {
-    if (i % 2 === 0 && i + 1 < tiers.length) {
-      placeBet({type: 'split', set: [tiers[i], tiers[i+1]], label: `${tiers[i]}-${tiers[i+1]}`}, 100);
-    }
-  });
-});
-
-document.getElementById('orphBtn').addEventListener('click', () => {
-  const orphans = [6, 34, 17, 1, 20, 14, 31, 9];
-  orphans.forEach((n, i) => {
-    if (i % 2 === 0 && i + 1 < orphans.length) {
-      placeBet({type: 'split', set: [orphans[i], orphans[i+1]], label: `${orphans[i]}-${orphans[i+1]}`}, 100);
-    }
-  });
-});
-
-document.querySelectorAll('.bets-buttons button[data-out]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const out = btn.dataset.out;
-    const maps = {
-      'red': {type: 'even', set: ALL.filter(n => REDS.has(n)), label: 'Rojo'},
-      'black': {type: 'even', set: ALL.filter(n => !REDS.has(n) && n !== 0), label: 'Negro'},
-      'even': {type: 'even', set: ALL.filter(n => n % 2 === 0), label: 'Par'},
-      'odd': {type: 'even', set: ALL.filter(n => n % 2 === 1), label: 'Impar'},
-      'low': {type: 'even', set: ALL.filter(n => n >= 1 && n <= 18), label: '1–18'},
-      'high': {type: 'even', set: ALL.filter(n => n >= 19), label: '19–36'},
-      'd1': {type: 'dozen', set: ALL.filter(n => n <= 12), label: '1ª Docena'},
-      'd2': {type: 'dozen', set: ALL.filter(n => n >= 13 && n <= 24), label: '2ª Docena'},
-      'd3': {type: 'dozen', set: ALL.filter(n => n >= 25), label: '3ª Docena'},
-      'c1': {type: 'column', set: ALL.filter(n => n % 3 === 1), label: 'Columna 1'},
-      'c2': {type: 'column', set: ALL.filter(n => n % 3 === 2), label: 'Columna 2'},
-      'c3': {type: 'column', set: ALL.filter(n => n % 3 === 0), label: 'Columna 3'}
-    };
-    const target = maps[out];
-    if (target) placeBet(target, 100);
-  });
-});
-
-/* ================== CHAT ================== */
-function addChatMessage(user, msg, type='user'){
-  const container = document.getElementById('chat-messages');
-  const div = document.createElement('div');
-  div.className = `chat-msg ${type === 'system' ? 'chat-system' : ''}`;
-  div.innerHTML = `<strong>${user}:</strong> ${msg}`;
-  container.appendChild(div);
-  container.scrollTop = container.scrollHeight;
-}
-
-document.getElementById('chat-send').addEventListener('click', () => {
-  const input = document.getElementById('chat-input');
-  const msg = input.value.trim();
-  if (!msg) return;
-  socket.emit('ruleta_chat', { sala_id: salaId, message: msg });
-  addChatMessage('Tú', msg, 'user');
-  input.value = '';
-});
-
-document.getElementById('chat-input').addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') document.getElementById('chat-send').click();
-});
-
-/* ================== PLAYERS LIST ================== */
 function updatePlayersList(players){
-  const list = document.getElementById('players-list');
-  list.innerHTML = '';
+  const list = document.getElementById("playersList");
+  list.innerHTML = "";
   players.forEach(p => {
-    const div = document.createElement('div');
-    div.className = `player-item ${p.ready ? 'ready' : ''}`;
-    div.innerHTML = `<strong>${p.username}</strong> ${p.ready ? '✅ Ready' : '⏳ Waiting'}`;
+    const div = document.createElement("div");
+    div.className = "player-item";
+    const uid = (p.usuario_id !== undefined) ? p.usuario_id : (p.id !== undefined ? p.id : p.user_id);
+    const color = colorMap[uid] || "#888";
+    const colorName = COLOR_NAME_MAP[color] || color;
+    div.innerHTML = `<div class="color-dot" style="background:${color};"></div><span>${p.username}</span><small style="margin-left:auto; opacity:.85">${colorName}</small>`;
     list.appendChild(div);
   });
 }
 
-/* ================== HELPERS ================== */
-function clearBets(){
-  bets = [];
-  document.querySelectorAll('.bet-badge').forEach(b => b.remove());
-  document.getElementById('betTotal').textContent = '0';
+function updateColorPickerState(){
+  // Disable manual picking entirely; instead visually mark assigned color
+  document.querySelectorAll(".color-btn").forEach(btn => {
+    const color = btn.dataset.color;
+    btn.disabled = true;
+    btn.classList.remove('selected');
+    if(myColor && color === myColor) btn.classList.add('selected');
+  });
 }
 
-/* ================== INIT ================== */
-document.addEventListener('DOMContentLoaded', () => {
+function updateStats(){
+  document.getElementById("wonTotal").textContent = stats.won.toFixed(2) + "€";
+  document.getElementById("lostTotal").textContent = stats.lost.toFixed(2) + "€";
+  const net = stats.won - stats.lost;
+  document.getElementById("netTotal").textContent = (net >= 0 ? "+" : "") + net.toFixed(2) + "€";
+}
+
+function updateRecentBetsUI(){
+  const container = document.getElementById('recentBets');
+  if(!container) return;
+  container.innerHTML = '';
+  recentBets.forEach(r => {
+    const row = document.createElement('div');
+    row.className = 'd-flex align-items-center mb-1';
+    const color = colorMap[r.usuario_id] || '#888';
+    const colorDot = `<span style="width:12px;height:12px;border-radius:50%;display:inline-block;margin-right:8px;background:${color}"></span>`;
+    const labels = (r.labels || []).join(', ');
+    const amount = centsToEuro(r.amount_cents || 0);
+    const resolved = r.resolved ? `<small class="text-success ms-2">resuelto</small>` : `<small class="text-muted ms-2"></small>`;
+    row.innerHTML = `${colorDot}<strong style="margin-right:8px">${r.username}</strong><span style="opacity:.9">${labels}</span><span style="margin-left:12px;font-weight:600">${amount}</span> ${resolved}`;
+    container.appendChild(row);
+  });
+}
+
+// spinAnimTo: animate the wheel and the ball orbit so the ball lands on the pocket
+function spinAnimTo(resultIdx){
+  return new Promise(resolve => {
+    const gNums = document.getElementById('numbers');
+    const ball = document.getElementById('ball');
+    const start = performance.now();
+
+    // get current wheel rotation (degrees) if any
+    let baseWheel = 0;
+    try{
+      const cur = gNums.getAttribute('transform') || '';
+      const m = cur.match(/rotate\((-?\d+(?:\.\d+)?)\)/);
+      if(m && m[1]) baseWheel = parseFloat(m[1]); else baseWheel = Math.random()*360;
+    }catch(e){ baseWheel = Math.random()*360; }
+
+    const per = 360 / EURO_SEQ.length;
+    const desiredFinal = -((resultIdx + 0.5) * per);
+
+    const fullTurns = 5;
+    const baseNorm = ((baseWheel % 360) + 360) % 360;
+    const delta = ((desiredFinal - baseNorm) % 360 + 360) % 360;
+    const spinWheel = 360 * fullTurns + delta;
+
+    const spinBall = 3000 + Math.random()*1200;
+    const duration = 5200 + Math.random()*1000;
+
+    function easeOutQuint(t){ return 1 - Math.pow(1-t,5); }
+
+    function frame(now){
+      const t = Math.min(1, (now - start) / duration);
+      const wheelAngle = baseWheel + easeOutQuint(t) * spinWheel;
+      gNums.setAttribute('transform', `rotate(${wheelAngle})`);
+      const wobble = (1-t) * 6 * Math.sin(now/80) + (1-t) * 3 * Math.sin(now/43);
+      const ballAngle = -(easeOutQuint(t) * spinBall) + wobble;
+      const rad = (ballAngle - 90) * Math.PI / 180;
+      const r = 170 - 30 * easeOutQuint(t) + 2 * Math.sin(now/60);
+      if(ball){ ball.setAttribute('cx', (r * Math.cos(rad)).toFixed(2)); ball.setAttribute('cy', (r * Math.sin(rad)).toFixed(2)); }
+      if(t < 1){ requestAnimationFrame(frame); } else { alignToPocket(resultIdx); resolve(); }
+    }
+    requestAnimationFrame(frame);
+  });
+}
+
+function alignToPocket(resultIdx){
+  const gNums = document.getElementById('numbers');
+  const ball = document.getElementById('ball');
+  const per = 360 / EURO_SEQ.length;
+  const finalWheel = -((resultIdx + 0.5) * per);
+  gNums.setAttribute('transform', `rotate(${finalWheel})`);
+  const finalBallAng = -90 - 4; // slight offset
+  const r2 = 150; const rad2 = finalBallAng * Math.PI / 180;
+  if(ball){ ball.setAttribute('cx', (r2 * Math.cos(rad2)).toFixed(2)); ball.setAttribute('cy', (r2 * Math.sin(rad2)).toFixed(2)); }
+}
+
+document.getElementById("undoBtn").addEventListener("click", undoBet);
+document.getElementById("exitBtn").addEventListener("click", () => {
+  if(confirm("¿Salir de la sala?")){
+    socket.emit("leave_ruleta_room", { sala_id: salaId });
+    window.location.href = "/dashboard";
+  }
+});
+
+document.getElementById("confirmBtn").addEventListener("click", () => {
+  const total = bets.reduce((sum, b) => sum + (b.amount || 0), 0);
+  if(total > bank){ log("❌ Saldo insuficiente"); return; }
+  if(total === 0){ log("❌ Ninguna apuesta para confirmar"); return; }
+  socket.emit("ruleta_place_bet", { sala_id: salaId, apuestas: bets, color: myColor });
+  // Guardar copia de la última jugada
+  lastBets = bets.map(b => ({ type: b.type, label: b.label, amount: b.amount || 0, set: new Set(Array.from(b.set || [])) }));
+  const totalEuro = (total/100).toFixed(2);
+  log(`✅ <span style="font-weight:bold;">${myUsername} confirmó: ${totalEuro}€</span>`);
+  document.getElementById("spinBtn").disabled = false;
+
+  // add to recent bets list for stats
+  const labels = bets.map(b => b.label || '');
+  recentBets.unshift({ usuario_id: myUserId, username: myUsername, labels: labels, amount_cents: total, resolved: false });
+  if(recentBets.length>20) recentBets.pop();
+  updateRecentBetsUI();
+});
+
+document.getElementById("spinBtn").addEventListener("click", () => {
+  if(spinning) return;
+  spinning = true;
+  document.getElementById("spinBtn").disabled = true;
+  socket.emit("ruleta_spin", { sala_id: salaId });
+});
+
+// Chat sending
+function enviarMensajeChat(){
+  const input = document.getElementById('chat-input');
+  if(!input) return;
+  const txt = (input.value || '').trim();
+  if(!txt) return;
+  socket.emit('ruleta_chat', { sala_id: salaId, message: txt });
+  input.value = '';
+}
+
+document.getElementById('chat-send').addEventListener('click', enviarMensajeChat);
+document.getElementById('chat-input').addEventListener('keydown', (e)=>{ if(e.key === 'Enter') enviarMensajeChat(); });
+
+document.getElementById("voisinsBtn").addEventListener("click", () => {
+  const neighbours = [26, 3, 35, 12, 28, 7, 29, 18, 22, 9, 31, 14, 20, 1, 33, 16, 24, 5, 10, 23, 8, 30, 11, 36, 13, 27, 6, 34, 17, 25, 2, 21, 4, 19, 15, 32, 0];
+  neighbours.slice(0, 9).forEach(n => placeBet({type: "straight", set: [n], label: String(n)}, currentChipValue()));
+});
+
+document.getElementById("tiersBtn").addEventListener("click", () => {
+  const tiers = [27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33];
+  for(let i=0; i<tiers.length; i+=2){
+    if(i+1 < tiers.length) placeBet({type: "split", set: [tiers[i], tiers[i+1]], label: `${tiers[i]}-${tiers[i+1]}`}, currentChipValue());
+  }
+});
+
+document.getElementById("orphBtn").addEventListener("click", () => {
+  const orphans = [6, 34, 17, 1, 20, 14, 31, 9];
+  for(let i=0; i<orphans.length; i+=2){
+    if(i+1 < orphans.length) placeBet({type: "split", set: [orphans[i], orphans[i+1]], label: `${orphans[i]}-${orphans[i+1]}`}, currentChipValue());
+  }
+});
+
+document.querySelectorAll("[data-out]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const out = btn.dataset.out;
+    const map = {
+      "red": {type: "even", set: ALL.filter(n => REDS.has(n)), label: "Rojo"},
+      "black": {type: "even", set: ALL.filter(n => !REDS.has(n) && n !== 0), label: "Negro"},
+      "even": {type: "even", set: ALL.filter(n => n % 2 === 0), label: "Par"},
+      "odd": {type: "even", set: ALL.filter(n => n % 2 === 1), label: "Impar"},
+      "low": {type: "even", set: ALL.filter(n => n >= 1 && n <= 18), label: "1–18"},
+      "high": {type: "even", set: ALL.filter(n => n >= 19), label: "19–36"}
+    };
+  if(map[out]) placeBet(map[out], currentChipValue());
+  });
+});
+
+function init(){
   initWheel();
   initTable();
-  document.getElementById('balance-user').textContent = (myBalance / 100).toFixed(2);
-  log(`<span style="color:#81c784;">✅ Conectado a sala</span>`);
-});
-</script>
+  setupChips();
+  bank = parseInt("{{ user.balance * 100 }}") || 0;
+  bankEl.textContent = centsToEuro(bank);
+  log("🎲 Bienvenido a la ruleta multijugador");
+}
 
+// Asegura que la inicialización ocurre siempre
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
 </body>
 </html>
