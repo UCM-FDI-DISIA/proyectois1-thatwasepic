@@ -53,7 +53,7 @@ for p in pages:
 @app.route('/<path:path>/')
 def flatpage(path):
     page = pages.get_or_404(path)
-    template = page.meta.get('template', 'flatpage/flatpage.html')
+    template = page.meta.get('template', 'pages/casino/flatpage.html')
     return render_template(template, page=page)
 
 # Inicializar DB
