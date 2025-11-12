@@ -10,7 +10,7 @@ def home():
     stats = Estadistica.query.filter_by(user_id=current_user.id).all()
     apuestas_recientes = Apuesta.query.filter_by(user_id=current_user.id).order_by(Apuesta.fecha.desc()).limit(10).all()
     
-    return render_template('estadisticas.html', 
+    return render_template('pages/casino/estadisticas/estadisticas.html', 
                          stats=stats, 
                          apuestas=apuestas_recientes,
                          user=current_user)

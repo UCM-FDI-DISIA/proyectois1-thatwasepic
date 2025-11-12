@@ -14,4 +14,4 @@ def home():
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
         return render_template("salas_espera/lista_salas.html", salas=salas_pag, compact_view=True)
 
-    return render_template("dashboard.html", realtime_required=True, user=current_user, salas=salas_pag)
+    return render_template("pages/casino/dashboard/dashboard.html", realtime_required=True, user=current_user, salas=salas_pag)

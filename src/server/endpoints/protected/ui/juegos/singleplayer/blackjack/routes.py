@@ -6,4 +6,4 @@ bp = Blueprint('blackjack', __name__)
 @bp.route('/blackjack')
 @login_required
 def home():
-    return render_template('blackjack.html')
+    return render_template('pages/casino/juegos/singleplayer/blackjack.html')

@@ -15,7 +15,7 @@ def home(user_id):  # Ya está correcto
         stats = Estadistica.query.filter_by(user_id=user_id).all()
         apuestas = Apuesta.query.filter_by(user_id=user_id).order_by(Apuesta.fecha.desc()).limit(20).all()
         
-        return render_template('admin_usuario_detalle.html',
+        return render_template('pages/admin/usuarios/usuarios_detalle.html',
                              usuario=usuario,
                              stats=stats,
                              apuestas=apuestas)

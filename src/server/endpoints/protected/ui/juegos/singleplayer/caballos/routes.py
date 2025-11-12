@@ -6,4 +6,4 @@ bp = Blueprint('caballos', __name__)
 @bp.route('/caballos')
 @login_required
 def home():
-    return render_template('caballos.html')
+    return render_template('pages/casino/juegos/singleplayer/caballos.html')

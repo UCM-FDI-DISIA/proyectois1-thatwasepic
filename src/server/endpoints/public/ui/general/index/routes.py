@@ -6,4 +6,4 @@ bp = Blueprint('index', __name__)
 # Ruta principal del sitio
 @bp.route('/')
 def home():
-    return render_template('index.html')
+    return render_template('pages/casino/inicio/index.html')

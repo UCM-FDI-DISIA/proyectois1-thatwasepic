@@ -71,7 +71,7 @@ def lobby():
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
         return render_template("salas_espera/lista_salas.html", salas=salas_pag)
 
-    return render_template('salas_espera/lobby.html', realtime_required=True, salas=salas_pag, juegos_permitidos=JUEGOS_PERMITIDOS)
+    return render_template('pages/casino/salas/lobby.html', realtime_required=True, salas=salas_pag, juegos_permitidos=JUEGOS_PERMITIDOS)
 
 @bp.route('/salas-espera/crear-sala', methods=['POST'])
 @login_required
@@ -167,7 +167,7 @@ def sala(sala_id):
         else:
             return redirect(f'/multijugador/partida/{sala.juego}/{sala_id}')
     
-    return render_template('salas_espera/sala_base.html', sala=sala)
+    return render_template('pages/casino/salas/sala.html', sala=sala)
 
 @bp.route('/salas-espera/salir-sala/<int:sala_id>', methods=['POST'])
 @login_required

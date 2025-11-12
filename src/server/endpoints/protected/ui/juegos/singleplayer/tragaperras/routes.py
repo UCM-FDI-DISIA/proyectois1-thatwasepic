@@ -6,4 +6,4 @@ bp = Blueprint('tragaperras', __name__)
 @bp.route('/tragaperras')
 @login_required
 def home():
-    return render_template('tragaperras.html')
+    return render_template('pages/casino/juegos/singleplayer/tragaperras.html')

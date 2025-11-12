@@ -6,4 +6,4 @@ bp = Blueprint('coinflip', __name__)
 @bp.route('/coinflip')
 @login_required
 def home():
-    return render_template('coinflip.html')
+    return render_template('pages/casino/juegos/singleplayer/coinflip.html')

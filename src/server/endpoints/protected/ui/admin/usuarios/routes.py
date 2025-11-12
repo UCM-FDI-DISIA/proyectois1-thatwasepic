@@ -30,7 +30,7 @@ def home():
         hace_30_dias = datetime.now() - timedelta(days=30)
         usuarios_activos = sum(1 for user in usuarios_no_negativos if user.created_at >= hace_30_dias)
         
-        return render_template('admin_usuarios.html', 
+        return render_template('pages/admin/usuarios/usuarios.html', 
                              usuarios=usuarios_no_negativos,  # Solo usuarios no negativos
                              total_balance=total_balance,
                              usuarios_positivos=usuarios_positivos,
@@ -208,7 +208,7 @@ def detalle_usuario(user_id):
             .order_by(UsuarioSala.fecha_union.desc())\
             .all()
         
-        return render_template('admin_usuario_detalle.html',
+        return render_template('pages/admin/usuarios/usuarios_detalle.html',
                              usuario=usuario,
                              estadisticas=estadisticas,
                              apuestas_recientes=apuestas_recientes,

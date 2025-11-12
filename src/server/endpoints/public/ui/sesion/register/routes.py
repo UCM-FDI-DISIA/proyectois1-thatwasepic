@@ -33,4 +33,4 @@ def home():
             flash(f'Error en el registro: {str(e)}')
             return redirect(url_for('register.home'))
     
-    return render_template('register.html')
+    return render_template('pages/casino/sesion/register.html')

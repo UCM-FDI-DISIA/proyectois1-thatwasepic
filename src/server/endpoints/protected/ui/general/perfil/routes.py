@@ -39,4 +39,4 @@ def home():
         flash('Perfil actualizado correctamente')
         return redirect(url_for('perfil.home'))
     
-    return render_template('perfil.html', user=current_user, stats=stats, is_admin=is_admin_user)
+    return render_template('pages/casino/perfil/perfil.html', user=current_user, stats=stats, is_admin=is_admin_user)

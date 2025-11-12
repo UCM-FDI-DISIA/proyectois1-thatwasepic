@@ -1,4 +1,4 @@
-{% extends "base/base_casino.html" %}
+{% extends "pages/casino/base.html" %}
 
 {% block title %}
 Salas multijugador
@@ -71,7 +71,7 @@ Salas multijugador
             <div class="card-body">
                 <div id="salas-container">
                     <!-- NO cambiar identificador, es necesario para que la lista se actualice periódicamente -->
-                    {% include "salas_espera/lista_salas.html" %}
+                    {% include "partials/lista_salas.html" %}
                 </div>
             </div>
         </div>

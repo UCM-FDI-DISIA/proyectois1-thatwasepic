@@ -18,6 +18,6 @@ def vista_sala_blackjack(sala_id):
     sala = SalaMultijugador.query.get_or_404(sala_id)
     if sala.juego != "blackjack":
         abort(404)
-    return render_template("juegos_multijugador/blackjack_multijugador.html",
+    return render_template("pages/casino/juegos/multiplayer/blackjack.html",
                            sala=sala, user=current_user)
 

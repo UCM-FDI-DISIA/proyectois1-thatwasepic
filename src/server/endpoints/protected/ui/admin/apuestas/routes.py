@@ -34,7 +34,7 @@ def home():
         apuestas = query.order_by(Apuesta.fecha.desc()).paginate(
             page=page, per_page=20, error_out=False)
         
-        return render_template('admin_apuestas.html', 
+        return render_template('pages/admin/apuestas/apuestas.html', 
                              apuestas=apuestas,
                              juego_actual=juego_filter,
                              resultado_actual=resultado_filter,

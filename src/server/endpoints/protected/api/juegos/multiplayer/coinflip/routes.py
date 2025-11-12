@@ -44,7 +44,7 @@ def sala_coinflip(sala_id):
         return redirect(url_for('salas_espera.lobby'))
     
     print(f"✅ Renderizando CoinFlip multijugador para {current_user.username}")
-    return render_template('juegos_multijugador/coinflip_multijugador.html', 
+    return render_template('pages/casino/juegos/multiplayer/coinflip.html', 
                          sala=sala, user=current_user)
 
 @bp.route('/apostar/<int:sala_id>', methods=['POST'])

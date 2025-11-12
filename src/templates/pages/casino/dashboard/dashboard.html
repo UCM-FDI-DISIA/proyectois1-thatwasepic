@@ -1,4 +1,4 @@
-{% extends "base/base_casino.html" %}
+{% extends "pages/casino/base.html" %}
 
 {% block title %}
 Dashboard
@@ -158,7 +158,7 @@ Dashboard
                         <div id="salas-container" class="mb-4">
                             <!-- NO cambiar identificador, es necesario para que la lista se actualice periódicamente -->
                             {% with compact_view = true %}
-                                {% include "salas_espera/lista_salas.html" %}
+                                {% include "partials/lista_salas.html" %}
                             {% endwith %}
                         </div>
                         <a href="{{ url_for('salas_espera.lobby') }}" class="btn btn-outline-primary btn-lg w-100">

@@ -109,7 +109,7 @@ def home():
         
         print(f"DEBUG: Estadísticas agrupadas: {juegos_stats}")
         
-        return render_template('admin_estadisticas.html',
+        return render_template('pages/admin/estadisticas/estadisticas.html',
                              total_usuarios=total_usuarios,
                              total_apuestas=total_apuestas,
                              total_balance=total_balance,

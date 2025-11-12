@@ -67,7 +67,7 @@ def home():
         usuarios_recientes = User.query.order_by(User.created_at.desc()).limit(5).all()
         apuestas_recientes = Apuesta.query.join(User).order_by(Apuesta.fecha.desc()).limit(10).all()
         
-        return render_template('admin_panel.html',
+        return render_template('pages/admin/inicio/index.html',
                              total_usuarios=total_usuarios,
                              total_apuestas=total_apuestas,
                              total_balance=total_balance,

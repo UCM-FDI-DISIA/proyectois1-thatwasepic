@@ -20,4 +20,4 @@ def home():
         except Exception as e:
             flash(f'Error en el login: {str(e)}')
     
-    return render_template('login.html')
+    return render_template('pages/casino/sesion/login.html')

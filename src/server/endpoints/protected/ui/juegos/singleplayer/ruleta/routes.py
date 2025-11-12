@@ -9,4 +9,4 @@ bp = Blueprint('ruleta', __name__)
 @login_required
 def home():
     """Página principal de la ruleta"""
-    return render_template('ruleta.html')
+    return render_template('pages/casino/juegos/singleplayer/ruleta.html')
