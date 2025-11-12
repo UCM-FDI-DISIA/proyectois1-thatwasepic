@@ -69,7 +69,7 @@ def lobby():
     salas_pag = obtener_pagina_salas(8)
 
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-        return render_template("salas_espera/lista_salas.html", salas=salas_pag)
+        return render_template("partials/lista_salas.html", salas=salas_pag)
 
     return render_template('pages/casino/salas/lobby.html', realtime_required=True, salas=salas_pag, juegos_permitidos=JUEGOS_PERMITIDOS)
 

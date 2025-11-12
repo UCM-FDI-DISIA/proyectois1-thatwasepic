@@ -12,6 +12,6 @@ def home():
 
     # Necesario para actualización automática de la lista de salas.
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-        return render_template("salas_espera/lista_salas.html", salas=salas_pag, compact_view=True)
+        return render_template("partials/lista_salas.html", salas=salas_pag, compact_view=True)
 
     return render_template("pages/casino/dashboard/dashboard.html", realtime_required=True, user=current_user, salas=salas_pag)
