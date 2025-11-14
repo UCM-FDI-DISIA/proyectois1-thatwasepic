@@ -1,10 +1,13 @@
-<h1 style="text-align: center;">🎰 LogBait, Plataforma de Apuestas Online</h1>
+<div align="center">
+    <img src="assets/logo/logo.png" width="40%">
+    <h1>LogBait</h1>
+    <p>🎰 Plataforma de Apuestas Online</p>
+    <a href="https://logbait.pythonanywhere.com/">logbait.pythonanywhere.com</a>
+</div>
+<br>
 
-<img width="512" height="512" alt="image" src="https://github.com/user-attachments/assets/bd5739a7-5476-4d39-aa36-6538b0d02da6" />
+**LogBait** es una plataforma web de apuestas desarrollada como proyecto académico.
 
-## [LogBait.com](https://logbait.pythonanywhere.com/)
-
-**LogBait** es una plataforma web de apuestas desarrollada como proyecto académico.  
 Su objetivo es ofrecer una experiencia sencilla, segura y responsable para los usuarios interesados en realizar apuestas en línea de manera simulada.
 
 > [!NOTE]
@@ -14,11 +17,14 @@ Su objetivo es ofrecer una experiencia sencilla, segura y responsable para los u
 
 ## 🧩 Descripción general
 
-LogBait permite a los usuarios registrarse, gestionar su saldo virtual, realizar apuestas en distintos juegos y consultar los resultados obtenidos.  
+LogBait permite a los usuarios registrarse, gestionar su saldo virtual, realizar apuestas en distintos juegos y consultar los resultados obtenidos.
+
 El proyecto se ha desarrollado aplicando **metodologías ágiles**, con iteraciones cortas y una planificación basada en **historias de usuario**.
 
 Actualmente se encuentra en su primera fase **MVP (Producto Mínimo Viable)**, cuyo propósito es ofrecer una versión funcional que cubra las características esenciales de una casa de apuestas online.
 Según vayamos avanzando en el proyecto, seguiremos implementando historias de usuario que aportarán versatilidad y comodidad al usuario. las funcionalidades concretas de estas historias se pueden observar en el apartado de **Próximos pasos**.
+
+Se puede encontrar información más detallada sobre el proyecto y su gestión en la [Wiki del repositorio](https://github.com/UCM-FDI-DISIA/proyectois1-thatwasepic/wiki).
 
 ---
 
@@ -77,10 +83,18 @@ Las futuras iteraciones del proyecto incluirán:
 
 ---
 
+## 👥 Créditos
+
+Este proyecto está desarrollado por un equipo de 7 personas, compuesto por las siguientes:
+
+<a href="https://github.com/UCM-FDI-DISIA/proyectois1-thatwasepic/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=UCM-FDI-DISIA/proyectois1-thatwasepic" height="50px"/>
+</a>
+
+---
+
 ## ⚠️ Aviso legal
 
 Este proyecto tiene **fines exclusivamente académicos**.  
 No se maneja dinero real ni se promueve el juego con apuestas monetarias.  
 El contenido está destinado a la **evaluación de conocimientos técnicos y metodológicos**.
-
----
