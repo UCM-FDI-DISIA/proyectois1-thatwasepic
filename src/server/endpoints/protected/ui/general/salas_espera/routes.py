@@ -160,6 +160,8 @@ def sala(sala_id):
             return redirect(f'/api/multijugador/coinflip/sala/{sala_id}')
         elif sala.juego == 'blackjack':
             return redirect(f'/blackjack/sala/{sala_id}')
+        if sala.juego == 'poker':
+            return redirect(f'/multijugador/partida/poker/{sala.id}')
         elif sala.juego == 'ruleta':
             return redirect(f'/ruleta/sala/{sala_id}')
         elif sala.juego == 'caballos':
