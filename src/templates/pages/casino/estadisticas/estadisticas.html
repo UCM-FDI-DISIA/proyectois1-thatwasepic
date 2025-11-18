@@ -4,6 +4,24 @@
 Estadísticas
 {% endblock %}
 
+{% macro game_emoji(game) -%}
+  {%- if game in ['poker', 'poker_multijugador'] -%}🂡
+  {%- elif game == 'blackjack' -%}🎲
+  {%- elif game == 'coinflip' -%}🪙
+  {%- elif game in ['tragaperras','slots'] -%}🎰
+  {%- elif game == 'caballos' -%}🏇
+  {%- elif game == 'ruleta' -%}🎯
+  {%- else -%}🎮
+  {%- endif -%}
+{%- endmacro %}
+
+{% macro game_label(game) -%}
+  {%- if game == 'poker_multijugador' -%}Póker Multijugador
+  {%- elif game == 'poker' -%}Póker
+  {%- else -%}{{ game|title }}
+  {%- endif -%}
+{%- endmacro %}
+
 {% block content %}
 <div class="row">
     <div class="col-12">
@@ -108,16 +126,7 @@ Estadísticas
         <div class="card animated-rotate h-100">
             <div class="card-body">
                 <div class="text-center d-flex flex-column align-items-center mb-3">
-                    <h4>
-                        {% if stat.juego == 'blackjack' %}🎲 
-                        {% elif stat.juego == 'poker' %}🃏 
-                        {% elif stat.juego == 'coinflip' %}🪙
-                        {% elif stat.juego in ['tragaperras','slots'] %}🎰
-                        {% elif stat.juego == 'caballos' %}🏇
-                        {% elif stat.juego == 'ruleta' %}🎯
-                        {% endif %}
-                        {{ stat.juego|title }}
-                    </h4>
+                    <h4>{{ game_emoji(stat.juego) }} {{ game_label(stat.juego) }}</h4>
                     <span class="badge {% if neto_juego >= 0 %}bg-success{% else %}bg-danger{% endif %}">
                         ${{ "%.2f"|format(neto_juego) }}
                     </span>
@@ -177,17 +186,9 @@ Estadísticas
                     {% for stat in stats %}
                     <div class="col-md-2 col-6 mb-3">
                         <div class="text-center">
-                            <div class="mb-2" style="font-size: 2em;">
-                                {% if stat.juego == 'blackjack' %}🎲 
-                                {% elif stat.juego == 'poker' %}🃏 
-                                {% elif stat.juego == 'coinflip' %}🪙
-                                {% elif stat.juego in ['tragaperras','slots'] %}🎰
-                                {% elif stat.juego == 'caballos' %}🏇
-                                {% elif stat.juego == 'ruleta' %}🎯
-                                {% endif %}
-                            </div>
+                            <div class="mb-2" style="font-size: 2em;">{{ game_emoji(stat.juego) }}</div>
                             <h6>{{ stat.partidas_jugadas }}</h6>
-                            <small class="text-muted">{{ stat.juego|title }}</small>
+                            <small class="text-muted">{{ game_label(stat.juego) }}</small>
                         </div>
                     </div>
                     {% endfor %}
@@ -196,6 +197,74 @@ Estadísticas
         </div>
     </div>
 </div>
+
+{% set poker_stats = stats|selectattr('juego','in',['poker','poker_multijugador'])|list %}
+{% if poker_stats|length > 0 %}
+{% set poker = namespace(partidas=0, victorias=0, apostado=0, ganado=0, perdido=0) %}
+{% for stat in poker_stats %}
+  {% set poker.partidas = poker.partidas + stat.partidas_jugadas %}
+  {% set poker.victorias = poker.victorias + stat.partidas_ganadas %}
+  {% set poker.apostado = poker.apostado + stat.apuesta_total %}
+  {% set neto = stat.ganancia_total - stat.apuesta_total %}
+  {% if neto >= 0 %}
+    {% set poker.ganado = poker.ganado + neto %}
+  {% else %}
+    {% set poker.perdido = poker.perdido + (neto * -1) %}
+  {% endif %}
+{% endfor %}
+{% set poker.neto = poker.ganado - poker.perdido %}
+<div class="row mt-4">
+  <div class="col-12">
+    <div class="card animated-translateY">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <span>🂡 Rendimiento en Póker</span>
+        <span class="badge bg-dark">{{ poker.partidas }} partidas</span>
+      </div>
+      <div class="card-body">
+        <div class="row text-center mb-3">
+          <div class="col-md-4">
+            <small class="text-muted">Partidas</small>
+            <h5 class="mb-0">{{ poker.partidas }}</h5>
+          </div>
+          <div class="col-md-4">
+            <small class="text-muted">Victorias</small>
+            <h5 class="text-success mb-0">{{ poker.victorias }}</h5>
+          </div>
+          <div class="col-md-4">
+            <small class="text-muted">Ratio</small>
+            <h5 class="mb-0">
+              {% if poker.partidas > 0 %}
+                {{ "%.1f"|format((poker.victorias / poker.partidas) * 100) }}%
+              {% else %}
+                0%
+              {% endif %}
+            </h5>
+          </div>
+        </div>
+        <hr>
+        <div class="d-flex justify-content-between mb-2">
+          <span>Total apostado:</span>
+          <strong>${{ "%.2f"|format(poker.apostado) }}</strong>
+        </div>
+        <div class="d-flex justify-content-between mb-2">
+          <span>Ganado (neto):</span>
+          <strong class="text-success">${{ "%.2f"|format(poker.ganado) }}</strong>
+        </div>
+        <div class="d-flex justify-content-between mb-2">
+          <span>Perdido (neto):</span>
+          <strong class="text-danger">${{ "%.2f"|format(poker.perdido) }}</strong>
+        </div>
+        <div class="d-flex justify-content-between">
+          <span>Balance Póker:</span>
+          <strong class="{% if poker.neto >= 0 %}text-success{% else %}text-danger{% endif %}">
+            ${{ "%.2f"|format(poker.neto) }}
+          </strong>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
 
 <!-- Historial de Apuestas -->
 <div class="row mt-4">
@@ -223,16 +292,8 @@ Estadísticas
                             {% set neto_row = (ap.ganancia - ap.cantidad) %}
                             <tr>
                                 <td>
-                                    <span class="me-2">
-                                        {% if ap.juego == 'blackjack' %}🎲 
-                                        {% elif ap.juego == 'poker' %}🃏 
-                                        {% elif ap.juego == 'coinflip' %}🪙
-                                        {% elif ap.juego in ['tragaperras','slots'] %}🎰
-                                        {% elif ap.juego == 'caballos' %}🏇
-                                        {% elif ap.juego == 'ruleta' %}🎯
-                                        {% endif %}
-                                    </span>
-                                    {{ ap.juego|title }}
+                                    <span class="me-2">{{ game_emoji(ap.juego) }}</span>
+                                    {{ game_label(ap.juego) }}
                                 </td>
                                 <td class="fw-bold">${{ "%.2f"|format(ap.cantidad) }}</td>
                                 <td>
@@ -333,16 +394,8 @@ Estadísticas
                 
                 {% if ns_juego.mas_jugado and ns_juego.mas_jugado.partidas_jugadas > 0 %}
                 <div class="text-center">
-                    <div style="font-size: 3em;">
-                        {% if ns_juego.mas_jugado.juego == 'blackjack' %}🎲 
-                        {% elif ns_juego.mas_jugado.juego == 'poker' %}🃏 
-                        {% elif ns_juego.mas_jugado.juego == 'coinflip' %}🪙
-                        {% elif ns_juego.mas_jugado.juego in ['tragaperras','slots'] %}🎰
-                        {% elif ns_juego.mas_jugado.juego == 'caballos' %}🏇
-                        {% elif ns_juego.mas_jugado.juego == 'ruleta' %}🎯
-                        {% endif %}
-                    </div>
-                    <h5 class="mt-2">{{ ns_juego.mas_jugado.juego|title }}</h5>
+                    <div style="font-size: 3em;">{{ game_emoji(ns_juego.mas_jugado.juego) }}</div>
+                    <h5 class="mt-2">{{ game_label(ns_juego.mas_jugado.juego) }}</h5>
                     <p class="text-muted">{{ ns_juego.mas_jugado.partidas_jugadas }} partidas</p>
                 </div>
                 {% else %}

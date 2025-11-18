@@ -4,134 +4,150 @@
 Póker (multijugador)
 {% endblock %}
 
+{% macro poker_role_label(role) -%}
+  {%- if role == 'dealer' -%}D{%- elif role == 'small_blind' -%}SB{%- elif role == 'big_blind' -%}BB{%- endif -%}
+{%- endmacro %}
+
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-xl-10">
-    <div class="card game-card cyber-grid">
-      <div class="card-header d-flex justify-content-between align-items-center">
+<div class="poker-wrapper container-xxl py-4">
+  <div class="poker-layout">
+    <!-- Zona principal -->
+    <section class="poker-stage">
+      <div class="poker-hud">
+        <div class="hud-pill">
+          <span>Sala #{{ sala.id }}</span>
+          <small>{{ sala.nombre }}</small>
+        </div>
+        <div class="hud-pill">
+          <span>Jugadores</span>
+          <small>{{ sala.jugadores_actuales }}/{{ sala.capacidad }}</small>
+        </div>
+        <div class="hud-pill hud-user">
+          <span>{{ current_user.username }}</span>
+          <small>Tú</small>
+        </div>
+      </div>
+
+      <div class="poker-table">
+        <div class="poker-table-inner">
+          <div class="poker-pot">
+            Bote total
+            <strong id="poker-pot-amount">0€</strong>
+            <small id="poker-current-bet">Apuesta a igualar: 0€</small>
+            <small id="poker-blinds-info">Ciegas: 0€ / 0€</small>
+          </div>
+          <div class="poker-community-label">Cartas comunitarias</div>
+          <div id="cartas-comunitarias" class="poker-community"></div>
+          <div id="mesa-jugadores" class="poker-player-ring"></div>
+        </div>
+      </div>
+
+      <div class="poker-hand-panel">
         <div>
-          <i class="fas fa-chess-queen me-2"></i>
-          PÓKER MULTIJUGADOR
+          <div class="text-uppercase small text-muted mb-2">Tu mano</div>
+          <div id="tus-cartas" class="poker-hand"></div>
         </div>
-        <div class="small text-muted">
-          Sala #{{ sala.id }} · {{ sala.nombre }}
+        <div class="poker-hand-meta">
+          <div>Estado</div>
+          <span id="estado-partida-badge" class="badge">Esperando inicio…</span>
+          <small id="call-info" class="text-muted d-block mt-2">A igualar: 0€</small>
         </div>
       </div>
 
-      <div class="card-body">
-
-        <!-- Info de sala / jugadores -->
-        <div class="mb-3">
-          <div class="d-flex justify-content-between flex-wrap gap-2">
-            <div>
-              <span class="badge bg-primary me-2">
-                <i class="fas fa-user"></i>
-                Tú: {{ current_user.username }}
-              </span>
-              <span class="badge bg-dark">
-                <i class="fas fa-users"></i>
-                Jugadores en la sala: {{ sala.jugadores_actuales }}/{{ sala.capacidad }}
-              </span>
-            </div>
-            <div>
-              <span class="badge bg-success" id="estado-partida-badge">
-                Esperando inicio…
-              </span>
-            </div>
-          </div>
+      <div class="poker-actions">
+        <div class="action-field">
+          <label for="input-apuesta">Apuesta actual</label>
+          <input id="input-apuesta" type="number" min="0" step="10" value="10">
         </div>
-
-        <!-- Mesa de póker -->
-        <div class="poker-mesa mb-4">
-          <!-- Cartas comunitarias -->
-          <div class="text-center mb-3">
-            <div class="mb-2 fw-bold text-uppercase small text-muted">
-              Cartas comunitarias
-            </div>
-            <div id="cartas-comunitarias" class="d-flex justify-content-center gap-2 flex-wrap">
-              <!-- Se rellena por JS -->
-            </div>
-          </div>
-
-          <hr class="my-3">
-
-          <!-- Tu mano -->
-          <div class="mb-3">
-            <div class="mb-2 fw-bold text-uppercase small text-muted">
-              Tu mano
-            </div>
-            <div id="tus-cartas" class="d-flex justify-content-center gap-2 flex-wrap">
-              <!-- Se rellena por JS -->
-            </div>
-          </div>
-
-          <!-- Jugadores -->
-          <div class="mb-3">
-            <div class="mb-2 fw-bold text-uppercase small text-muted">
-              Jugadores
-            </div>
-            <div id="lista-jugadores" class="row g-2">
-              <!-- Se rellena por JS -->
-            </div>
-          </div>
+        <div class="action-buttons">
+          <button id="btn-iniciar" class="btn primary">
+            <i class="fas fa-play me-1"></i> Empezar mano
+          </button>
+          <button id="btn-call" class="btn accent">
+            <i class="fas fa-coins me-1"></i> Call
+          </button>
+          <button id="btn-check" class="btn ghost">
+            <i class="fas fa-hand-paper me-1"></i> Check
+          </button>
+          <button id="btn-raise" class="btn secondary">
+            <i class="fas fa-level-up-alt me-1"></i> Raise
+          </button>
+          <button id="btn-fold" class="btn danger ghost">
+            <i class="fas fa-flag-checkered me-1"></i> Fold
+          </button>
         </div>
-
-        <!-- Controles -->
-        <div class="poker-controles mb-3">
-          <div class="row g-2 align-items-end">
-            <div class="col-md-3">
-              <label class="form-label small text-muted">
-                Apuesta actual
-              </label>
-              <input id="input-apuesta" type="number" min="0" step="10" class="form-control form-control-sm" value="10">
-            </div>
-            <div class="col-md-9">
-              <div class="d-flex flex-wrap gap-2">
-                <button id="btn-iniciar" class="btn btn-success btn-sm">
-                  <i class="fas fa-play me-1"></i> Empezar mano
-                </button>
-                <button id="btn-igualar" class="btn btn-primary btn-sm">
-                  <i class="fas fa-coins me-1"></i> Igualar / Apostar
-                </button>
-                <button id="btn-pasar" class="btn btn-outline-light btn-sm">
-                  <i class="fas fa-hand-paper me-1"></i> Pasar
-                </button>
-                <button id="btn-retirarse" class="btn btn-outline-danger btn-sm">
-                  <i class="fas fa-flag-checkered me-1"></i> Retirarse
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Log -->
-        <div class="poker-log border rounded p-2 small" id="log">
-          <div class="text-muted">Esperando a que el creador de la sala inicie la mano…</div>
-        </div>
-
       </div>
-    </div>
+    </section>
+
+    <!-- Lateral -->
+    <aside class="poker-sidebar">
+      <div class="poker-panel">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+          <h5 class="mb-0">Jugadores</h5>
+          <span class="text-muted small">Actualizado en tiempo real</span>
+        </div>
+        <div id="lista-jugadores" class="poker-player-list"></div>
+      </div>
+
+      <div class="poker-panel">
+        <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+          <h5 class="mb-0">Chat de mesa</h5>
+          <span class="text-muted small">Habla con la sala</span>
+        </div>
+        <div class="poker-chat-box">
+          <div id="poker-chat-messages" class="poker-chat-messages">
+            <div class="text-muted small">Sin mensajes</div>
+          </div>
+          <div class="poker-chat-input">
+            <input id="poker-chat-input" type="text" class="form-control form-control-sm" placeholder="Escribe un mensaje...">
+            <button id="poker-chat-send" class="btn accent">Enviar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="poker-panel">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h5 class="mb-0">Eventos</h5>
+          <span class="text-muted small">Mesa {{ sala.id }}</span>
+        </div>
+        <div class="poker-log" id="log">
+          <div class="text-muted small">Esperando a que el creador de la sala inicie la mano…</div>
+        </div>
+      </div>
+    </aside>
   </div>
 </div>
 
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
 // ======== Config básica ========
 const salaId = {{ sala.id }};
 const currentUserId = {{ current_user.id }};
 const isOwner = {{ 'true' if sala.creador_id == current_user.id else 'false' }};
+const socket = io();
+const HAND_PHASES = new Set(['preflop', 'flop', 'turn', 'river']);
 
 // Elementos
 const elMesa = {
   comunitarias: document.getElementById('cartas-comunitarias'),
   tusCartas: document.getElementById('tus-cartas'),
   jugadores: document.getElementById('lista-jugadores'),
+  playerRing: document.getElementById('mesa-jugadores'),
   log: document.getElementById('log'),
   estadoBadge: document.getElementById('estado-partida-badge'),
   apuesta: document.getElementById('input-apuesta'),
   btnIniciar: document.getElementById('btn-iniciar'),
-  btnIgualar: document.getElementById('btn-igualar'),
-  btnPasar: document.getElementById('btn-pasar'),
-  btnRetirarse: document.getElementById('btn-retirarse'),
+  btnCall: document.getElementById('btn-call'),
+  btnCheck: document.getElementById('btn-check'),
+  btnRaise: document.getElementById('btn-raise'),
+  btnFold: document.getElementById('btn-fold'),
+  potAmount: document.getElementById('poker-pot-amount'),
+  currentBet: document.getElementById('poker-current-bet'),
+  potBlinds: document.getElementById('poker-blinds-info'),
+  chatMessages: document.getElementById('poker-chat-messages'),
+  chatInput: document.getElementById('poker-chat-input'),
+  chatSend: document.getElementById('poker-chat-send'),
+  callInfo: document.getElementById('call-info'),
 };
 
 // Desactivar botón iniciar si no es el creador
@@ -148,19 +164,67 @@ function addLog(msg){
   elMesa.log.prepend(div);
 }
 
-function renderCarta(carta){
+function formatCurrency(value){
+  const num = Number(value || 0);
+  return `${num.toFixed(2)}€`;
+}
+
+function formatTime(ts){
+  if (!ts) return '';
+  const d = new Date(ts);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function addChatMessage(payload){
+  if (!payload) return;
+  if (elMesa.chatMessages.querySelector('.text-muted')){
+    elMesa.chatMessages.innerHTML = '';
+  }
+  const row = document.createElement('div');
+  row.className = 'chat-row';
+
+  const meta = document.createElement('div');
+  meta.className = 'chat-meta';
+  const userSpan = document.createElement('span');
+  userSpan.className = 'chat-user';
+  userSpan.textContent = payload.username || 'Jugador';
+  const timeSpan = document.createElement('span');
+  timeSpan.className = 'chat-time';
+  timeSpan.textContent = formatTime(payload.timestamp);
+  meta.appendChild(userSpan);
+  meta.appendChild(timeSpan);
+
+  const msg = document.createElement('div');
+  msg.className = 'chat-message';
+  msg.textContent = payload.message || '';
+
+  row.appendChild(meta);
+  row.appendChild(msg);
+
+  elMesa.chatMessages.appendChild(row);
+  elMesa.chatMessages.scrollTop = elMesa.chatMessages.scrollHeight;
+}
+
+function sendChatMessage(){
+  const text = elMesa.chatInput.value.trim();
+  if (!text) return;
+  socket.emit('poker_chat_message', { sala_id: salaId, message: text });
+  elMesa.chatInput.value = '';
+}
+
+function renderCarta(carta, { mini=false, back=false } = {}){
   const div = document.createElement('div');
-  div.className = 'poker-card';
-  if (!carta){
+  div.className = `poker-card${mini ? ' mini' : ''}`;
+  if (back || !carta){
     div.classList.add('poker-card-back');
-    div.textContent = '?';
+    div.innerHTML = '<span>🂠</span>';
     return div;
   }
+  const roja = ['♥', '♦'].includes(carta.palo) ? ' roja' : '';
   div.innerHTML = `
-    <div class="poker-card-value">${carta.valor}</div>
-    <div class="poker-card-suit ${['♥','♦'].includes(carta.palo) ? 'text-danger' : ''}">
-      ${carta.palo}
-    </div>
+    <span class="poker-card-value${roja}">${carta.valor}</span>
+    <span class="poker-card-suit${roja}">${carta.palo}</span>
   `;
   return div;
 }
@@ -171,72 +235,191 @@ function renderEstado(estado){
 }
 
 // ====== Pintar estado que viene del backend ======
+function ordenarJugadoresParaMesa(jugadores, ordenLista){
+  const mapa = jugadores || {};
+  const lista = [];
+  if (Array.isArray(ordenLista) && ordenLista.length){
+    ordenLista.forEach(uid => {
+      const jugador = mapa[String(uid)];
+      if (jugador) lista.push(jugador);
+    });
+    Object.values(mapa).forEach(j => {
+      if (!ordenLista.includes(j.user_id)){
+        lista.push(j);
+      }
+    });
+  } else {
+    Object.values(mapa).forEach(j => lista.push(j));
+    lista.sort((a, b) => a.user_id - b.user_id);
+  }
+  if (!lista.length) return [];
+  const idxYo = lista.findIndex(j => j.user_id === currentUserId);
+  if (idxYo > 0){
+    return lista.slice(idxYo).concat(lista.slice(0, idxYo));
+  }
+  return lista;
+}
+
+function seatIndexForPosition(position, total){
+  if (total <= 0) return 0;
+  if (total >= 6) return Math.min(position, 5);
+  const raw = Math.round((position / total) * 6);
+  return Math.min(raw, 5);
+}
+
 function renderEstadoPartida(st){
   // Estado badge
+  if (st.fase !== 'terminada'){
+    renderEstadoPartida._ultimoGanadorMostrado = null;
+  }
   const estados = {
     esperando: { texto: 'Esperando jugadores', clase: 'bg-secondary' },
     repartiendo: { texto: 'Repartiendo cartas', clase: 'bg-info' },
     apuestas: { texto: 'Ronda de apuestas', clase: 'bg-warning text-dark' },
     showdown: { texto: 'Mostrando manos', clase: 'bg-success' },
     terminada: { texto: 'Mano terminada', clase: 'bg-dark' },
+    preflop: { texto: 'Preflop', clase: 'bg-primary' },
+    flop: { texto: 'Flop', clase: 'bg-primary' },
+    turn: { texto: 'Turn', clase: 'bg-primary' },
+    river: { texto: 'River', clase: 'bg-primary' },
   };
   renderEstado(estados[st.fase] || estados.esperando);
+  elMesa.potAmount.textContent = formatCurrency(st.bote || 0);
+  elMesa.currentBet.textContent = `Apuesta a igualar: ${formatCurrency(st.apuesta_ronda || 0)}`;
+  elMesa.potBlinds.textContent = `Ciegas: ${formatCurrency(st.small_blind || 0)} / ${formatCurrency(st.big_blind || 0)}`;
 
   // Cartas comunitarias
   elMesa.comunitarias.innerHTML = '';
-  (st.cartas_comunitarias || []).forEach(c => {
-    elMesa.comunitarias.appendChild(renderCarta(c));
-  });
+  const comunitarias = st.cartas_comunitarias_visibles || [];
+  if (!comunitarias.length){
+    Array.from({ length: 5 }).forEach(() => elMesa.comunitarias.appendChild(renderCarta(null, { back: true })));
+  } else {
+    comunitarias.forEach(carta => {
+      elMesa.comunitarias.appendChild(renderCarta(carta));
+    });
+  }
 
   // Tus cartas
-  const yo = st.jugadores[String(currentUserId)];
+  const jugadoresEstado = st.jugadores || {};
+  const yo = jugadoresEstado[String(currentUserId)];
+  const turnoJugador = jugadoresEstado[String(st.turno_actual)];
   elMesa.tusCartas.innerHTML = '';
   if (yo && yo.cartas){
     yo.cartas.forEach(c => elMesa.tusCartas.appendChild(renderCarta(c)));
+  } else {
+    Array.from({ length: 2 }).forEach(() => elMesa.tusCartas.appendChild(renderCarta(null, { back: true })));
   }
 
-  // Jugadores
+  const manoActiva = HAND_PHASES.has(st.fase);
+  const apuestaActualUsuario = yo ? Number(yo.apuesta_actual || 0) : 0;
+  const callAmount = Math.max(0, (st.apuesta_ronda || 0) - apuestaActualUsuario);
+  const hayGanadores = Array.isArray(st.ganador) && st.ganador.length > 0;
+  const esMiTurno = Number(st.turno_actual) === currentUserId;
+  const puedoActuar = manoActiva && yo && yo.estado === 'activo' && esMiTurno && !hayGanadores;
+  elMesa.callInfo.textContent = esMiTurno
+    ? `Es tu turno · A igualar: ${formatCurrency(callAmount)}`
+    : turnoJugador
+      ? `Turno de ${turnoJugador.username} · A igualar: ${formatCurrency(callAmount)}`
+      : `A igualar: ${formatCurrency(callAmount)}`;
+  elMesa.btnCall.disabled = !puedoActuar || callAmount <= 0;
+  elMesa.btnCheck.disabled = !puedoActuar || callAmount > 0;
+  elMesa.btnRaise.disabled = !puedoActuar;
+  elMesa.btnFold.disabled = !puedoActuar;
+  elMesa.btnCall.innerHTML = callAmount > 0
+    ? `<i class="fas fa-coins me-1"></i> Call ${formatCurrency(callAmount)}`
+    : `<i class="fas fa-coins me-1"></i> Call`;
+
+  // Jugadores (panel lateral)
   elMesa.jugadores.innerHTML = '';
-  Object.values(st.jugadores || {}).forEach(j => {
+  Object.values(jugadoresEstado).forEach(j => {
     const col = document.createElement('div');
-    col.className = 'col-md-4';
+    let className = 'poker-player-row';
+    if (j.user_id === currentUserId) className += ' me';
+    if (j.es_ganador) className += ' winner';
+    if (j.user_id === st.turno_actual) className += ' turno';
+    col.className = className;
+    const roleLabel = j.rol === 'dealer' ? 'D' : j.rol === 'small_blind' ? 'SB' : j.rol === 'big_blind' ? 'BB' : null;
+    const roleBadge = roleLabel ? `<span class="badge role ${j.rol}">${roleLabel}</span>` : '';
+    const turnoBadge = j.user_id === st.turno_actual ? `<span class="badge turno-badge">Turno</span>` : '';
     col.innerHTML = `
-      <div class="p-2 rounded border h-100 small">
-        <div class="fw-bold d-flex justify-content-between mb-1">
-          <span>${j.username}</span>
-          <span class="badge ${j.estado === 'activo' ? 'bg-success' : 'bg-secondary'}">
-            ${j.estado}
-          </span>
+      <div class="row-top">
+        <div class="d-flex align-items-center gap-1">
+          ${roleBadge}
+          <strong>${j.username}</strong>
         </div>
-        <div class="mb-1">
-          Stack: <strong>${j.stack.toFixed(2)}€</strong>
+        <div class="d-flex align-items-center gap-1">
+          ${turnoBadge}
+          <span class="badge ${j.estado === 'activo' ? 'bg-success' : 'bg-secondary'}">${j.estado}</span>
         </div>
-        <div class="mb-1">
-          Apuesta: <strong>${j.apuesta_actual.toFixed(2)}€</strong>
-        </div>
-        <div class="mb-1">
-          Última acción: <em>${j.ultima_accion || '-'}</em>
-        </div>
-        ${j.cartas_visibles ? `
-          <div class="d-flex gap-1 mt-1">
-            ${j.cartas_visibles.map(c => `
-              <div class="poker-card mini">
-                <div class="poker-card-value">${c.valor}</div>
-                <div class="poker-card-suit ${['♥','♦'].includes(c.palo) ? 'text-danger' : ''}">
-                  ${c.palo}
-                </div>
-              </div>
-            `).join('')}
-          </div>` : ''}
+      </div>
+      <div class="row-body">
+        <div>Mesa: <strong>${formatCurrency(j.stack)}</strong></div>
+        <div>Cuenta: <strong>${formatCurrency(j.saldo_cuenta ?? j.stack)}</strong></div>
+      </div>
+      <div class="row-body secondary">
+        <div>Total aportado: <strong>${formatCurrency(j.total_aportado)}</strong></div>
+        <div>En ronda: <strong>${formatCurrency(j.apuesta_actual)}</strong></div>
+      </div>
+      <div class="row-foot">
+        <div>Última acción: <em>${j.ultima_accion || '-'}</em></div>
+        ${j.ultima_ganancia ? `<div class="text-success">+${formatCurrency(j.ultima_ganancia)}</div>` : ''}
       </div>
     `;
     elMesa.jugadores.appendChild(col);
   });
 
-  // Si hay ganador, lo mostramos en el log (solo una vez)
-  if (st.ganador && !renderEstadoPartida._ultimoGanadorMostrado){
-    addLog(`Ganador: ${st.ganador.username} (+${st.ganador.ganancia.toFixed(2)}€)`);
-    renderEstadoPartida._ultimoGanadorMostrado = st.ganador.username;
+  // Jugadores alrededor de la mesa
+  const orden = ordenarJugadoresParaMesa(jugadoresEstado, st.orden_turnos);
+  elMesa.playerRing.innerHTML = '';
+  orden.forEach((j, idx) => {
+    const seatIndex = seatIndexForPosition(idx, orden.length || 1);
+    const seat = document.createElement('div');
+    let seatClass = `poker-seat seat-${seatIndex}`;
+    if (j.user_id === currentUserId) seatClass += ' me';
+    if (j.estado !== 'activo') seatClass += ' inactive';
+    if (j.es_ganador) seatClass += ' winner';
+    if (j.user_id === st.turno_actual) seatClass += ' turno';
+    seat.className = seatClass;
+    const roleLabel = j.rol === 'dealer' ? 'D' : j.rol === 'small_blind' ? 'SB' : j.rol === 'big_blind' ? 'BB' : '';
+    seat.innerHTML = `
+      <div class="avatar">${(j.username || '?').slice(0, 2).toUpperCase()}</div>
+      <div class="info">
+        ${roleLabel ? `<div class="role-chip ${j.rol}">${roleLabel}</div>` : ''}
+        <div class="name">${j.username}</div>
+        <div class="stack">Mesa: ${formatCurrency(j.stack)}</div>
+        <div class="bank">Cuenta: ${formatCurrency(j.saldo_cuenta ?? j.stack)}</div>
+        <div class="last">${j.ultima_accion || '---'}</div>
+      </div>
+    `;
+    if (j.cartas_visibles){
+      const cardsWrap = document.createElement('div');
+      cardsWrap.className = 'seat-cards';
+      j.cartas_visibles.forEach(c => cardsWrap.appendChild(renderCarta(c, { mini: true })));
+      seat.appendChild(cardsWrap);
+    }
+    if (j.mano_ganadora && j.mano_ganadora.length){
+      const best = document.createElement('div');
+      best.className = 'seat-best-hand';
+      best.innerHTML = `<span>${j.mano_texto || 'Mejor mano'}</span>`;
+      const bestCards = document.createElement('div');
+      bestCards.className = 'seat-best-cards';
+      j.mano_ganadora.forEach(c => bestCards.appendChild(renderCarta(c, { mini: true })));
+      best.appendChild(bestCards);
+      seat.appendChild(best);
+    }
+    elMesa.playerRing.appendChild(seat);
+  });
+
+  // Mostrar ganadores en log
+  if (Array.isArray(st.ganador) && st.ganador.length){
+    const key = JSON.stringify(st.ganador.map(g => g.user_id).sort());
+    if (renderEstadoPartida._ultimoGanadorMostrado !== key){
+      const resumen = st.ganador.map(g => `${g.username} (+${formatCurrency(g.ganancia)})`).join(', ');
+      addLog(`Ganador/es: ${resumen}`);
+      renderEstadoPartida._ultimoGanadorMostrado = key;
+    }
+  } else {
+    renderEstadoPartida._ultimoGanadorMostrado = null;
   }
 }
 
@@ -270,15 +453,55 @@ async function postAccion(path, body){
 elMesa.btnIniciar.addEventListener('click', () => {
   postAccion('iniciar', {});
 });
-elMesa.btnIgualar.addEventListener('click', () => {
+elMesa.btnCall.addEventListener('click', () => {
+  postAccion('call', {});
+});
+elMesa.btnCheck.addEventListener('click', () => {
+  postAccion('check', {});
+});
+elMesa.btnRaise.addEventListener('click', () => {
   const cantidad = Number(elMesa.apuesta.value || 0);
-  postAccion('apostar', { cantidad });
+  postAccion('raise', { cantidad });
 });
-elMesa.btnPasar.addEventListener('click', () => {
-  postAccion('pasar', {});
+elMesa.btnFold.addEventListener('click', () => {
+  postAccion('fold', {});
 });
-elMesa.btnRetirarse.addEventListener('click', () => {
-  postAccion('retirarse', {});
+elMesa.chatSend.addEventListener('click', sendChatMessage);
+elMesa.chatInput.addEventListener('keydown', (ev) => {
+  if (ev.key === 'Enter' && !ev.shiftKey){
+    ev.preventDefault();
+    sendChatMessage();
+  }
+});
+
+// ====== Eventos Socket.IO ======
+socket.on('poker_chat_history', (mensajes = []) => {
+  if (!mensajes.length){
+    elMesa.chatMessages.innerHTML = '<div class="text-muted small">Sin mensajes</div>';
+    return;
+  }
+  elMesa.chatMessages.innerHTML = '';
+  mensajes.forEach(addChatMessage);
+});
+
+socket.on('poker_chat_message', addChatMessage);
+
+socket.on('poker_estado_actualizado', (payload = {}) => {
+  if (Number(payload.sala_id) === salaId){
+    getEstado();
+  }
+});
+
+socket.on('poker_error', (data = {}) => {
+  if (data.error){
+    addLog(`Socket: ${data.error}`);
+  }
+});
+
+socket.emit('poker_join', { sala_id: salaId });
+
+window.addEventListener('beforeunload', () => {
+  socket.emit('poker_leave', { sala_id: salaId });
 });
 
 // ====== Polling sencillo ======
@@ -287,49 +510,483 @@ setInterval(getEstado, 3000);
 </script>
 
 <style>
-.poker-mesa {
-  background: radial-gradient(1200px 600px at 50% 0%, rgba(0, 243, 255, 0.08), transparent 60%);
-  border-radius: 16px;
-  border: 1px solid rgba(255,255,255,.08);
-  padding: 16px;
+.poker-wrapper {
+  color: #ecf4ff;
 }
-
-.poker-card {
-  width: 52px;
-  height: 76px;
-  border-radius: 8px;
-  border: 1px solid rgba(255,255,255,.4);
-  background: rgba(0,0,0,.6);
+.poker-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 1.5rem;
+}
+@media (max-width: 1200px) {
+  .poker-layout {
+    grid-template-columns: 1fr;
+  }
+}
+.poker-stage {
+  background: radial-gradient(circle at 30% 20%, rgba(30, 255, 233, 0.1), rgba(9, 13, 39, 0.95));
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 1.5rem;
+  box-shadow: 0 20px 80px rgba(0,0,0,0.35);
+}
+.poker-hud {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+.hud-pill {
+  padding: 0.75rem 1rem;
+  border-radius: 16px;
+  background: rgba(8, 12, 34, 0.8);
+  border: 1px solid rgba(255,255,255,0.08);
+  min-width: 140px;
+}
+.hud-pill span {
+  display: block;
+  font-weight: 600;
+}
+.hud-pill small {
+  color: rgba(255,255,255,0.6);
+}
+.hud-pill.hud-user {
+  background: linear-gradient(135deg, rgba(77, 172, 255, 0.2), rgba(50, 78, 255, 0.1));
+  border-color: rgba(77, 172, 255, 0.4);
+}
+.poker-table {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+.poker-table-inner {
+  position: relative;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(28, 109, 76, 0.9), rgba(11, 33, 26, 0.95));
+  border: 4px solid rgba(0,0,0,0.65);
+  min-height: 420px;
+  padding: 3rem 4rem 4rem;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  box-shadow: 0 0 12px rgba(0, 243, 255, 0.3);
+  gap: 0.75rem;
+  overflow: visible;
 }
-
+.poker-pot {
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.7);
+}
+.poker-pot strong {
+  display: block;
+  font-size: 2rem;
+  color: #ffd369;
+}
+.poker-pot small {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.8rem;
+  text-transform: none;
+  color: rgba(255,255,255,0.75);
+}
+.poker-community-label {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+  margin-top: 0.5rem;
+}
+.poker-community {
+  display: flex;
+  gap: 0.9rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: nowrap;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+}
+.poker-player-ring {
+  position: absolute;
+  inset: -3rem;
+  pointer-events: none;
+}
+.poker-seat {
+  position: absolute;
+  width: 150px;
+  background: rgba(5, 8, 24, 0.92);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.82rem;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  align-items: flex-start;
+  pointer-events: none;
+}
+.poker-seat.me {
+  border-color: #ffd369;
+  box-shadow: 0 0 20px rgba(255,211,105,0.4);
+}
+.poker-seat.turno {
+  border-color: #4fc3f7;
+  box-shadow: 0 0 22px rgba(79,195,247,0.5);
+}
+.poker-seat.inactive {
+  opacity: 0.45;
+}
+.poker-seat.winner {
+  border-color: #4caf50;
+  box-shadow: 0 0 22px rgba(76,175,80,0.45);
+}
+.poker-seat .avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+}
+.poker-seat .info {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  pointer-events: auto;
+}
+.role-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 18px;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+  background: rgba(255,255,255,0.12);
+}
+.role-chip.dealer {
+  background: rgba(255,215,64,0.4);
+  color: #1a1200;
+}
+.role-chip.small_blind {
+  background: rgba(129,212,250,0.3);
+  color: #06121f;
+}
+.role-chip.big_blind {
+  background: rgba(255,138,101,0.35);
+  color: #1f0d05;
+}
+.poker-seat .name {
+  font-weight: 700;
+}
+.poker-seat .stack {
+  color: #8df1ba;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.poker-seat .bank {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.7);
+}
+.poker-seat .last {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.55);
+}
+.seat-cards {
+  display: flex;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+.seat-best-hand {
+  position: absolute;
+  left: 50%;
+  bottom: -70px;
+  transform: translateX(-50%);
+  background: rgba(3,5,18,0.92);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.74rem;
+  color: rgba(255,255,255,0.85);
+  text-align: center;
+  box-shadow: 0 12px 24px rgba(0,0,0,0.45);
+  min-width: 140px;
+}
+.seat-best-cards {
+  display: flex;
+  gap: 0.25rem;
+  margin-top: 0.2rem;
+  justify-content: center;
+}
+.poker-seat.seat-0 { top: 88%; left: 50%; transform: translate(-50%, -50%); }
+.poker-seat.seat-1 { top: 65%; right: -45px; transform: translateY(-50%); }
+.poker-seat.seat-2 { top: 30%; right: -45px; transform: translateY(-50%); }
+.poker-seat.seat-3 { top: 8%; left: 50%; transform: translate(-50%, -50%); }
+.poker-seat.seat-4 { top: 30%; left: -45px; transform: translateY(-50%); }
+.poker-seat.seat-5 { top: 65%; left: -45px; transform: translateY(-50%); }
+.poker-hand-panel {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.poker-hand {
+  display: flex;
+  gap: 0.75rem;
+}
+.poker-hand-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  text-align: right;
+}
+.poker-hand-meta .badge {
+  background: #2f3649;
+}
+.poker-actions {
+  background: rgba(5, 7, 22, 0.85);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+}
+.action-field {
+  flex: 1;
+  min-width: 200px;
+}
+.action-field label {
+  display: block;
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 0.35rem;
+}
+.action-field input {
+  width: 100%;
+  padding: 0.65rem;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #fff;
+}
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+.btn {
+  padding: 0.75rem 1.4rem;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform .1s;
+}
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.btn.primary {
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  color: #031108;
+}
+.btn.accent {
+  background: linear-gradient(135deg, #38d9ff, #1d66ff);
+  color: #031c2f;
+}
+.btn.secondary {
+  background: linear-gradient(135deg, #ffd369, #ff9635);
+  color: #3d1f00;
+}
+.btn.ghost {
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.btn.danger {
+  border-color: rgba(255,87,87,0.5);
+  color: #ff8787;
+}
+.btn:not(:disabled):active {
+  transform: scale(0.97);
+}
+.poker-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.poker-panel {
+  background: rgba(6, 8, 29, 0.85);
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 1.25rem;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+}
+.poker-player-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.poker-player-row {
+  background: rgba(15,17,35,0.9);
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.04);
+  padding: 0.85rem;
+  font-size: 0.85rem;
+}
+.poker-player-row.me {
+  border-color: rgba(255, 211, 105, 0.5);
+}
+.poker-player-row.winner {
+  border-color: rgba(76,175,80,0.7);
+  box-shadow: 0 0 15px rgba(76,175,80,0.2);
+}
+.poker-player-row.turno {
+  border-color: rgba(79,195,247,0.6);
+}
+.poker-player-row .row-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.35rem;
+}
+.poker-player-row .row-body {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  color: #9efadd;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.poker-player-row .row-body.secondary {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.75);
+}
+.poker-player-row .row-foot {
+  margin-top: 0.35rem;
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.6);
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.badge.role {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  font-size: 0.65rem;
+}
+.badge.role.small_blind {
+  background: rgba(129,212,250,0.25);
+  color: #031728;
+}
+.badge.role.big_blind {
+  background: rgba(255,138,101,0.35);
+  color: #2b1106;
+}
+.badge.role.dealer {
+  background: rgba(255,215,64,0.5);
+  color: #1c1200;
+}
+.badge.turno-badge {
+  background: rgba(79,195,247,0.4);
+  color: #052534;
+}
+.poker-card {
+  width: 60px;
+  height: 86px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(7,10,26,0.75);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+}
 .poker-card.mini {
   width: 40px;
   height: 60px;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
-
-.poker-card-value {
-  font-size: 1.1rem;
-}
-
-.poker-card-suit {
+.poker-card-back {
+  background: linear-gradient(135deg, rgba(0,0,0,0.75), rgba(36,44,78,0.95));
+  color: rgba(255,255,255,0.5);
   font-size: 1.4rem;
 }
-
-.poker-controles .btn {
-  min-width: 140px;
+.poker-card-value,
+.poker-card-suit {
+  line-height: 1.1;
 }
-
+.poker-card-value.roja,
+.poker-card-suit.roja {
+  color: #ff8d8d;
+}
 .poker-log {
-  max-height: 160px;
+  max-height: 220px;
   overflow-y: auto;
-  background: rgba(0,0,0,.5);
+  font-size: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.poker-chat-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.poker-chat-messages {
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 0.75rem;
+  background: rgba(255,255,255,0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.chat-row {
+  background: rgba(0,0,0,0.2);
+  border-radius: 8px;
+  padding: 0.4rem 0.6rem;
+}
+.chat-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.55);
+}
+.chat-user {
+  font-weight: 600;
+  color: #8df1ba;
+}
+.chat-message {
+  font-size: 0.85rem;
+  margin-top: 0.2rem;
+}
+.poker-chat-input {
+  display: flex;
+  gap: 0.5rem;
+}
+.poker-chat-input input {
+  flex: 1;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #fff;
 }
 </style>
 
