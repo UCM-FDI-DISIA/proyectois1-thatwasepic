@@ -212,8 +212,6 @@ def register_blackjack_handlers(socketio, app):
         if not sala or sala.juego != "blackjack":
             return
         room = f"blackjack_sala_{sala_id}"
-        join_room(room)
-
         st = salas_blackjack.setdefault(sala_id, {
             "jugadores": {},
             "dealer": [],
@@ -225,6 +223,13 @@ def register_blackjack_handlers(socketio, app):
             "votos_revancha": set(),
             "_timer_activo": False
         })
+
+        # Limitar sala a max. 4 jugadores nuevos; permitir reingreso del mismo usuario
+        if current_user.id not in st["jugadores"] and len(st["jugadores"]) >= 4:
+            emit("error_blackjack", {"msg": "Sala llena (maximo 4 jugadores)."}, room=request.sid)
+            return
+
+        join_room(room)
 
         if current_user.id not in st["jugadores"]:
             st["jugadores"][current_user.id] = {
