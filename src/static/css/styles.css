@@ -572,3 +572,355 @@ html {
     translate: 0 50px;
   }
 }
+
+/* === RULETA SINGLEPLAYER === */
+.ruleta-breakout {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  padding: 0 clamp(1.5rem, 4vw, 5rem);
+  box-sizing: border-box;
+}
+
+.ruleta-page {
+  --ruleta-felt: #1a2240;
+  --ruleta-felt-dark: #151b34;
+  --ruleta-gold: #e0b14a;
+  --ruleta-tile: #202a55;
+  --ruleta-tile-outer: #1e264c;
+  --ruleta-badge-bg: rgba(255, 255, 255, 0.92);
+  --ruleta-badge-fg: #10121f;
+  background: rgba(10, 12, 25, 0.7);
+  border: 1px solid rgba(0, 243, 255, 0.2);
+  border-radius: 32px;
+  padding: clamp(1.5rem, 2vw, 3rem);
+  box-shadow: 0 25px 65px rgba(2, 8, 20, 0.6);
+  width: min(1800px, 100%);
+  margin: 0 auto;
+}
+
+.ruleta-header {
+  background: rgba(15, 18, 32, 0.92);
+  border-radius: 24px;
+  padding: 1.75rem;
+  border: 1px solid rgba(0, 243, 255, 0.18);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  box-shadow: var(--shadow-hologram);
+}
+
+.ruleta-heading {
+  font-family: var(--font-family-title);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.ruleta-section-label {
+  letter-spacing: 0.25em;
+  font-size: 0.85rem;
+}
+
+.ruleta-header .balances {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.ruleta-header .pill,
+.ruleta-ui .pill {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(0, 243, 255, 0.25);
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.ruleta-ui .pill-toggle input {
+  accent-color: var(--neon-cyan);
+}
+
+.ruleta-ui .pill-inline {
+  gap: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+.ruleta-ui {
+  margin-top: 1.5rem;
+  width: 100%;
+}
+
+.ruleta-ui .panel {
+  background: linear-gradient(180deg, var(--ruleta-felt), var(--ruleta-felt-dark));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 1.5rem;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+}
+
+.ruleta-ui .wheel-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.ruleta-grid {
+  display: grid;
+  grid-template-columns: minmax(360px, 450px) minmax(0, 1fr);
+  gap: clamp(1.5rem, 2vw, 2.5rem);
+  align-items: flex-start;
+}
+
+.ruleta-panel-table {
+  min-width: 0;
+  width: 100%;
+}
+
+.ruleta-ui .wheel-wrap svg {
+  width: 100%;
+  max-width: 460px;
+  height: auto;
+}
+
+.ruleta-ui .controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: center;
+}
+
+.ruleta-ui .controls .btn,
+.ruleta-ui .bets-buttons .btn,
+.ruleta-ui #addChip {
+  border: none;
+  border-radius: 12px;
+  padding: 0.65rem 1rem;
+  font-weight: 700;
+  background: var(--gradient-cyber);
+  color: #050511;
+  box-shadow: var(--glow-cyan-button);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ruleta-ui .controls .btn.secondary,
+.ruleta-ui .bets-buttons .btn.secondary,
+.ruleta-ui #addChip.secondary {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text-light);
+  box-shadow: none;
+}
+
+.ruleta-ui .controls .btn:hover,
+.ruleta-ui .bets-buttons .btn:hover,
+.ruleta-ui #addChip:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 243, 255, 0.35);
+}
+
+.ruleta-ui .controls .btn:active,
+.ruleta-ui .bets-buttons .btn:active,
+.ruleta-ui #addChip:active {
+  transform: translateY(0);
+}
+
+.ruleta-ui .chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 18px;
+  margin-bottom: 1rem;
+}
+
+.ruleta-ui #customChip {
+  width: 6em;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: var(--text-light);
+  padding: 0.35rem 0.5rem;
+}
+
+.ruleta-ui .bets-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin: 0.5rem 0 1rem;
+}
+
+.ruleta-ui .table {
+  display: grid;
+  grid-template-columns: 90px repeat(12, 1fr) 140px 140px;
+  gap: 5px;
+  padding: 12px;
+  background: var(--ruleta-felt);
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  overflow-x: auto;
+  min-width: 1100px;
+}
+
+.ruleta-ui .cell {
+  position: relative;
+  background: var(--ruleta-tile);
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  color: #fafafa;
+  text-align: center;
+  padding: 22px 8px;
+  border-radius: 10px;
+  user-select: none;
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+
+.ruleta-ui .cell.zero {
+  background: #1d6f3e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ruleta-ui .cell.red {
+  background: #9e1f24;
+}
+
+.ruleta-ui .cell.black {
+  background: #0b0b0b;
+}
+
+.ruleta-ui .cell.preview {
+  outline: 3px solid rgba(255, 215, 0, 0.85);
+  box-shadow: 0 6px 18px rgba(255, 215, 0, 0.2);
+}
+
+.ruleta-ui .outside {
+  background: var(--ruleta-tile-outer);
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
+.ruleta-ui .bet-badge {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  background: var(--ruleta-badge-bg);
+  color: var(--ruleta-badge-fg);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.ruleta-ui .color-dot {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 0, 0, 0.45);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.25);
+}
+
+.ruleta-ui .stack {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+}
+
+.ruleta-ui .mini-chip {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 3px dotted rgba(0, 0, 0, 0.35);
+  display: grid;
+  place-items: center;
+  font-size: 0.65rem;
+  font-weight: 900;
+  color: #000;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.ruleta-ui .chip {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  border: 6px dotted rgba(0, 0, 0, 0.25);
+  cursor: grab;
+  color: #000;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+}
+
+.ruleta-ui .group {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  padding: 1.25rem;
+}
+
+.ruleta-ui .group-title {
+  margin-bottom: 1rem;
+  font-family: var(--font-family-title);
+  letter-spacing: 0.05em;
+}
+
+.ruleta-ui .log {
+  height: 220px;
+  overflow: auto;
+  background: #0f1535;
+  color: #eafdf0;
+  padding: 1rem;
+  border-radius: 12px;
+  font-family: ui-monospace, Consolas, monospace;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ruleta-note {
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 991.98px) {
+  .ruleta-page {
+    padding: 1.25rem;
+  }
+
+  .ruleta-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ruleta-header .balances {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .ruleta-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ruleta-breakout {
+    width: 100%;
+    margin-left: 0;
+    padding: 0 1rem;
+  }
+
+  .ruleta-ui .table {
+    min-width: 900px;
+  }
+}

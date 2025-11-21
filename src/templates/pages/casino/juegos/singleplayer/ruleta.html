@@ -1,139 +1,113 @@
-<!DOCTYPE html>
-<html lang="es" data-mode="bet">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ruleta Europea 🎯</title>
-  <style>
-    :root{
-      --felt:#1a2240; --felt-dark:#151b34; --gold:#e0b14a; --cream:#f3efe2; --shadow:0 6px 18px rgba(0,0,0,.22);
-      --tile:#202a55; --tile-outer:#1e264c; --text:#e8ecff; --badge-bg:rgba(255,255,255,.92); --badge-fg:#10121f;
-    }
-    *{box-sizing:border-box} html,body{height:100%}
-    body{margin:0; font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif; background: radial-gradient(900px 600px at 60% 30%, #0f1330, var(--felt-dark)); color:var(--text); display:flex; flex-direction:column; gap:10px;}
-    header{ padding:12px 16px; color:var(--cream); display:flex; align-items:center; justify-content:space-between; }
-    .pill{background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15); padding:6px 10px; border-radius:999px}
-    main{display:grid; gap:18px; padding:0 16px 16px; max-width:1400px; width:100%; margin:0 auto; grid-template-columns: 380px 1fr;}
-    .panel{background:linear-gradient(180deg, var(--felt), var(--felt-dark)); border:2px solid rgba(255,255,255,.12); border-radius:18px; padding:14px; box-shadow:var(--shadow)}
-    .wheel-wrap{display:grid; place-items:center}
-    .controls{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; align-items:center; justify-content:center}
-    .btn{appearance:none; border:none; padding:10px 14px; border-radius:12px; background:var(--gold); color:#1a1a1a; font-weight:700; cursor:pointer; box-shadow:var(--shadow)}
-    .btn.secondary{background:#e5e7ff; color:#10121f}
-    .wheel-wrap svg{ width:100%; height:auto; display:block; max-width:460px; }
-    .table{display:grid; grid-template-columns: 90px repeat(12, 1fr) 140px 140px; gap:5px; padding:10px; background:var(--felt); border-radius:14px; border:1px solid rgba(255,255,255,.15)}
-  .cell{position:relative; background:var(--tile); border:1px solid rgba(0,0,0,.35); color:#fafafa; text-align:center; padding:22px 8px; border-radius:10px; user-select:none; font-size:28px; font-weight:900}
-    .cell.zero{grid-row: 1 / span 3; background:#1d6f3e; display:flex; align-items:center; justify-content:center}
-    .cell.red{background:#9e1f24} .cell.black{background:#0b0b0b}
-  .cell.preview{ outline:3px solid rgba(255,215,0,0.85); box-shadow:0 6px 18px rgba(255,215,0,0.12) }
-    .outside{ background:var(--tile-outer); font-weight:800; font-size:18px }
-    .bet-badge{position:absolute; right:8px; bottom:8px; background:var(--badge-bg); color:var(--badge-fg); padding:2px 8px; border-radius:999px; font-size:13px; font-weight:900}
-    .color-dot{position:absolute; left:8px; bottom:8px; width:14px; height:14px; border-radius:50%; border:2px solid rgba(0,0,0,.45); box-shadow: inset 0 0 0 2px rgba(255,255,255,.25)}
-    .stack{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); pointer-events:auto}
-    .mini-chip{width:26px; height:26px; border-radius:50%; border:3px dotted rgba(0,0,0,.35); display:grid; place-items:center; font-size:10px; font-weight:900; color:#000; position:absolute; left:0; top:0;}
-    .chips{display:flex; gap:10px; flex-wrap:wrap; align-items:center; padding:10px}
-    .chip{width:56px; height:56px; border-radius:50%; display:grid; place-items:center; font-weight:900; box-shadow:var(--shadow); border:6px dotted rgba(0,0,0,.25); cursor:grab; color:#000}
-    .group{background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.15); border-radius:14px; padding:10px; margin-top:12px}
-    .log{height:200px; overflow:auto; background:#0f1535; color:#eafdf0; padding:10px; border-radius:12px; font-family:ui-monospace,Consolas,monospace}
-  
-.logo-link{
-  display:inline-block; margin-left:12px; padding:8px 16px; border-radius:999px;
-  text-decoration:none; text-transform:uppercase; letter-spacing:.08em; font-weight:800;
-  color:#e8ecff; border:1px solid rgba(255,255,255,.18);
-  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-  box-shadow:0 6px 18px rgba(0,0,0,.22), inset 0 0 0 1px rgba(255,255,255,.06);
-  backdrop-filter: blur(2px);
-}
-.logo-link:hover{ border-color:rgba(255,255,255,.35); transform:translateY(-1px); }
-.logo-link:active{ transform:translateY(0); box-shadow:0 4px 14px rgba(0,0,0,.28), inset 0 0 0 1px rgba(255,255,255,.08); }
-</style>
-</head>
-<body data-mode="bet">
-  <header>
-    <div style="font-weight:800; font-size:18px">🎯 Ruleta europea</div>
-    <div class="balances"><a href="/dashboard" class="logo-link">LOGBAIT</a>
+{% extends "pages/casino/base.html" %}
+
+{% block title %}
+Ruleta Europea
+{% endblock %}
+
+{% block content %}
+<div class="ruleta-breakout">
+<div class="ruleta-page">
+  <div class="ruleta-header">
+    <div>
+      <p class="ruleta-section-label text-uppercase text-muted mb-1">Modo singleplayer</p>
+      <h2 class="ruleta-heading mb-0">🎯 Ruleta europea</h2>
+    </div>
+    <div class="balances">
       <span class="pill">Banco: <b id="bank">0</b>¢</span>
       <span class="pill">Apuesta actual: <b id="betTotal">0</b>¢</span>
       <span class="pill">Última acción: <span id="lastAction">—</span></span>
     </div>
-  </header>
+    <div class="ms-auto">
+      <a href="{{ url_for('dashboard.home') }}" class="btn btn-outline-primary btn-sm">
+        <i class="fas fa-gauge me-1"></i>Dashboard
+      </a>
+    </div>
+  </div>
 
-  <main>
-    <section class="panel wheel-wrap">
-      <svg id="wheel" viewBox="-220 -220 440 440" aria-label="ruleta">
-        <defs>
-          <radialGradient id="rim" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="#c08a26"/>
-            <stop offset="70%" stop-color="#8a5e10"/>
-            <stop offset="100%" stop-color="#5a3b08"/>
-          </radialGradient>
-        </defs>
-        <circle r="210" fill="url(#rim)"/>
-        <g id="numbers"></g>
-        <circle r="110" fill="#2f7a3d"/>
-        <circle r="20" fill="#1a4a25"/>
-        <circle id="ball" r="6" fill="#f3efe2" cx="0" cy="-170"/>
-      </svg>
-      <div class="controls">
-        <button id="spinBtn" class="btn">Girar</button>
-        <button id="clearBtn" class="btn secondary">Borrar jugada</button>
-        <button id="undoBtn" class="btn secondary">Deshacer</button>
-        <button id="dupBtn" class="btn">Duplicar apuesta</button>
-        <button id="repeatBtn" class="btn">Última jugada</button>
-        <label class="pill" style="display:flex;align-items:center;gap:8px;">
-          <input type="checkbox" id="instantToggle">
-          Modo instantáneo
-        </label>        
-      </div>
-    </section>
+  <div class="ruleta-ui mt-4">
+    <div class="ruleta-grid">
+      <section class="panel wheel-wrap">
+          <svg id="wheel" viewBox="-220 -220 440 440" aria-label="ruleta">
+            <defs>
+              <radialGradient id="rim" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#c08a26" />
+                <stop offset="70%" stop-color="#8a5e10" />
+                <stop offset="100%" stop-color="#5a3b08" />
+              </radialGradient>
+            </defs>
+            <circle r="210" fill="url(#rim)" />
+            <g id="numbers"></g>
+            <circle r="110" fill="#2f7a3d" />
+            <circle r="20" fill="#1a4a25" />
+            <circle id="ball" r="6" fill="#f3efe2" cx="0" cy="-170" />
+          </svg>
+          <div class="controls">
+            <button id="spinBtn" class="btn">Girar</button>
+            <button id="clearBtn" class="btn secondary">Borrar jugada</button>
+            <button id="undoBtn" class="btn secondary">Deshacer</button>
+            <button id="dupBtn" class="btn">Duplicar apuesta</button>
+            <button id="repeatBtn" class="btn">Última jugada</button>
+            <label class="pill pill-toggle">
+              <input type="checkbox" id="instantToggle">
+              Modo instantáneo
+            </label>
+          </div>
+        </section>
+      <section class="panel ruleta-panel-table">
+          <div class="chips" id="chips">
+            <div class="chip" draggable="true" data-value="20">0,20€</div>
+            <div class="chip" draggable="true" data-value="50">0,50€</div>
+            <div class="chip" draggable="true" data-value="100">1€</div>
+            <div class="chip" draggable="true" data-value="200">2€</div>
+            <div class="chip" draggable="true" data-value="500">5€</div>
+            <div class="chip" draggable="true" data-value="1000">10€</div>
+            <label class="pill pill-inline ms-auto">
+              + Moneda:
+              <input id="customChip" type="number" min="10" step="10" value="250">¢
+              <button id="addChip" class="btn secondary">Añadir</button>
+            </label>
+          </div>
 
-    <section class="panel">
-      <div class="chips" id="chips">
-        <div class="chip" draggable="true" data-value="20">0,20€</div>
-        <div class="chip" draggable="true" data-value="50">0,50€</div>
-        <div class="chip" draggable="true" data-value="100">1€</div>
-        <div class="chip" draggable="true" data-value="200">2€</div>
-        <div class="chip" draggable="true" data-value="500">5€</div>
-        <div class="chip" draggable="true" data-value="1000">10€</div>
-        <label class="pill" style="background:#fff; color:#111; display:flex; align-items:center; gap:6px; margin-left:auto">
-          + Moneda: <input id="customChip" type="number" min="10" step="10" value="250" style="width:6em">¢
-          <button id="addChip" class="btn secondary">Añadir</button>
-        </label>
-      </div>
+          <div class="bets-buttons">
+            <button class="btn" id="voisinsBtn">Vecinos del 0</button>
+            <button class="btn" id="tiersBtn">Tiers</button>
+            <button class="btn" id="orphBtn">Huérfanos</button>
+          </div>
 
-      <div class="bets-buttons" style="margin:8px 0 4px;">
-        <button class="btn" id="voisinsBtn">Vecinos del 0</button>
-        <button class="btn" id="tiersBtn">Tiers</button>
-        <button class="btn" id="orphBtn">Huérfanos</button>
-      </div>
+          <div class="table" id="layout"></div>
 
-      <div class="table" id="layout"></div>
+          <div class="group mt-4">
+            <h3 class="group-title">Apuestas exteriores</h3>
+            <div class="bets-buttons flex-wrap">
+              <button class="btn" data-out="red">Rojo</button>
+              <button class="btn" data-out="black">Negro</button>
+              <button class="btn" data-out="even">Par</button>
+              <button class="btn" data-out="odd">Impar</button>
+              <button class="btn" data-out="low">1–18</button>
+              <button class="btn" data-out="high">19–36</button>
+              <button class="btn" data-out="d1">1ª Docena</button>
+              <button class="btn" data-out="d2">2ª Docena</button>
+              <button class="btn" data-out="d3">3ª Docena</button>
+              <button class="btn" data-out="c1">Columna 1</button>
+              <button class="btn" data-out="c2">Columna 2</button>
+              <button class="btn" data-out="c3">Columna 3</button>
+            </div>
+          </div>
 
-      <div class="group">
-        <h3 style="margin:6px 6px 10px;">Apuestas exteriores</h3>
-        <div class="bets-buttons">
-          <button class="btn" data-out="red">Rojo</button>
-          <button class="btn" data-out="black">Negro</button>
-          <button class="btn" data-out="even">Par</button>
-          <button class="btn" data-out="odd">Impar</button>
-          <button class="btn" data-out="low">1–18</button>
-          <button class="btn" data-out="high">19–36</button>
-          <button class="btn" data-out="d1">1ª Docena</button>
-          <button class="btn" data-out="d2">2ª Docena</button>
-          <button class="btn" data-out="d3">3ª Docena</button>
-          <button class="btn" data-out="c1">Columna 1</button>
-          <button class="btn" data-out="c2">Columna 2</button>
-          <button class="btn" data-out="c3">Columna 3</button>
-        </div>
-      </div>
+          <div class="log mt-4" id="log"></div>
+        </section>
+    </div>
+  </div>
 
-      <div class="log" id="log"></div>
-    </section>
-  </main>
+  <p class="ruleta-note text-center text-muted small mb-0 mt-4">
+    Demo educativa. Mínimo por casilla: 20¢.
+  </p>
+</div>
+</div>
+{% endblock %}
 
-  <footer>
-    <small style="opacity:.8;padding:10px 16px;display:block">Demo educativa. Mínimo por casilla: 20¢.</small>
-  </footer>
-
+{% block scripts %}
+{{ super() }}
 <script>
 /* ================== DATOS Y ESTADO ================== */
 const EURO_SEQ = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
@@ -664,5 +638,5 @@ function settle(number){
 let _ruletaPoll = setInterval(()=>refreshState(), 5000);
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) refreshState(); });
 </script>
-</body>
-</html>
+
+{% endblock %}
