@@ -89,6 +89,26 @@ body{background:#12191b;color:#e7e7e7;font-family:system-ui,-apple-system,Segoe 
 }
 .btn-cta:hover{filter:brightness(1.06);box-shadow:0 0 18px rgba(0,243,255,.55)}
 
+/* Top-right navigation pills */
+.topbar .nav-btn{
+  white-space:normal;
+  text-align:center;
+  line-height:1.15;
+  min-width:180px;
+  padding:12px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+}
+.topbar .nav-btn.nav-btn-stack{
+  flex-direction:column;
+  gap:2px;
+  font-size:0.95rem;
+}
+.topbar .nav-btn .label-block{display:block;}
+.topbar .nav-btn.nav-btn-wide{min-width:230px;}
+
 /* Mesa */
 .holo-table {
   background: linear-gradient(135deg, rgba(0, 243, 255, 0.05), rgba(255, 0, 255, 0.05));
@@ -195,11 +215,12 @@ body{background:#12191b;color:#e7e7e7;font-family:system-ui,-apple-system,Segoe 
             <div class="estado" id="estado-sistema">EN ESPERA</div>
           </div>
           <div class="topbar-right">
-            <a href="{{ url_for('dashboard.home') }}" class="btn btn-cta" style="white-space: nowrap;">
+            <a href="{{ url_for('dashboard.home') }}" class="btn btn-cta nav-btn">
               <i class="fas fa-home me-1"></i> MEN&Uacute; PRINCIPAL
             </a>
-            <a class="btn btn-cta" href="/salas-espera?juego=blackjack" style="white-space: nowrap;">
-              Modo Multijugador (crear/unirse a sala)
+            <a class="btn btn-cta nav-btn nav-btn-stack nav-btn-wide" href="/salas-espera?juego=blackjack">
+              <span class="label-block">Modo Multijugador</span>
+              <span class="label-block">(crear/unirse a sala)</span>
             </a>
             <div class="help-pill" id="open-help" style="white-space: nowrap;">
               AYUDA
