@@ -199,3 +199,42 @@ def test_revancha_resetea_estado_y_mazo(app, sala_y_clients):
     assert all(j["mano"] == [] for j in estado["jugadores"].values())
     assert all(j["apuesta"] == 0 for j in estado["jugadores"].values())
     assert estado["votos_revancha"] == set()
+
+
+def test_no_permite_mas_de_cuatro_jugadores(app, sala_y_clients):
+    sala, (c1, c2), (user1, user2) = sala_y_clients
+
+    extras = []
+    clients_extra = []
+    try:
+        # Se pueden unir dos jugadores adicionales (total 4)
+        for idx in range(3, 5):
+            usuario = _crear_usuario(app, f"bj_user_{idx}", balance=50.0)
+            extras.append(usuario)
+            cli = _socket_client_para_usuario(app, usuario)
+            clients_extra.append(cli)
+            cli.emit("join_sala_blackjack", {"sala_id": sala.id})
+
+        estado = salas_blackjack[sala.id]
+        assert len(estado["jugadores"]) == 4
+        assert estado["orden_turnos"] == [user1.id, user2.id, extras[0].id, extras[1].id]
+
+        # Quinto jugador debe recibir error y no entrar en la sala
+        u5 = _crear_usuario(app, "bj_user_5", balance=50.0)
+        extras.append(u5)
+        c5 = _socket_client_para_usuario(app, u5)
+        clients_extra.append(c5)
+        c5.emit("join_sala_blackjack", {"sala_id": sala.id})
+        mensajes = c5.get_received()
+        assert any(evt["name"] == "error_blackjack" for evt in mensajes), "Debe avisar sala llena"
+        assert len(estado["jugadores"]) == 4, "No debe agregar quinto jugador"
+    finally:
+        for cli in clients_extra:
+            try:
+                cli.disconnect()
+            except Exception:
+                pass
+        with app.app_context():
+            for u in extras:
+                db.session.delete(User.query.get(u.id))
+            db.session.commit()
