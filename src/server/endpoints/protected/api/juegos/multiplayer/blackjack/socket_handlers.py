@@ -2,7 +2,7 @@ import time, random
 from collections import deque
 from flask_login import current_user
 from flask_socketio import join_room, leave_room, emit
-from models import db, User, SalaMultijugador
+from models import db, User, SalaMultijugador, Apuesta, Estadistica
 from flask import request
 
 
@@ -132,7 +132,8 @@ def ejecutar_crupier_y_resolver(sala_id):
     # - ganada: 2× apuesta (apuesta + beneficio)
     # - blackjack natural: 2.5× apuesta (3:2)
     for uid, j in st["jugadores"].items():
-        if j["apuesta"] <= 0:
+        apuesta_monto = j["apuesta"]
+        if apuesta_monto <= 0:
             continue
         pj = valor_mano(j["mano"])
         pago_total = 0.0
@@ -141,13 +142,13 @@ def ejecutar_crupier_y_resolver(sala_id):
             pago_total = 0.0
         elif es_blackjack(j["mano"]):
             if dealer_bj:
-                pago_total = j["apuesta"]  # push si ambos blackjack
+                pago_total = apuesta_monto  # push si ambos blackjack
             else:
-                pago_total = j["apuesta"] * 2.5  # 3:2
+                pago_total = apuesta_monto * 2.5  # 3:2
         elif dealer_val > 21 or pj > dealer_val:
-            pago_total = j["apuesta"] * 2.0
+            pago_total = apuesta_monto * 2.0
         elif pj == dealer_val:
-            pago_total = j["apuesta"]
+            pago_total = apuesta_monto
         else:
             pago_total = 0.0
 
@@ -158,7 +159,41 @@ def ejecutar_crupier_y_resolver(sala_id):
             db.session.add(user)
             # Mantener memoria alineada con DB para el header
             j["balance"] = float(user.balance)
-                    
+            
+            # Registrar apuesta y estadisticas consolidando en blackjack
+            resultado = "perdida"
+            if pago_total > apuesta_monto:
+                resultado = "ganada"
+            elif pago_total == apuesta_monto:
+                resultado = "empate"
+
+            apuesta_db = Apuesta(
+                user_id=uid,
+                juego="blackjack_multijugador",
+                cantidad=apuesta_monto,
+                resultado=resultado,
+                ganancia=pago_total
+            )
+            db.session.add(apuesta_db)
+
+            stats = Estadistica.query.filter_by(user_id=uid, juego="blackjack").first()
+            if not stats:
+                stats = Estadistica(
+                    user_id=uid,
+                    juego="blackjack",
+                    partidas_jugadas=0,
+                    partidas_ganadas=0,
+                    ganancia_total=0.0,
+                    apuesta_total=0.0
+                )
+                db.session.add(stats)
+
+            stats.partidas_jugadas += 1
+            stats.apuesta_total += apuesta_monto
+            stats.ganancia_total += pago_total
+            if pago_total > apuesta_monto:
+                stats.partidas_ganadas += 1
+
             emit("balance_update", {"balance": float(user.balance)}, room=f"blackjack_sala_{sala_id}")
 
 
