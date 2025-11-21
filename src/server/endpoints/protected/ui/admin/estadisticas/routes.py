@@ -55,6 +55,7 @@ def home():
             'tragaperras': ['tragaperras', 'slots'],
             'caballos': ['caballos'],
             'ruleta': ['ruleta'],
+            'quiniela': ['quiniela']
         }
         
         juegos_stats = {}
