@@ -179,6 +179,63 @@ def _emit_estado_actualizado(sala_id: int):
     socketio.emit('poker_estado_actualizado', {'sala_id': sala_id}, room=room)
 
 
+def _emit_hand_summary(sala_id: int, bote: float, ganadores: list[dict]):
+    """
+    Envía un resumen de mano al chat de mesa (Socket.IO) con ganadores,
+    bote repartido y mano con la que ganaron.
+    """
+    socketio = current_app.extensions.get('socketio')
+    if not socketio:
+        return
+    room = f"poker_{sala_id}"
+    socketio.emit('poker_hand_summary', {
+        'sala_id': sala_id,
+        'bote': round(float(bote or 0.0), 2),
+        'ganadores': ganadores,
+        'timestamp': datetime.utcnow().isoformat()
+    }, room=room)
+
+
+def _asegurar_jugador_en_estado(estado: dict, usuario: User):
+    """
+    Garantiza que el usuario exista en el estado con stack en mesa y saldo_cuenta.
+    Si no existe, arranca con stack 0 y saldo del usuario.
+    """
+    jugadores = estado.setdefault('jugadores', {})
+    uid = str(usuario.id)
+    if uid not in jugadores:
+        jugadores[uid] = {
+            'user_id': usuario.id,
+            'username': usuario.username,
+            'stack': 0.0,
+            'apuesta_actual': 0.0,
+            'total_aportado': 0.0,
+            'saldo_cuenta': float(usuario.balance or 0.0),
+            'estado': 'activo',
+            'ultima_accion': '---',
+            'ha_actuado': False,
+            'es_ganador': False,
+            'mano_ganadora': None,
+            'mano_texto': None,
+            'cartas': [],
+            'cartas_visibles': None
+        }
+    else:
+        info = jugadores[uid]
+        info.setdefault('stack', 0.0)
+        info.setdefault('saldo_cuenta', float(usuario.balance or 0.0))
+        info.setdefault('apuesta_actual', 0.0)
+        info.setdefault('total_aportado', 0.0)
+        info.setdefault('estado', 'activo')
+        info.setdefault('ultima_accion', '---')
+        info.setdefault('ha_actuado', False)
+        info.setdefault('es_ganador', False)
+        info.setdefault('mano_ganadora', None)
+        info.setdefault('mano_texto', None)
+        info.setdefault('cartas_visibles', None)
+    return estado['jugadores'][uid]
+
+
 def _jugador_necesita_actuar(jugador: dict | None, estado: dict) -> bool:
     if not jugador or jugador.get('estado') != 'activo':
         return False
@@ -255,18 +312,13 @@ def _apostar_blind(jugador: dict, monto: float, estado: dict) -> float:
     if monto <= 0:
         return 0.0
     stack = float(jugador.get('stack', 0.0) or 0.0)
-    user = User.query.get(jugador['user_id'])
-    saldo = float(user.balance if user else jugador.get('saldo_cuenta', stack))
-    disponible = min(stack, saldo)
-    aporte = min(monto, disponible)
+    if stack <= 0:
+        return 0.0
+    aporte = min(monto, stack)
     jugador['stack'] = stack - aporte
     jugador['apuesta_actual'] = float(jugador.get('apuesta_actual', 0.0)) + aporte
     jugador['total_aportado'] = float(jugador.get('total_aportado', 0.0) or 0.0) + aporte
     estado['bote'] = float(estado.get('bote', 0.0)) + aporte
-    nuevo_saldo = saldo - aporte
-    jugador['saldo_cuenta'] = nuevo_saldo
-    if user:
-        user.balance = nuevo_saldo
     if jugador['stack'] <= 1e-6:
         jugador['stack'] = 0.0
         jugador['sin_stack'] = True
@@ -293,6 +345,7 @@ def _sanitizar_estado_para_usuario(estado: dict, user_id: int) -> dict:
         if int(uid) != int(user_id):
             if estado_copia.get('fase') not in ('showdown', 'terminada'):
                 info.pop('cartas', None)
+            info.pop('saldo_cuenta', None)
     return estado_copia
 
 
@@ -307,14 +360,14 @@ def _asegurar_usuario_en_sala(sala_id: int):
     return sala, usuario_sala, None, None
 
 
-def _resolver_si_todos_han_actuado(estado: dict):
+def _resolver_si_todos_han_actuado(estado: dict, sala_id: int | None = None):
     jugadores = estado.get('jugadores', {})
     activos = [j for j in jugadores.values() if j.get('estado') == 'activo']
     if not activos:
         return  # nadie activo
 
     if len(activos) == 1:
-        _finalizar_con_ganador(estado, activos[0])
+        _finalizar_con_ganador(estado, activos[0], sala_id)
         return
 
     # Si falta alguien por actuar, no avanzamos
@@ -347,7 +400,7 @@ def _resolver_si_todos_han_actuado(estado: dict):
         return
 
     if fase in ('river', 'apuestas'):
-        _finalizar_con_ganador(estado, None)
+        _finalizar_con_ganador(estado, None, sala_id)
 
 
 def _reiniciar_ronda_apuestas(estado: dict):
@@ -361,7 +414,7 @@ def _reiniciar_ronda_apuestas(estado: dict):
     estado['turno_actual'] = None
 
 
-def _finalizar_con_ganador(estado: dict, ganador: dict | None):
+def _finalizar_con_ganador(estado: dict, ganador: dict | None, sala_id: int | None = None):
     jugadores = estado.get('jugadores', {})
     bote = float(estado.get('bote', 0.0) or 0.0)
     comunitarias = estado.get('cartas_comunitarias', [])
@@ -392,6 +445,7 @@ def _finalizar_con_ganador(estado: dict, ganador: dict | None):
 
     estado['ganador'] = []
     participantes_ids = {res['jugador']['user_id'] for res in resultados}
+    ganadores_payload = []
 
     for res in resultados:
         jugador = res['jugador']
@@ -408,10 +462,13 @@ def _finalizar_con_ganador(estado: dict, ganador: dict | None):
             jugador['ultima_accion'] = f'Gana {reparto:.2f}€'
             jugador['es_ganador'] = True
             jugador['ultima_ganancia'] = reparto
-            user = User.query.get(jugador['user_id'])
-            if user:
-                user.balance += reparto
-                jugador['saldo_cuenta'] = user.balance
+            ganadores_payload.append({
+                'user_id': jugador['user_id'],
+                'username': jugador['username'],
+                'ganancia': round(reparto, 2),
+                'mano': jugador.get('mano_ganadora', []),
+                'mano_texto': jugador.get('mano_texto')
+            })
             estado['ganador'].append({
                 'user_id': jugador['user_id'],
                 'username': jugador['username'],
@@ -428,6 +485,9 @@ def _finalizar_con_ganador(estado: dict, ganador: dict | None):
     estado['apuesta_ronda'] = 0.0
     estado['turno_idx'] = None
     estado['turno_actual'] = None
+
+    if sala_id is not None and ganadores_payload:
+        _emit_hand_summary(sala_id, bote, ganadores_payload)
 
     for datos in jugadores.values():
         if datos['user_id'] not in participantes_ids:
@@ -492,9 +552,8 @@ def _accion_generica(sala_id: int, tipo: str, cantidad: float | None = None):
         return jsonify({'error': 'No se pueden realizar acciones en este momento'}), 400
 
     jugadores = estado.setdefault('jugadores', {})
+    _asegurar_jugador_en_estado(estado, current_user)
     j = jugadores.get(str(current_user.id))
-    if j is None:
-        return jsonify({'error': 'No estás registrado como jugador en esta mano'}), 400
 
     if j.get('estado') != 'activo':
         return jsonify({'error': 'Ya no participas en esta mano'}), 400
@@ -512,8 +571,9 @@ def _accion_generica(sala_id: int, tipo: str, cantidad: float | None = None):
         if monto <= 0:
             return 0.0
         stack_disponible = float(j.get('stack', 0.0))
-        saldo_usuario = float(getattr(current_user, 'balance', 0.0))
-        disponible = min(stack_disponible, saldo_usuario)
+        if stack_disponible <= 0:
+            raise ValueError('stack')
+        disponible = stack_disponible
         if disponible <= 0:
             raise ValueError('stack')
         aporte = min(monto, disponible)
@@ -521,8 +581,6 @@ def _accion_generica(sala_id: int, tipo: str, cantidad: float | None = None):
         j['apuesta_actual'] = float(j.get('apuesta_actual', 0.0)) + aporte
         j['total_aportado'] = float(j.get('total_aportado', 0.0) or 0.0) + aporte
         estado['bote'] = float(estado.get('bote', 0.0)) + aporte
-        current_user.balance = saldo_usuario - aporte
-        j['saldo_cuenta'] = current_user.balance
         if j['stack'] <= 1e-6:
             j['stack'] = 0.0
             j['sin_stack'] = True
@@ -591,7 +649,7 @@ def _accion_generica(sala_id: int, tipo: str, cantidad: float | None = None):
     j['ha_actuado'] = True
 
     fase_antes = estado.get('fase')
-    _resolver_si_todos_han_actuado(estado)
+    _resolver_si_todos_han_actuado(estado, sala_id)
     _actualizar_turno_despues_accion(estado, fase_antes)
     _guardar_estado(partida, estado)
 
@@ -615,7 +673,59 @@ def estado(sala_id):
 
     partida = _obtener_o_crear_partida(sala)
     estado = _cargar_estado(partida)
+    # Aseguramos que el jugador actual exista en el estado con stack inicial 0
+    ya_estaba = str(current_user.id) in (estado.get('jugadores') or {})
+    _asegurar_jugador_en_estado(estado, current_user)
+    if not ya_estaba:
+        _guardar_estado(partida, estado)
     return jsonify(_sanitizar_estado_para_usuario(estado, current_user.id))
+
+
+@bp.route('/api/multijugador/poker/stack/<int:sala_id>', methods=['POST'])
+@login_required
+def ajustar_stack(sala_id):
+    sala, usuario_sala, resp, code = _asegurar_usuario_en_sala(sala_id)
+    if resp is not None:
+        return resp, code
+
+    partida = _obtener_o_crear_partida(sala)
+    estado = _cargar_estado(partida)
+    jugador_estado = _asegurar_jugador_en_estado(estado, current_user)
+
+    data = request.get_json() or {}
+    try:
+        nuevo_stack = float(data.get('stack', 0.0))
+    except (TypeError, ValueError):
+        return jsonify({'error': 'Cantidad no válida'}), 400
+    if nuevo_stack < 0:
+        return jsonify({'error': 'El stack en mesa no puede ser negativo'}), 400
+
+    stack_actual = float(jugador_estado.get('stack', 0.0) or 0.0)
+    saldo_usuario = float(getattr(current_user, 'balance', 0.0) or 0.0)
+    delta = nuevo_stack - stack_actual
+
+    if delta > 0 and saldo_usuario + 1e-6 < delta:
+        return jsonify({'error': 'Saldo insuficiente en tu cuenta'}), 400
+    if delta < 0 and stack_actual + 1e-6 < (-delta):
+        return jsonify({'error': 'No tienes tanto stack en la mesa para retirar'}), 400
+
+    if abs(delta) > 1e-6:
+        jugador_estado['stack'] = nuevo_stack
+        current_user.balance = saldo_usuario - delta  # si delta positivo, resta; si negativo, suma
+        jugador_estado['saldo_cuenta'] = float(current_user.balance)
+        jugador_estado['ultima_accion'] = f'Stack mesa: {nuevo_stack:.2f}€'
+        db.session.add(current_user)
+        _guardar_estado(partida, estado)
+    else:
+        jugador_estado['saldo_cuenta'] = float(current_user.balance)
+        _guardar_estado(partida, estado)
+
+    return jsonify({
+        'mensaje': 'Stack actualizado',
+        'stack': float(jugador_estado.get('stack', 0.0)),
+        'saldo_cuenta': float(jugador_estado.get('saldo_cuenta', 0.0)),
+        'balance_usuario': float(current_user.balance or 0.0)
+    })
 
 
 @bp.route('/api/multijugador/poker/iniciar/<int:sala_id>', methods=['POST'])
@@ -631,6 +741,7 @@ def iniciar_mano(sala_id):
 
     partida = _obtener_o_crear_partida(sala)
     estado_previo = _cargar_estado(partida)
+    jugadores_previos = estado_previo.get('jugadores', {}) if isinstance(estado_previo, dict) else {}
 
     mazo = _crear_mazo()
     random.shuffle(mazo)
@@ -646,14 +757,16 @@ def iniciar_mano(sala_id):
         cartas = [mazo.pop(), mazo.pop()]
         jugador_user = getattr(us, 'player', None)
         username = jugador_user.username if jugador_user else f'Usuario {us.usuario_id}'
-        stack_inicial = float(getattr(jugador_user, 'balance', 1000.0) or 0.0)
+        previo = jugadores_previos.get(str(us.usuario_id), {}) if jugadores_previos else {}
+        stack_inicial = float(previo.get('stack', 0.0) or 0.0)
+        saldo_actual = float(getattr(jugador_user, 'balance', 0.0) or 0.0)
         jugadores_estado[str(us.usuario_id)] = {
             'user_id': us.usuario_id,
             'username': username,
             'stack': stack_inicial,
             'apuesta_actual': 0.0,
             'total_aportado': 0.0,
-            'saldo_cuenta': stack_inicial,
+            'saldo_cuenta': saldo_actual,
             'estado': 'activo',
             'ultima_accion': '---',
             'ha_actuado': False,

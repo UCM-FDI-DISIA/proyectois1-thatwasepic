@@ -10,6 +10,35 @@ Póker (multijugador)
 
 {% block content %}
 <div class="poker-wrapper container-xxl py-4">
+  <div id="buyin-overlay" class="buyin-overlay">
+    <div class="buyin-card">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h4 class="mb-0">Elige tu buy-in</h4>
+        <button id="buyin-close" class="btn ghost btn-sm" type="button">Cerrar</button>
+      </div>
+      <p class="mb-3 text-muted" style="font-size:0.9rem;">Arrancas con 0€ en mesa. Mueve fichas desde tu cuenta y podrás retirarlas cuando quieras.</p>
+      <div class="buyin-stats">
+        <div>
+          <span class="label">Cuenta</span>
+          <strong id="buyin-bank-label">0€</strong>
+        </div>
+        <div>
+          <span class="label">En mesa</span>
+          <strong id="buyin-table-label">0€</strong>
+        </div>
+      </div>
+      <label for="buyin-input" class="buyin-label">Cantidad a llevar</label>
+      <input id="buyin-input" type="number" min="0" step="0.01" class="buyin-input" />
+      <div id="buyin-error" class="buyin-error"></div>
+      <div class="buyin-actions">
+        <button id="buyin-apply" class="btn primary" type="button">Meter a la mesa</button>
+        <button id="buyin-withdraw" class="btn secondary btn-sm" type="button">Retirar cantidad</button>
+        <button id="buyin-max" class="btn accent btn-sm" type="button">Meter todo</button>
+        <button id="buyin-clear" class="btn ghost btn-sm" type="button">Retirar todo</button>
+      </div>
+    </div>
+  </div>
+
   <div class="poker-layout">
     <!-- Zona principal -->
     <section class="poker-stage">
@@ -25,6 +54,19 @@ Póker (multijugador)
         <div class="hud-pill hud-user">
           <span>{{ current_user.username }}</span>
           <small>Tú</small>
+        </div>
+        <div class="hud-pill hud-balance">
+          <span>Cuenta</span>
+          <small id="hud-bank">0€</small>
+        </div>
+        <div class="hud-pill hud-table">
+          <div class="d-flex justify-content-between align-items-center gap-2">
+            <div>
+              <span>Disponible</span>
+              <small id="hud-table-amount">0€</small>
+            </div>
+            <button id="open-buyin" class="btn ghost btn-sm" type="button">Ajustar</button>
+          </div>
         </div>
       </div>
 
@@ -126,6 +168,8 @@ const currentUserId = {{ current_user.id }};
 const isOwner = {{ 'true' if sala.creador_id == current_user.id else 'false' }};
 const socket = io();
 const HAND_PHASES = new Set(['preflop', 'flop', 'turn', 'river']);
+const initialBankCents = parseInt("{{ ((current_user.balance or 0) * 100)|int }}", 10) || 0;
+const minBuyinCents = parseInt("{{ ((sala.apuesta_minima or 0) * 100)|int }}", 10) || 0;
 
 // Elementos
 const elMesa = {
@@ -148,6 +192,20 @@ const elMesa = {
   chatInput: document.getElementById('poker-chat-input'),
   chatSend: document.getElementById('poker-chat-send'),
   callInfo: document.getElementById('call-info'),
+  hudBank: document.getElementById('hud-bank'),
+  hudTable: document.getElementById('hud-table-amount'),
+  buyinOverlay: document.getElementById('buyin-overlay'),
+  buyinInput: document.getElementById('buyin-input'),
+  buyinBankLabel: document.getElementById('buyin-bank-label'),
+  buyinTableLabel: document.getElementById('buyin-table-label'),
+  buyinError: document.getElementById('buyin-error'),
+  buyinApply: document.getElementById('buyin-apply'),
+  buyinWithdraw: document.getElementById('buyin-withdraw'),
+  buyinMax: document.getElementById('buyin-max'),
+  buyinClear: document.getElementById('buyin-clear'),
+  buyinClose: document.getElementById('buyin-close'),
+  openBuyin: document.getElementById('open-buyin'),
+  withdrawAll: document.getElementById('withdraw-all')
 };
 
 // Desactivar botón iniciar si no es el creador
@@ -169,12 +227,31 @@ function formatCurrency(value){
   return `${num.toFixed(2)}€`;
 }
 
+function formatCents(cents){
+  return formatCurrency((Number(cents || 0)) / 100);
+}
+
 function formatTime(ts){
   if (!ts) return '';
   const d = new Date(ts);
   if (Number.isNaN(d.getTime())) return '';
   return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
+
+// Actualiza el badge verde global y el HUD de cuenta con el mismo valor
+function setGlobalBalance(euros){
+  const val = Number(euros || 0);
+  const nav = document.getElementById('balance');
+  if (nav){
+    nav.textContent = val.toFixed(2);
+    nav.dataset.balance = val;
+  }
+  if (elMesa.hudBank){
+    elMesa.hudBank.textContent = formatCurrency(val);
+  }
+}
+// Sobrescribimos siempre para asegurarnos de que el header se actualiza como el HUD
+window.updateHeaderBalance = setGlobalBalance;
 
 function addChatMessage(payload){
   if (!payload) return;
@@ -205,6 +282,144 @@ function addChatMessage(payload){
   elMesa.chatMessages.appendChild(row);
   elMesa.chatMessages.scrollTop = elMesa.chatMessages.scrollHeight;
 }
+
+// ====== Buy-in ======
+const buyinState = {
+  bankCents: initialBankCents,
+  tableCents: 0
+};
+let buyinEditing = false;
+// El balance global es el saldo de cuenta (el mismo que muestra tu etiqueta "Cuenta")
+function headerBalanceEuros(bankCentsOverride){
+  const bank = (typeof bankCentsOverride === 'number') ? bankCentsOverride : buyinState.bankCents;
+  return Math.max(0, bank) / 100;
+}
+
+function updateBuyinButtonsState(){
+  const valEuros = parseFloat(elMesa.buyinInput?.value || '0');
+  const valCents = Math.round((isNaN(valEuros) ? 0 : valEuros) * 100);
+  const disableApply = !valCents || valCents <= 0;
+  const disableWithdraw = disableApply || valCents > buyinState.tableCents;
+  if (elMesa.buyinApply) elMesa.buyinApply.disabled = disableApply;
+  if (elMesa.buyinWithdraw) elMesa.buyinWithdraw.disabled = disableWithdraw;
+}
+
+function syncBuyinLabels(){
+  if (!elMesa.buyinBankLabel) return;
+  elMesa.buyinBankLabel.textContent = formatCents(buyinState.bankCents);
+  elMesa.buyinTableLabel.textContent = formatCents(buyinState.tableCents);
+  const headerBalanceCents = Math.max(0, buyinState.bankCents);
+  if (elMesa.hudBank) elMesa.hudBank.textContent = formatCents(headerBalanceCents);
+  if (elMesa.hudTable) elMesa.hudTable.textContent = formatCents(buyinState.bankCents);
+  setGlobalBalance(headerBalanceCents / 100);
+  if (elMesa.buyinInput && !buyinEditing){
+    const suggested = Math.max(minBuyinCents, 0);
+    elMesa.buyinInput.value = Math.max(suggested / 100, 0).toFixed(2);
+    updateBuyinButtonsState();
+  }
+}
+
+function toggleBuyinOverlay(show){
+  if (!elMesa.buyinOverlay) return;
+  elMesa.buyinOverlay.classList.toggle('visible', !!show);
+  if (show){
+    elMesa.buyinError.textContent = '';
+    syncBuyinLabels();
+    if (elMesa.buyinInput){
+      const defaultVal = Math.max(minBuyinCents, 0);
+      elMesa.buyinInput.value = (defaultVal / 100).toFixed(2);
+      elMesa.buyinInput.focus();
+      updateBuyinButtonsState();
+    }
+  }
+}
+
+async function aplicarBuyin(cents){
+  if (cents < 0){
+    elMesa.buyinError.textContent = 'La cantidad no puede ser negativa';
+    return;
+  }
+  if (cents > buyinState.bankCents + buyinState.tableCents){
+    elMesa.buyinError.textContent = 'No tienes fondos suficientes en la cuenta para sentar esa cantidad.';
+    return;
+  }
+  elMesa.buyinError.textContent = '';
+  try{
+    const resp = await fetch(`/api/multijugador/poker/stack/${salaId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stack: (cents / 100) })
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok){
+      elMesa.buyinError.textContent = data.error || 'No se pudo ajustar el buy-in';
+      addLog(data.error || 'No se pudo ajustar el buy-in');
+      return;
+    }
+    const stackCents = Math.round(Number(data.stack || data.stack_nuevo || (cents / 100)) * 100);
+    const cuentaCents = Math.round(Number(data.saldo_cuenta ?? data.balance_usuario ?? buyinState.bankCents) * 100);
+    buyinState.tableCents = Math.max(0, stackCents);
+    buyinState.bankCents = Math.max(0, cuentaCents);
+    syncBuyinLabels();
+    addLog(data.mensaje || `Stack actualizado: mesa ${formatCents(buyinState.tableCents)}, cuenta ${formatCents(buyinState.bankCents)}`);
+    if (data.balance_usuario !== undefined && window.updateHeaderBalance){
+      const bankCents = Math.round(Number(data.balance_usuario || 0) * 100);
+      buyinState.bankCents = bankCents;
+      setGlobalBalance(headerBalanceEuros(bankCents));
+    }
+    toggleBuyinOverlay(false);
+    getEstado();
+  }catch(err){
+    elMesa.buyinError.textContent = 'Error de red al ajustar buy-in';
+    addLog('Error de red al ajustar buy-in');
+  }
+}
+
+if (elMesa.buyinApply){
+  elMesa.buyinApply.addEventListener('click', () => {
+    const euros = parseFloat(elMesa.buyinInput.value || '0');
+    aplicarBuyin(Math.round(euros * 100));
+  });
+}
+if (elMesa.buyinWithdraw){
+  elMesa.buyinWithdraw.addEventListener('click', () => {
+    const euros = parseFloat(elMesa.buyinInput.value || '0');
+    const cents = Math.round(euros * 100);
+    if (cents < 0){
+      elMesa.buyinError.textContent = 'La cantidad no puede ser negativa';
+      return;
+    }
+    if (cents > buyinState.tableCents){
+      elMesa.buyinError.textContent = 'No tienes tanto en la mesa para retirar.';
+      return;
+    }
+    aplicarBuyin(Math.max(0, buyinState.tableCents - cents));
+  });
+}
+if (elMesa.buyinMax){
+  elMesa.buyinMax.addEventListener('click', () => {
+    aplicarBuyin(buyinState.bankCents + buyinState.tableCents);
+  });
+}
+if (elMesa.buyinClear){
+  elMesa.buyinClear.addEventListener('click', () => aplicarBuyin(0));
+}
+if (elMesa.buyinClose){
+  elMesa.buyinClose.addEventListener('click', () => toggleBuyinOverlay(false));
+}
+if (elMesa.openBuyin){
+  elMesa.openBuyin.addEventListener('click', () => toggleBuyinOverlay(true));
+}
+if (elMesa.withdrawAll){
+  elMesa.withdrawAll.addEventListener('click', () => aplicarBuyin(0));
+}
+if (elMesa.buyinInput){
+  elMesa.buyinInput.addEventListener('focus', () => { buyinEditing = true; });
+  elMesa.buyinInput.addEventListener('blur', () => { buyinEditing = false; });
+   elMesa.buyinInput.addEventListener('input', updateBuyinButtonsState);
+}
+toggleBuyinOverlay(true);
+syncBuyinLabels();
 
 function sendChatMessage(){
   const text = elMesa.chatInput.value.trim();
@@ -329,6 +544,16 @@ function renderEstadoPartida(st){
     ? `<i class="fas fa-coins me-1"></i> Call ${formatCurrency(callAmount)}`
     : `<i class="fas fa-coins me-1"></i> Call`;
 
+  // Actualizar saldos locales de buy-in
+  if (yo){
+    const stackCents = Math.round(Number(yo.stack || 0) * 100);
+    const cuentaCents = Math.round(Number(yo.saldo_cuenta ?? yo.stack ?? 0) * 100);
+    buyinState.tableCents = stackCents;
+    buyinState.bankCents = cuentaCents;
+    syncBuyinLabels();
+    setGlobalBalance(headerBalanceEuros(cuentaCents));
+  }
+
   // Jugadores (panel lateral)
   elMesa.jugadores.innerHTML = '';
   Object.values(jugadoresEstado).forEach(j => {
@@ -354,7 +579,7 @@ function renderEstadoPartida(st){
       </div>
       <div class="row-body">
         <div>Mesa: <strong>${formatCurrency(j.stack)}</strong></div>
-        <div>Cuenta: <strong>${formatCurrency(j.saldo_cuenta ?? j.stack)}</strong></div>
+        <div>Cuenta: <strong>${j.user_id === currentUserId ? formatCurrency(j.saldo_cuenta ?? j.stack) : '—'}</strong></div>
       </div>
       <div class="row-body secondary">
         <div>Total aportado: <strong>${formatCurrency(j.total_aportado)}</strong></div>
@@ -387,7 +612,7 @@ function renderEstadoPartida(st){
         ${roleLabel ? `<div class="role-chip ${j.rol}">${roleLabel}</div>` : ''}
         <div class="name">${j.username}</div>
         <div class="stack">Mesa: ${formatCurrency(j.stack)}</div>
-        <div class="bank">Cuenta: ${formatCurrency(j.saldo_cuenta ?? j.stack)}</div>
+        <div class="bank">Cuenta: ${j.user_id === currentUserId ? formatCurrency(j.saldo_cuenta ?? j.stack) : '—'}</div>
         <div class="last">${j.ultima_accion || '---'}</div>
       </div>
     `;
@@ -445,8 +670,23 @@ async function postAccion(path, body){
   }
   getEstado();
   if (data.nuevo_balance !== undefined && window.updateHeaderBalance){
-    window.updateHeaderBalance(data.nuevo_balance);
+    const bankCents = Math.round(Number(data.nuevo_balance || 0) * 100);
+    buyinState.bankCents = bankCents;
+    const totalCuenta = headerBalanceEuros(bankCents);
+    setGlobalBalance(totalCuenta);
   }
+}
+
+// Fallback para actualizar el badge verde global si el layout no define updateHeaderBalance
+if (typeof window.updateHeaderBalance !== 'function'){
+  window.updateHeaderBalance = function(total){
+    const el = document.getElementById('balance');
+    if (el){
+      const num = Number(total || 0);
+      el.textContent = num.toFixed(2);
+      el.dataset.balance = num;
+    }
+  };
 }
 
 // ====== Eventos botones ======
@@ -485,6 +725,47 @@ socket.on('poker_chat_history', (mensajes = []) => {
 });
 
 socket.on('poker_chat_message', addChatMessage);
+
+function describeWinningHand(winner){
+  const mano = Array.isArray(winner.mano) ? winner.mano : [];
+  const manoTexto = winner.mano_texto || 'Mejor mano';
+  const valores = {};
+  mano.forEach(c => { if(!c) return; const v = c.valor; valores[v] = (valores[v]||0)+1; });
+  const byCount = Object.entries(valores).sort((a,b)=>b[1]-a[1] || b[0].localeCompare(a[0]));
+  const cardStr = (c)=> `${c.valor || ''}${c.palo || ''}`;
+  const listStr = mano.map(cardStr).filter(Boolean).join(', ');
+  if(byCount.length){
+    const [val, cnt] = byCount[0];
+    const sameCards = mano.filter(c => c && c.valor === val).map(cardStr).join(' ');
+    if(cnt === 4) return `Póker de ${val} (${sameCards})`;
+    if(cnt === 3) return `Trío de ${val} (${sameCards})`;
+    if(cnt === 2){
+      const second = byCount[1] && byCount[1][1] === 2 ? byCount[1][0] : null;
+      if(second){
+        const secondCards = mano.filter(c => c && c.valor === second).map(cardStr).join(' ');
+        return `Doble pareja ${val}/${second} (${sameCards} ${secondCards})`;
+      }
+      return `Pareja de ${val} (${sameCards})`;
+    }
+  }
+  return `${manoTexto} (${listStr})`;
+}
+
+socket.on('poker_hand_summary', (data = {}) => {
+  if (Number(data.sala_id) !== salaId) return;
+  const bote = formatCurrency(data.bote || 0);
+  const winners = Array.isArray(data.ganadores) ? data.ganadores : [];
+  winners.forEach((w, idx) => {
+    const mano = describeWinningHand(w);
+    const gan = formatCurrency(w.ganancia || 0);
+    const message = `Ganador${winners.length > 1 ? ` ${idx + 1}` : ''}: ${w.username || 'Jugador'} se lleva ${gan} del bote (${bote}) con ${mano}`;
+    addChatMessage({
+      username: 'Mesa',
+      message,
+      timestamp: data.timestamp || new Date().toISOString()
+    });
+  });
+});
 
 socket.on('poker_estado_actualizado', (payload = {}) => {
   if (Number(payload.sala_id) === salaId){
@@ -563,8 +844,8 @@ setInterval(getEstado, 3000);
   border-radius: 999px;
   background: radial-gradient(circle, rgba(28, 109, 76, 0.9), rgba(11, 33, 26, 0.95));
   border: 4px solid rgba(0,0,0,0.65);
-  min-height: 420px;
-  padding: 3rem 4rem 4rem;
+  min-height: 460px;
+  padding: 2.5rem 3.5rem 4.5rem;
   box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
   display: flex;
   flex-direction: column;
@@ -600,7 +881,7 @@ setInterval(getEstado, 3000);
 }
 .poker-community {
   display: flex;
-  gap: 0.9rem;
+  gap: 0.7rem;
   justify-content: center;
   align-items: center;
   flex-wrap: nowrap;
@@ -609,17 +890,17 @@ setInterval(getEstado, 3000);
 }
 .poker-player-ring {
   position: absolute;
-  inset: -3rem;
+  inset: -3.5rem;
   pointer-events: none;
 }
 .poker-seat {
   position: absolute;
-  width: 150px;
+  width: 132px;
   background: rgba(5, 8, 24, 0.92);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 16px;
-  padding: 0.65rem 0.75rem;
-  font-size: 0.82rem;
+  padding: 0.55rem 0.65rem;
+  font-size: 0.78rem;
   box-shadow: 0 8px 25px rgba(0,0,0,0.4);
   display: flex;
   flex-direction: column;
@@ -643,13 +924,14 @@ setInterval(getEstado, 3000);
   box-shadow: 0 0 22px rgba(76,175,80,0.45);
 }
 .poker-seat .avatar {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: rgba(255,255,255,0.1);
   display: grid;
   place-items: center;
   font-weight: 700;
+  font-size: 0.85rem;
 }
 .poker-seat .info {
   width: 100%;
@@ -688,7 +970,7 @@ setInterval(getEstado, 3000);
 .poker-seat .stack {
   color: #8df1ba;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 .poker-seat .bank {
   font-size: 0.8rem;
@@ -716,7 +998,7 @@ setInterval(getEstado, 3000);
   color: rgba(255,255,255,0.85);
   text-align: center;
   box-shadow: 0 12px 24px rgba(0,0,0,0.45);
-  min-width: 140px;
+  min-width: 136px;
 }
 .seat-best-cards {
   display: flex;
@@ -724,12 +1006,12 @@ setInterval(getEstado, 3000);
   margin-top: 0.2rem;
   justify-content: center;
 }
-.poker-seat.seat-0 { top: 88%; left: 50%; transform: translate(-50%, -50%); }
-.poker-seat.seat-1 { top: 65%; right: -45px; transform: translateY(-50%); }
-.poker-seat.seat-2 { top: 30%; right: -45px; transform: translateY(-50%); }
-.poker-seat.seat-3 { top: 8%; left: 50%; transform: translate(-50%, -50%); }
-.poker-seat.seat-4 { top: 30%; left: -45px; transform: translateY(-50%); }
-.poker-seat.seat-5 { top: 65%; left: -45px; transform: translateY(-50%); }
+.poker-seat.seat-0 { top: 92%; left: 50%; transform: translate(-50%, -50%); }
+.poker-seat.seat-1 { top: 66%; right: -52px; transform: translateY(-50%); }
+.poker-seat.seat-2 { top: 28%; right: -52px; transform: translateY(-50%); }
+.poker-seat.seat-3 { top: 6%; left: 50%; transform: translate(-50%, -50%); }
+.poker-seat.seat-4 { top: 28%; left: -52px; transform: translateY(-50%); }
+.poker-seat.seat-5 { top: 66%; left: -52px; transform: translateY(-50%); }
 .poker-hand-panel {
   display: flex;
   justify-content: space-between;
@@ -820,6 +1102,10 @@ setInterval(getEstado, 3000);
 }
 .btn:not(:disabled):active {
   transform: scale(0.97);
+}
+.btn.btn-sm {
+  padding: 0.35rem 0.8rem;
+  font-size: 0.85rem;
 }
 .poker-sidebar {
   display: flex;
@@ -987,6 +1273,65 @@ setInterval(getEstado, 3000);
   background: rgba(0,0,0,0.3);
   border: 1px solid rgba(255,255,255,0.1);
   color: #fff;
+}
+/* Buy-in overlay */
+.buyin-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 6, 18, 0.8);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+.buyin-overlay.visible {
+  display: flex;
+}
+.buyin-card {
+  background: rgba(9, 12, 32, 0.95);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 18px;
+  padding: 1.25rem;
+  width: min(420px, 90vw);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.45);
+}
+.buyin-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+.buyin-stats .label {
+  display: block;
+  color: rgba(255,255,255,0.65);
+  font-size: 0.85rem;
+}
+.buyin-label {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: rgba(255,255,255,0.7);
+}
+.buyin-input {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.4);
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+.buyin-error {
+  color: #ff8a8a;
+  min-height: 18px;
+  font-size: 0.85rem;
+  margin-bottom: 0.4rem;
+}
+.buyin-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 </style>
 
