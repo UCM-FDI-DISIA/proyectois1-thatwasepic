@@ -51,25 +51,28 @@ def editar_usuario(user_id):
     """Endpoint para editar usuario"""
     try:
         usuario = User.query.get_or_404(user_id)
-        data = request.get_json()
+        data = request.form
         
         # Validar que no se esté editando a sí mismo para ciertos campos
         if usuario.id == current_user.id:
-            return jsonify({'success': False, 'message': 'No puedes modificar tu propio usuario desde aquí'})
+            flash('No puedes modificar tu propio usuario desde aquí', 'info')
+            return redirect(url_for('admin_usuarios.home'))
         
         # Campos editables
         if 'username' in data and data['username']:
             # Verificar que el username no esté en uso
             existing_user = User.query.filter(User.username == data['username'], User.id != user_id).first()
             if existing_user:
-                return jsonify({'success': False, 'message': 'El nombre de usuario ya está en uso'})
+                flash('El nombre de usuario ya está en uso', 'info')
+                return redirect(url_for('admin_usuarios.home'))
             usuario.username = data['username']
         
         if 'email' in data and data['email']:
             # Verificar que el email no esté en uso
             existing_email = User.query.filter(User.email == data['email'], User.id != user_id).first()
             if existing_email:
-                return jsonify({'success': False, 'message': 'El email ya está en uso'})
+                flash('El email ya está en uso', 'info')
+                return redirect(url_for('admin_usuarios.home'))
             usuario.email = data['email']
         
         if 'balance' in data:
@@ -78,26 +81,20 @@ def editar_usuario(user_id):
                 if nuevo_balance >= 0:  # Prevenir balances negativos
                     usuario.balance = nuevo_balance
                 else:
-                    return jsonify({'success': False, 'message': 'El balance no puede ser negativo'})
+                    flash('El balance no puede ser negativo', 'info')
+                    return redirect(url_for('admin_usuarios.home'))
             except ValueError:
                 return jsonify({'success': False, 'message': 'Balance inválido'})
         
         db.session.commit()
         
-        return jsonify({
-            'success': True, 
-            'message': 'Usuario actualizado correctamente',
-            'user': {
-                'id': usuario.id,
-                'username': usuario.username,
-                'email': usuario.email,
-                'balance': usuario.balance
-            }
-        })
+        flash('Usuario actualizado correctamente', 'info')
+        return redirect(url_for('admin_usuarios.home'))
         
     except Exception as e:
         db.session.rollback()
-        return jsonify({'success': False, 'message': f'Error al actualizar usuario: {str(e)}'})
+        flash(f'Error al actualizar usuario: {str(e)}', 'info')
+        return redirect(url_for('admin_usuarios.home'))
     
 @bp.route('/admin/usuarios/<int:user_id>/cambiar-password', methods=['POST'])
 @login_required
@@ -106,29 +103,25 @@ def cambiar_password_usuario(user_id):
     """Endpoint para cambiar contraseña de usuario"""
     try:
         usuario = User.query.get_or_404(user_id)
-        data = request.get_json()
+        data = request.form
         
         # Prevenir auto-cambio de contraseña desde admin
         if usuario.id == current_user.id:
-            return jsonify({'success': False, 'message': 'No puedes cambiar tu propia contraseña desde aquí. Usa la opción de perfil.'})
+            flash('No puedes cambiar tu propia contraseña desde aquí. Usa la opción de perfil.', 'info')
+            return redirect(url_for('admin_usuarios.home'))
         
-        if 'nueva_password' in data and data['nueva_password']:
-            nueva_password = data['nueva_password'].strip()
-            
-            # Validar longitud mínima
-            if len(nueva_password) < 6:
-                return jsonify({'success': False, 'message': 'La contraseña debe tener al menos 6 caracteres'})
+        if 'password' in data and data['password']:
+            nueva_password = data['password'].strip()
             
             # Cambiar la contraseña
             usuario.set_password(nueva_password)
             db.session.commit()
             
-            return jsonify({
-                'success': True, 
-                'message': 'Contraseña actualizada correctamente'
-            })
+            flash('Contraseña actualizada correctamente', 'info')
+            return redirect(url_for('admin_usuarios.home'))
         else:
-            return jsonify({'success': False, 'message': 'La nueva contraseña es requerida'})
+            flash('La nueva contraseña es requerida', 'info')
+            return redirect(url_for('admin_usuarios.home'))
         
     except Exception as e:
         db.session.rollback()
@@ -144,7 +137,8 @@ def eliminar_usuario(user_id):
         
         # Prevenir auto-eliminación
         if usuario.id == current_user.id:
-            return jsonify({'success': False, 'message': 'No puedes eliminar tu propio usuario'})
+            flash('No puedes eliminar tu propio usuario', 'info')
+            return redirect(url_for('admin_usuarios.home'))
         
         # Guardar información para el mensaje
         username = usuario.username
@@ -170,15 +164,14 @@ def eliminar_usuario(user_id):
         # 5. Finalmente eliminar el usuario
         db.session.delete(usuario)
         db.session.commit()
-        
-        return jsonify({
-            'success': True, 
-            'message': f'Usuario "{username}" eliminado correctamente'
-        })
+
+        flash(f'Usuario "{username}" eliminado correctamente', 'info')
+        return redirect(url_for('admin_usuarios.home'))
         
     except Exception as e:
         db.session.rollback()
-        return jsonify({'success': False, 'message': f'Error al eliminar usuario: {str(e)}'})
+        flash(f'Error al eliminar usuario: {str(e)}', 'info')
+        return redirect(url_for('admin_usuarios.home'))
 
 @bp.route('/admin/usuarios/<int:user_id>/detalle')
 @login_required

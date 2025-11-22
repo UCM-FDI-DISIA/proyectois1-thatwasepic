@@ -1,0 +1,260 @@
+<!-- Modal de Edición -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <div class="fs-1">👤</div>
+                    <h4 class="modal-title mt-2">Editar datos de <span id="editCurrentUser" class="font-monospace"></span></h4>
+                </div>
+                
+                <form id="editUserForm" method="POST">
+                    <input type="hidden" id="editUserId">
+                    
+                    <div class="mb-3">
+                        <label for="editUsername" class="form-label mb-1 fw-bold">Nombre de usuario</label>
+                        <input type="text" class="form-control" id="editUsername" name="username" required>
+                        <div class="small text-muted">Mínimo 3 caracteres, sin espacios.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="editEmail" class="form-label mb-1 fw-bold">Correo electrónico</label>
+                        <input type="email" class="form-control" id="editEmail" name="mail" required>
+                        <div class="small text-muted">Debe ser una dirección de correo electrónico válida.</div>
+                    </div>
+                    
+                    <div>
+                        <label for="editBalance" class="form-label mb-1 fw-bold">Balance</label>
+                        <input type="number" step="0.01" min="0" class="form-control" id="editBalance" name="balance" required>
+                        <div class="small text-muted">Balance actual del usuario. No puede ser negativo.</div>
+                    </div>
+                </form>
+
+                <div id="editAlert"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-ban me-1"></i>Cancelar
+                </button>
+                <button type="submit" form="editUserForm" class="btn btn-success" id="saveEditBtn">
+                    <i class="fa-solid fa-floppy-disk me-1"></i> Guardar Cambios
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Cambiar Contraseña -->
+<div class="modal fade" id="passwordModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <div class="fs-1">🔐</div>
+                    <h4 class="modal-title mt-2">Cambiar contraseña de <span id="passwordCurrentUser" class="font-monospace"></span></h4>
+                </div>
+                
+                <form id="passwordUserForm" method="POST">
+                    <input type="hidden" id="passwordUserId">
+                    
+                    <div class="mb-3">
+                        <label for="nuevaPassword" class="form-label mb-1 fw-bold">Nueva Contraseña</label>
+                        <input type="password" class="form-control" id="newPass" name="password" required 
+                               placeholder="Ingresa la nueva contraseña">
+                        <div class="small text-muted">Mínimo 6 caracteres.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="confirmarPassword" class="form-label mb-1 fw-bold">Confirmar Contraseña</label>
+                        <input type="password" class="form-control" id="confirmPass" required 
+                               placeholder="Confirma la nueva contraseña">
+                        <div class="small text-muted">Debe coincidir con la nueva contraseña.</div>
+                    </div>
+                    
+                    <div class="password-strength mt-3">
+                        <label class="form-label mb-1 fw-bold">Fortaleza de la contraseña</label>
+                        <div class="strength-bar">
+                            <div class="strength-fill" id="strengthFill"></div>
+                        </div>
+                        <small class="text-muted" id="strengthText">Ingresa una contraseña.</small>
+                    </div>
+                </form>
+                
+                <div class="alert alert-warning mt-3 mb-0">
+                    <small>
+                        <i class="fa-solid fa-warning me-1"></i>
+                        El usuario tendrá que usar esta nueva contraseña para iniciar sesión. 
+                        Esta acción no se puede deshacer.
+                    </small>
+                </div>
+
+                <div id="passwordAlert"></div>
+            </div>
+            <div class="modal-footer cyber-modal-footer">
+                <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-ban me-1"></i>Cancelar
+                </button>
+                <button type="submit" form="passwordUserForm" class="btn btn-warning" id="savePasswordBtn">
+                    <i class="fa-solid fa-key me-1"></i>Cambiar Contraseña
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmación para Eliminar -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <div class="fs-1">🗑️</div>
+                    <h4 class="modal-title mt-2 mb-2">¿Estás seguro?</h4>
+                    <p>
+                        Estás a punto de eliminar al usuario <span id="deleteUserName" class="font-monospace"></span>.
+                    </p>
+                </div>
+
+                <form id="deleteUserForm" method="POST"></form>
+
+                <div class="alert alert-warning mt-3 mb-0">
+                    <small>
+                        <i class="fa-solid fa-warning me-1"></i><strong>Advertencia:</strong> Esta acción no se puede deshacer. 
+                        Se eliminarán todos los datos del usuario incluyendo apuestas, historial y saldo.
+                    </small>
+                </div>
+
+                <div id="deleteAlert"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-ban me-1"></i>Cancelar
+                </button>
+                <button type="submit" form="deleteUserForm" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="fa-solid fa-trash me-1"></i> Eliminar Usuario
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block partial_scripts %}
+<script>
+/* ============================================================================
+   Utilidad: mostrar alertas dentro de los modales
+   ============================================================================ */
+function modalAlert(containerId, msg, type) {
+    document.getElementById(containerId).innerHTML = `
+        <div class="alert alert-${type} mb-0 mt-3">${msg}</div>
+    `;
+}
+
+/* ============================================================================
+   Funciones de apertura de modales desde la página que incluye
+   ============================================================================ */
+window.openEditUserModal = function(user) {
+    const editModal = document.getElementById("editModal");
+    const form = editModal.querySelector("form");
+    form.action = `/admin/usuarios/${user.id}/editar`;
+
+    document.getElementById('editUserId').value = user.id;
+    document.getElementById('editUsername').value = user.username;
+    document.getElementById('editEmail').value = user.email;
+    document.getElementById('editBalance').value = user.balance;
+    document.getElementById('editCurrentUser').textContent = user.username;
+
+    new bootstrap.Modal('#editModal').show();
+};
+
+window.openPasswordModal = function(user) {
+    const passwordModal = document.getElementById("passwordModal");
+    const form = passwordModal.querySelector("form");
+    form.action = `/admin/usuarios/${user.id}/cambiar-password`;
+
+    document.getElementById('passwordUserId').value = user.id;
+    document.getElementById('passwordCurrentUser').textContent = user.username;
+
+    document.getElementById('newPass').value = "";
+    document.getElementById('confirmPass').value = "";
+
+    new bootstrap.Modal('#passwordModal').show();
+};
+
+window.openDeleteUserModal = function(user) {
+    const deleteModal = document.getElementById("deleteModal");
+    const form = deleteModal.querySelector("form");
+    form.action = `/admin/usuarios/${user.id}/eliminar`;
+
+    document.getElementById('deleteUserName').textContent = user.username;
+
+    new bootstrap.Modal('#deleteModal').show();
+};
+
+/* ============================================================================
+   Cambiar contraseña
+   ============================================================================ */
+document.getElementById('passwordUserForm').addEventListener('submit', function (event) {
+    const p1 = document.getElementById('newPass').value;
+    const p2 = document.getElementById('confirmPass').value;
+
+    if (p1 !== p2) {
+        event.preventDefault(); // No entregar datos al servidor
+        return modalAlert("passwordAlert", "Las contraseñas no coinciden", "danger");
+    }
+});
+
+/* ============================================================================
+   Utilidades
+   ============================================================================ */
+// Función para verificar fortaleza de contraseña
+function checkPasswordStrength(password) {
+    let strength = 0;
+    const strengthFill = document.getElementById('strengthFill');
+    const strengthText = document.getElementById('strengthText');
+
+    if (password.length === 0) {
+        strengthFill.className = 'strength-fill';
+        strengthText.textContent = 'Ingresa una contraseña';
+        strengthText.style.color = '';
+        return;
+    }
+
+    // Longitud mínima
+    if (password.length >= 6) strength += 1;
+    if (password.length >= 8) strength += 1;
+    
+    // Caracteres variados
+    if (/[a-z]/.test(password)) strength += 1;
+    if (/[A-Z]/.test(password)) strength += 1;
+    if (/[0-9]/.test(password)) strength += 1;
+    if (/[^a-zA-Z0-9]/.test(password)) strength += 1;
+
+    // Actualizar visualización
+    if (strength <= 2) {
+        strengthFill.className = 'strength-fill strength-weak';
+        strengthText.textContent = 'Débil';
+        strengthText.style.color = '#dc3545';
+    } else if (strength <= 4) {
+        strengthFill.className = 'strength-fill strength-medium';
+        strengthText.textContent = 'Media';
+        strengthText.style.color = '#ffc107';
+    } else if (strength <= 5) {
+        strengthFill.className = 'strength-fill strength-strong';
+        strengthText.textContent = 'Fuerte';
+        strengthText.style.color = '#28a745';
+    } else {
+        strengthFill.className = 'strength-fill strength-very-strong';
+        strengthText.textContent = 'Muy fuerte';
+        strengthText.style.color = '#20c997';
+    }
+}
+
+// Inicialización cuando el DOM está listo
+document.addEventListener('DOMContentLoaded', function() {
+    // Configurar verificación de fortaleza de contraseña en tiempo real
+    document.getElementById('newPass').addEventListener('input', function(e) {
+        checkPasswordStrength(e.target.value);
+    });
+});
+</script>
+{% endblock %}

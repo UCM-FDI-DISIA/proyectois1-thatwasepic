@@ -204,17 +204,28 @@ Usuarios
                                         </a>
                                         {% if usuario.username != current_user.username %}
                                         <button class="btn btn-outline-primary"
-                                                onclick="editUser({{ usuario.id }})"
+                                                onclick="openEditUserModal({
+                                                    id: {{ usuario.id }},
+                                                    username: '{{ usuario.username }}',
+                                                    email: '{{ usuario.email }}',
+                                                    balance: {{ usuario.balance }}
+                                                })"
                                                 title="Editar usuario">
                                             <i class="fa-solid fa-user-pen"></i>
                                         </button>
                                         <button class="btn btn-outline-primary"
-                                                onclick="changePassword({{ usuario.id }}, '{{ usuario.username }}')"
+                                                onclick="openPasswordModal({
+                                                    id: {{ usuario.id }},
+                                                    username: '{{ usuario.username }}'
+                                                })"
                                                 title="Cambiar contraseña">
                                             <i class="fa-solid fa-key"></i>
                                         </button>
                                         <button class="btn btn-danger"
-                                                onclick="deleteUser({{ usuario.id }}, '{{ usuario.username }}')"
+                                                onclick="openDeleteUserModal({
+                                                    id: {{ usuario.id }},
+                                                    username: '{{ usuario.username }}'
+                                                })"
                                                 title="Eliminar usuario">
                                             <i class="fa-solid fa-trash"></i>
                                         </button>
@@ -261,136 +272,8 @@ Usuarios
     </div>
 </div>
 
-<!-- Modal de Edición -->
-<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-body">
-                <div class="text-center mb-4">
-                    <div class="fs-1">👤</div>
-                    <h4 class="modal-title mt-2">Editar datos de <span id="editCurrentUser" class="font-monospace"></span></h4>
-                </div>
-                
-                <form id="editUserForm">
-                    <input type="hidden" id="editUserId">
-                    
-                    <div class="mb-3">
-                        <label for="editUsername" class="form-label mb-1 fw-bold">Nombre de usuario</label>
-                        <input type="text" class="form-control" id="editUsername" required>
-                        <div class="small text-muted">Mínimo 3 caracteres, sin espacios.</div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="editEmail" class="form-label mb-1 fw-bold">Correo electrónico</label>
-                        <input type="email" class="form-control" id="editEmail" required>
-                        <div class="small text-muted">Debe ser una dirección de correo electrónico válida.</div>
-                    </div>
-                    
-                    <div>
-                        <label for="editBalance" class="form-label mb-1 fw-bold">Balance</label>
-                        <input type="number" step="0.01" min="0" class="form-control" id="editBalance" required>
-                        <div class="small text-muted">Balance actual del usuario. No puede ser negativo.</div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">
-                    <i class="fa-solid fa-ban me-1"></i>Cancelar
-                </button>
-                <button type="button" class="btn btn-success" id="saveEditBtn">
-                    <i class="fa-solid fa-floppy-disk me-1"></i> Guardar Cambios
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+{% include "partials/acciones_usuario.html" %}
 
-<!-- Modal para Cambiar Contraseña -->
-<div class="modal fade" id="passwordModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-body">
-                <div class="text-center mb-4">
-                    <div class="fs-1">🔐</div>
-                    <h4 class="modal-title mt-2">Cambiar contraseña de <span id="passwordCurrentUser" class="font-monospace"></span></h4>
-                </div>
-                
-                <form id="passwordUserForm">
-                    <input type="hidden" id="passwordUserId">
-                    
-                    <div class="mb-3">
-                        <label for="nuevaPassword" class="form-label mb-1 fw-bold">Nueva Contraseña</label>
-                        <input type="password" class="form-control" id="nuevaPassword" required 
-                               placeholder="Ingresa la nueva contraseña">
-                        <div class="small text-muted">Mínimo 6 caracteres.</div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="confirmarPassword" class="form-label mb-1 fw-bold">Confirmar Contraseña</label>
-                        <input type="password" class="form-control" id="confirmarPassword" required 
-                               placeholder="Confirma la nueva contraseña">
-                        <div class="small text-muted">Debe coincidir con la nueva contraseña.</div>
-                    </div>
-                    
-                    <div class="password-strength mt-3">
-                        <label class="form-label mb-1 fw-bold">Fortaleza de la contraseña</label>
-                        <div class="strength-bar">
-                            <div class="strength-fill" id="strengthFill"></div>
-                        </div>
-                        <small class="text-muted" id="strengthText">Ingresa una contraseña.</small>
-                    </div>
-                </form>
-                
-                <div class="alert alert-warning mt-3 mb-0">
-                    <small>
-                        <i class="fa-solid fa-warning me-1"></i>
-                        El usuario tendrá que usar esta nueva contraseña para iniciar sesión. 
-                        Esta acción no se puede deshacer.
-                    </small>
-                </div>
-            </div>
-            <div class="modal-footer cyber-modal-footer">
-                <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">
-                    <i class="fa-solid fa-ban me-1"></i>Cancelar
-                </button>
-                <button type="button" class="btn btn-warning" id="savePasswordBtn">
-                    <i class="fa-solid fa-key me-1"></i>Cambiar Contraseña
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal de Confirmación para Eliminar -->
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-body">
-                <div class="text-center mb-4">
-                    <div class="fs-1">🗑️</div>
-                    <h4 class="modal-title mt-2 mb-2">¿Estás seguro?</h4>
-                    <p>
-                        Estás a punto de eliminar al usuario <span id="deleteUserName" class="font-monospace"></span>.
-                    </p>
-                </div>
-                <div class="alert alert-warning mt-3 mb-0">
-                    <small>
-                        <i class="fa-solid fa-warning me-1"></i><strong>Advertencia:</strong> Esta acción no se puede deshacer. 
-                        Se eliminarán todos los datos del usuario incluyendo apuestas, historial y saldo.
-                    </small>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">
-                    <i class="fa-solid fa-ban me-1"></i>Cancelar
-                </button>
-                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
-                    <i class="fa-solid fa-trash me-1"></i> Eliminar Usuario
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}
 
 {% block scripts %}
@@ -470,89 +353,6 @@ function applySort() {
     filterUsers(); // Reaplicar filtros después de ordenar
 }
 
-// Función para editar usuario
-function editUser(userId) {
-    // Obtener datos actuales del usuario
-    const row = document.querySelector(`.user-row[data-user-id="${userId}"]`);
-    const username = row.querySelector('.data-username').textContent;
-    const email = row.querySelector('.data-email').textContent;
-    const balance = row.querySelector('.data-balance').textContent.replace('$', '').trim();
-
-    // Mostrar modal de edición
-    const editModal = new bootstrap.Modal(document.getElementById('editModal'));
-    
-    // Llenar formulario con datos actuales
-    document.getElementById('editUserId').value = userId;
-    document.getElementById('editUsername').value = username;
-    document.getElementById('editEmail').value = email;
-    document.getElementById('editBalance').value = balance;
-    document.getElementById('editCurrentUser').textContent = username;
-    
-    editModal.show();
-}
-
-// Función para guardar cambios del usuario
-function saveUserChanges() {
-    const userId = document.getElementById('editUserId').value;
-    const username = document.getElementById('editUsername').value.trim();
-    const email = document.getElementById('editEmail').value.trim();
-    const balance = document.getElementById('editBalance').value.trim();
-
-    // Validaciones básicas
-    if (!username || !email) {
-        showAlert('⚠️ Error: Username y email son obligatorios', 'danger');
-        return;
-    }
-
-    if (!balance || isNaN(parseFloat(balance))) {
-        showAlert('⚠️ Error: Balance debe ser un número válido', 'danger');
-        return;
-    }
-
-    // Mostrar loading
-    const saveBtn = document.getElementById('saveEditBtn');
-    const originalText = saveBtn.innerHTML;
-    saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Guardando...';
-    saveBtn.disabled = true;
-
-    // Enviar datos al servidor
-    fetch(`/admin/usuarios/${userId}/editar`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            username: username,
-            email: email,
-            balance: parseFloat(balance)
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showAlert('✅ ' + data.message, 'success');
-            
-            // Actualizar la fila en la tabla
-            updateUserRow(userId, data.user);
-            
-            // Cerrar modal
-            const editModal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
-            editModal.hide();
-        } else {
-            showAlert('❌ ' + data.message, 'danger');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showAlert('❌ Error de conexión', 'danger');
-    })
-    .finally(() => {
-        // Restaurar botón
-        saveBtn.innerHTML = originalText;
-        saveBtn.disabled = false;
-    });
-}
-
 // Función para actualizar la fila del usuario
 function updateUserRow(userId, userData) {
     const row = document.querySelector(`.user-row[data-user-id="${userId}"]`);
@@ -572,250 +372,11 @@ function updateUserRow(userId, userData) {
     }
 }
 
-// Función para cambiar contraseña
-function changePassword(userId, userName) {
-    currentPasswordUserId = userId;
-    currentPasswordUserName = userName;
-    
-    // Resetear formulario
-    document.getElementById('nuevaPassword').value = '';
-    document.getElementById('confirmarPassword').value = '';
-    document.getElementById('strengthFill').className = 'strength-fill';
-    document.getElementById('strengthText').textContent = 'Ingresa una contraseña';
-    document.getElementById('strengthText').style.color = '';
-    
-    // Actualizar modal con información del usuario
-    document.getElementById('passwordCurrentUser').textContent = userName;
-    document.getElementById('passwordUserId').value = userId;
-    
-    // Mostrar modal
-    const passwordModal = new bootstrap.Modal(document.getElementById('passwordModal'));
-    passwordModal.show();
-}
-
-// Función para guardar nueva contraseña
-function saveNewPassword() {
-    const userId = document.getElementById('passwordUserId').value;
-    const nuevaPassword = document.getElementById('nuevaPassword').value;
-    const confirmarPassword = document.getElementById('confirmarPassword').value;
-
-    // Validaciones
-    if (!nuevaPassword) {
-        showAlert('⚠️ Error: La nueva contraseña es requerida', 'danger');
-        return;
-    }
-
-    if (nuevaPassword !== confirmarPassword) {
-        showAlert('⚠️ Error: Las contraseñas no coinciden', 'danger');
-        return;
-    }
-
-    // Mostrar loading
-    const saveBtn = document.getElementById('savePasswordBtn');
-    const originalText = saveBtn.innerHTML;
-    saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Cambiando...';
-    saveBtn.disabled = true;
-
-    // Enviar datos al servidor
-    fetch(`/admin/usuarios/${userId}/cambiar-password`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            nueva_password: nuevaPassword
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showAlert('✅ ' + data.message, 'success');
-            
-            // Cerrar modal
-            const passwordModal = bootstrap.Modal.getInstance(document.getElementById('passwordModal'));
-            passwordModal.hide();
-            
-            // Resetear variables
-            currentPasswordUserId = null;
-            currentPasswordUserName = '';
-        } else {
-            showAlert('❌ ' + data.message, 'danger');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showAlert('❌ Error de conexión', 'danger');
-    })
-    .finally(() => {
-        // Restaurar botón
-        saveBtn.innerHTML = originalText;
-        saveBtn.disabled = false;
-    });
-}
-
-// Función para verificar fortaleza de contraseña
-function checkPasswordStrength(password) {
-    let strength = 0;
-    const strengthFill = document.getElementById('strengthFill');
-    const strengthText = document.getElementById('strengthText');
-
-    if (password.length === 0) {
-        strengthFill.className = 'strength-fill';
-        strengthText.textContent = 'Ingresa una contraseña';
-        strengthText.style.color = '';
-        return;
-    }
-
-    // Longitud mínima
-    if (password.length >= 6) strength += 1;
-    if (password.length >= 8) strength += 1;
-    
-    // Caracteres variados
-    if (/[a-z]/.test(password)) strength += 1;
-    if (/[A-Z]/.test(password)) strength += 1;
-    if (/[0-9]/.test(password)) strength += 1;
-    if (/[^a-zA-Z0-9]/.test(password)) strength += 1;
-
-    // Actualizar visualización
-    if (strength <= 2) {
-        strengthFill.className = 'strength-fill strength-weak';
-        strengthText.textContent = 'Débil';
-        strengthText.style.color = '#dc3545';
-    } else if (strength <= 4) {
-        strengthFill.className = 'strength-fill strength-medium';
-        strengthText.textContent = 'Media';
-        strengthText.style.color = '#ffc107';
-    } else if (strength <= 5) {
-        strengthFill.className = 'strength-fill strength-strong';
-        strengthText.textContent = 'Fuerte';
-        strengthText.style.color = '#28a745';
-    } else {
-        strengthFill.className = 'strength-fill strength-very-strong';
-        strengthText.textContent = 'Muy fuerte';
-        strengthText.style.color = '#20c997';
-    }
-}
-
-// Función para eliminar usuario
-function deleteUser(userId, userName) {
-    currentDeleteUserId = userId;
-    currentDeleteUserName = userName;
-    
-    // Actualizar modal con información del usuario
-    document.getElementById('deleteUserName').textContent = userName;
-    
-    // Mostrar modal
-    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-    deleteModal.show();
-}
-
-// Función para confirmar eliminación
-function confirmDelete() {
-    if (!currentDeleteUserId) return;
-
-    // Mostrar loading
-    const deleteBtn = document.getElementById('confirmDeleteBtn');
-    const originalText = deleteBtn.innerHTML;
-    deleteBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Eliminando...';
-    deleteBtn.disabled = true;
-
-    // Enviar solicitud de eliminación
-    fetch(`/admin/usuarios/${currentDeleteUserId}/eliminar`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showAlert('✅ ' + data.message, 'success');
-            
-            // Ocultar la fila eliminada
-            const row = document.querySelector(`.user-row[data-user-id="${currentDeleteUserId}"]`);
-            if (row) {
-                row.style.display = 'none';
-            }
-            
-            // Cerrar modal
-            const deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
-            deleteModal.hide();
-            
-            // Actualizar contadores
-            updateUserCounts();
-            
-        } else {
-            showAlert('❌ ' + data.message, 'danger');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showAlert('❌ Error de conexión', 'danger');
-    })
-    .finally(() => {
-        // Restaurar botón
-        deleteBtn.innerHTML = originalText;
-        deleteBtn.disabled = false;
-        currentDeleteUserId = null;
-    });
-}
-
-// Función para mostrar alertas
-function showAlert(message, type) {
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
-    alertDiv.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    
-    // Insertar al inicio del contenido
-    const content = document.querySelector('.row.g-3.mt-3');
-    content.parentNode.insertBefore(alertDiv, content);
-    
-    // Auto-eliminar después de 5 segundos
-    setTimeout(() => {
-        if (alertDiv.parentNode) {
-            alertDiv.remove();
-        }
-    }, 5000);
-}
-
 // Función para actualizar contadores
 function updateUserCounts() {
     // Recalcular contadores después de eliminar
     const visibleRows = document.querySelectorAll('.user-row:not([style*="display: none"])');
     document.getElementById('visibleCount').textContent = visibleRows.length;
 }
-
-// Inicialización cuando el DOM está listo
-document.addEventListener('DOMContentLoaded', function() {
-    // Configurar evento de confirmación de eliminación
-    document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDelete);
-    
-    // Configurar evento de guardar edición
-    document.getElementById('saveEditBtn').addEventListener('click', saveUserChanges);
-    
-    // Configurar evento de guardar contraseña
-    document.getElementById('savePasswordBtn').addEventListener('click', saveNewPassword);
-    
-    // Configurar verificación de fortaleza de contraseña en tiempo real
-    document.getElementById('nuevaPassword').addEventListener('input', function(e) {
-        checkPasswordStrength(e.target.value);
-    });
-
-    // Permitir guardar con Enter en los modales
-    document.getElementById('editModal').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            saveUserChanges();
-        }
-    });
-
-    document.getElementById('passwordModal').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            saveNewPassword();
-        }
-    });
-});
 </script>
 {% endblock %}
