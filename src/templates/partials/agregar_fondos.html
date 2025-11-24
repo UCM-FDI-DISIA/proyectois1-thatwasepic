@@ -79,6 +79,7 @@ function agregarFondos() {
 
 function agregarRapido(cantidad) {
     document.getElementById('cantidad_fondos').value = cantidad;
+    
     realizarTransaccion(cantidad);
 }
 
@@ -120,6 +121,10 @@ function realizarTransaccion(cantidad) {
         
         // Limpiar campo
         document.getElementById('cantidad_fondos').value = '';
+        
+        // Disparar evento para que el perfil se actualice
+        const event = new CustomEvent('fondosAgregados', { detail: data });
+        document.dispatchEvent(event);
     })
     .catch(error => {
         console.error('Error:', error);

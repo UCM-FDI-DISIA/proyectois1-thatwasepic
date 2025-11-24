@@ -18,7 +18,8 @@ class User(UserMixin, db.Model):
     estadisticas = db.relationship('Estadistica', backref='user', lazy=True)
     salas_creadas = db.relationship('SalaMultijugador', backref='owner', lazy=True)
     salas_unidas = db.relationship('UsuarioSala', backref='player', lazy=True)
-
+    ingresos_fondos = db.relationship('IngresoFondos', backref='user', lazy=True)
+    
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
@@ -39,7 +40,16 @@ class Apuesta(db.Model):
 
     def __repr__(self):
         return f'<Apuesta {self.juego} {self.cantidad} {self.resultado}>'
+class IngresoFondos(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    cantidad = db.Column(db.Float, nullable=False)
+    metodo = db.Column(db.String(50), default='manual')  # manual, transferencia, bonificación, etc.
+    fecha = db.Column(db.DateTime, default=datetime.utcnow)
+    descripcion = db.Column(db.String(200), default='Ingreso manual de fondos')
 
+    def __repr__(self):
+        return f'<IngresoFondos {self.cantidad} {self.fecha}>'
 class Estadistica(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -49,7 +59,6 @@ class Estadistica(db.Model):
     ganancia_total = db.Column(db.Float, default=0.0, nullable=False) 
     apuesta_total = db.Column(db.Float, default=0.0, nullable=False)
 
-# Añadir al final de models.py
 class SalaMultijugador(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False)
