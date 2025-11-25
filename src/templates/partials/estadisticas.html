@@ -313,148 +313,9 @@
                 <span class="badge bg-primary">{{ pagination.total }} transacciones</span>
             </div>
             <div class="card-body">
-                <!-- Pestañas estáticas -->
-                <ul class="nav nav-tabs mb-4" id="ingresosTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link {% if request.args.get('tab') != 'todos' %}active{% endif %}" 
-                                id="recientes-tab" data-bs-toggle="tab" 
-                                data-bs-target="#recientes" type="button" role="tab" 
-                                aria-controls="recientes" aria-selected="{% if request.args.get('tab') != 'todos' %}true{% else %}false{% endif %}">
-                            <i class="fas fa-clock me-1"></i>Últimos Ingresos
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link {% if request.args.get('tab') == 'todos' %}active{% endif %}" 
-                                id="todos-tab" data-bs-toggle="tab" 
-                                data-bs-target="#todos" type="button" role="tab" 
-                                aria-controls="todos" aria-selected="{% if request.args.get('tab') == 'todos' %}true{% else %}false{% endif %}">
-                            <i class="fas fa-list me-1"></i>Todos los Ingresos
-                        </button>
-                    </li>
-                </ul>
-
-                <!-- Contenido de las pestañas estáticas -->
-                <div class="tab-content" id="ingresosTabContent">
-                    <!-- Pestaña 1: Últimos Ingresos -->
-                    <div class="tab-pane fade {% if request.args.get('tab') != 'todos' %}show active{% endif %}" 
-                         id="recientes" role="tabpanel" aria-labelledby="recientes-tab">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Fecha</th>
-                                        <th>Cantidad</th>
-                                        <th>Método</th>
-                                        <th>Descripción</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for ingreso in ingresos_fondos %}
-                                    <tr>
-                                        <td>
-                                            <small>{{ ingreso.fecha.strftime('%d/%m/%Y %H:%M') }}</small>
-                                        </td>
-                                        <td class="text-success fw-bold">
-                                            +${{ "%.2f"|format(ingreso.cantidad) }}
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-info">{{ ingreso.metodo|title }}</span>
-                                        </td>
-                                        <td>
-                                            <small class="text-muted">{{ ingreso.descripcion }}</small>
-                                        </td>
-                                    </tr>
-                                    {% else %}
-                                    <tr>
-                                        <td colspan="4" class="text-center text-muted py-4">
-                                            <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
-                                            No hay ingresos recientes
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Pestaña 2: Todos los Ingresos -->
-                    <div class="tab-pane fade {% if request.args.get('tab') == 'todos' %}show active{% endif %}" 
-                         id="todos" role="tabpanel" aria-labelledby="todos-tab">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Fecha</th>
-                                        <th>Cantidad</th>
-                                        <th>Método</th>
-                                        <th>Descripción</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for ingreso in ingresos_fondos %}
-                                    <tr>
-                                        <td>
-                                            <small>{{ ingreso.fecha.strftime('%d/%m/%Y %H:%M') }}</small>
-                                        </td>
-                                        <td class="text-success fw-bold">
-                                            +${{ "%.2f"|format(ingreso.cantidad) }}
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-info">{{ ingreso.metodo|title }}</span>
-                                        </td>
-                                        <td>
-                                            <small class="text-muted">{{ ingreso.descripcion }}</small>
-                                        </td>
-                                    </tr>
-                                    {% else %}
-                                    <tr>
-                                        <td colspan="4" class="text-center text-muted py-4">
-                                            <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
-                                            No hay ingresos registrados
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Paginación para "Todos los Ingresos" -->
-                        {% if pagination.pages > 1 %}
-                        <nav aria-label="Paginación de ingresos">
-                            <ul class="pagination justify-content-center mt-4">
-                                {% if pagination.has_prev %}
-                                <li class="page-item">
-                                    <a class="page-link" href="{{ url_for('perfil.home', page=pagination.prev_num, tab='todos') }}">
-                                        <i class="fas fa-chevron-left"></i> Anterior
-                                    </a>
-                                </li>
-                                {% endif %}
-                                
-                                {% for page_num in pagination.iter_pages() %}
-                                    {% if page_num %}
-                                        <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
-                                            <a class="page-link" href="{{ url_for('perfil.home', page=page_num, tab='todos') }}">
-                                                {{ page_num }}
-                                            </a>
-                                        </li>
-                                    {% else %}
-                                        <li class="page-item disabled">
-                                            <span class="page-link">...</span>
-                                        </li>
-                                    {% endif %}
-                                {% endfor %}
-                                
-                                {% if pagination.has_next %}
-                                <li class="page-item">
-                                    <a class="page-link" href="{{ url_for('perfil.home', page=pagination.next_num, tab='todos') }}">
-                                        Siguiente <i class="fas fa-chevron-right"></i>
-                                    </a>
-                                </li>
-                                {% endif %}
-                            </ul>
-                        </nav>
-                        {% endif %}
-                    </div>
+                <!-- Lista de todos los ingresos -->
+                <div id="ingresosContent">
+                    {% include "partials/tabla_ingresos.html" %}
                 </div>
 
                 <!-- Resumen de ingresos -->
@@ -463,7 +324,7 @@
                         <div class="card bg-dark">
                             <div class="card-body text-center">
                                 <h6 class="text-muted">Total Ingresado</h6>
-                                <h4 class="text-success">
+                                <h4 class="balance-positive">
                                     ${{ "%.2f"|format(total_ingresado) }}
                                 </h4>
                                 <small class="text-muted">
@@ -476,13 +337,13 @@
                         <div class="card bg-dark">
                             <div class="card-body text-center">
                                 <h6 class="text-muted">Último Ingreso</h6>
-                                <h6 class="text-white">
+                                <h4 class="balance-neutral">
                                     {% if ingresos_fondos %}
                                     ${{ "%.2f"|format(ingresos_fondos[0].cantidad) }}
                                     {% else %}
                                     $0.00
                                     {% endif %}
-                                </h6>
+                                </h4>
                                 <small class="text-muted">
                                     {% if ingresos_fondos %}
                                     {{ ingresos_fondos[0].fecha.strftime('%d/%m/%Y') }}

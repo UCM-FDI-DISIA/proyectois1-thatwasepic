@@ -41,5 +41,5 @@ def home():
     
     return render_template('pages/casino/perfil/perfil.html', 
                          user=current_user, 
-                         stats=stats, 
+                         stats=stats,
                          is_admin=is_admin_user)
