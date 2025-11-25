@@ -273,7 +273,7 @@ function mostrarAlerta(mensaje) {
 }
 
 function correrCarrera(velocidades, cantidad) {
-    const meta = document.querySelector('.pista-carrera').offsetWidth - 80;
+    const meta = document.querySelector('.pista-carrera').offsetWidth - 60;
     let ganador = null;
     let posiciones = {1: 0, 2: 0, 3: 0, 4: 0};
     
@@ -305,6 +305,7 @@ function finalizarCarrera(ganador, cantidad) {
     const gano = ganador === caballoSeleccionado;
     const multiplicador = caballos[caballoSeleccionado].multiplicador;
     const ganancia = gano ? cantidad * multiplicador : 0;
+    const caballoApostado = caballoSeleccionado; // Guardar antes de limpiar
 
     checkMotivationalMessage(gano ? 'ganada' : 'perdida');
     
@@ -328,7 +329,7 @@ function finalizarCarrera(ganador, cantidad) {
         </div>
     `;
     
-    enviarResultadoCaballos(gano ? 'ganada' : 'perdida', cantidad, ganancia, caballoSeleccionado, ganador);
+    enviarResultadoCaballos(gano ? 'ganada' : 'perdida', cantidad, ganancia, caballoApostado, ganador);
     
     carreraEnCurso = false;
     document.getElementById('btn-carrera').disabled = false;
@@ -351,6 +352,8 @@ function reiniciarCarrera() {
 }
 
 function enviarResultadoCaballos(resultado, cantidad, ganancia, caballoApostado, caballoGanador) {
+    console.log('📤 Enviando resultado:', { resultado, cantidad, ganancia, caballoApostado, caballoGanador });
+    
     fetch('/api/caballos/apostar', {
         method: 'POST',
         headers: {
@@ -359,13 +362,28 @@ function enviarResultadoCaballos(resultado, cantidad, ganancia, caballoApostado,
         },
         body: JSON.stringify({ cantidad, resultado, ganancia, caballo_apostado: caballoApostado, caballo_ganador: caballoGanador })
     })
-    .then(res => res.json())
-    .then(data => {
-        if (data.error) return mostrarAlerta('Error: ' + data.error);
-        document.getElementById('balance').textContent = data.nuevo_balance.toFixed(2);
-        document.getElementById('cantidad').max = data.nuevo_balance;
+    .then(res => {
+        console.log('📥 Respuesta recibida:', res.status);
+        return res.json();
     })
-    .catch(() => mostrarAlerta('Error al procesar la apuesta'));
+    .then(data => {
+        console.log('📦 Datos de respuesta:', data);
+        if (data.error) {
+            console.error('❌ Error en respuesta:', data.error);
+            mostrarAlerta('Error: ' + data.error);
+            return;
+        }
+        // Actualizar balance en UI
+        if (data.nuevo_balance !== undefined) {
+            console.log('💰 Actualizando balance:', data.nuevo_balance);
+            document.getElementById('balance').textContent = data.nuevo_balance.toFixed(2);
+            document.getElementById('cantidad').max = data.nuevo_balance;
+        }
+    })
+    .catch(err => {
+        console.error('❌ Error al procesar la apuesta:', err);
+        mostrarAlerta('Error al procesar la apuesta: ' + err.message);
+    });
 }
 
 function getCSRFToken() {
@@ -382,58 +400,91 @@ document.getElementById('cantidad').addEventListener('input', function() {
 <style>
 /* Solo estilos específicos de la carrera - el resto usa tus estilos globales */
 .pista-carrera {
-    background: linear-gradient(45deg, var(--deep-space), var(--dark-space));
-    border: 2px solid var(--neon-cyan);
+    background: linear-gradient(135deg, #1a5f2a 0%, #2d8f3f 50%, #1a5f2a 100%);
+    border: 3px solid var(--neon-cyan);
     border-radius: var(--border-radius-card);
-    padding: 20px;
+    padding: 15px;
     position: relative;
-    height: 300px;
+    height: 340px;
     overflow: hidden;
-    box-shadow: var(--shadow-hologram);
+    box-shadow: var(--shadow-hologram), inset 0 0 30px rgba(0,0,0,0.4);
+    background-attachment: fixed;
+}
+
+.pista-carrera::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        repeating-linear-gradient(90deg, rgba(20, 120, 40, 0.3) 0px, rgba(20, 120, 40, 0.3) 2px, transparent 2px, transparent 4px),
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 1px, transparent 1px, transparent 2px);
+    pointer-events: none;
+    z-index: 1;
 }
 
 .meta {
     position: absolute;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    width: 6px;
-    background: var(--neon-green);
+    right: 5px;
+    top: 5px;
+    bottom: 5px;
+    width: 8px;
+    background: linear-gradient(180deg, var(--neon-yellow) 0%, var(--neon-orange) 50%, var(--neon-yellow) 100%);
     z-index: 2;
-    box-shadow: var(--glow-green);
+    box-shadow: var(--glow-yellow-button), inset 0 0 5px rgba(255,255,255,0.5);
+    border-radius: 4px;
 }
 
 .carril {
     position: relative;
-    height: 60px;
-    margin: 10px 0;
-    border-bottom: 2px dashed var(--neon-cyan);
+    height: 70px;
+    margin: 8px 0;
+    background: linear-gradient(90deg, 
+        rgba(100, 200, 100, 0.2) 0%, 
+        rgba(120, 220, 120, 0.3) 50%, 
+        rgba(100, 200, 100, 0.2) 100%);
+    border: 2px solid rgba(0, 243, 255, 0.4);
+    border-radius: 8px;
     display: flex;
     align-items: center;
+    padding: 0 10px;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.3), 0 2px 5px rgba(0,0,0,0.2);
+    overflow: hidden;
+    z-index: 2;
+}
+
+.carril:nth-child(odd) {
+    background: linear-gradient(90deg, 
+        rgba(80, 180, 80, 0.25) 0%, 
+        rgba(100, 200, 100, 0.35) 50%, 
+        rgba(80, 180, 80, 0.25) 100%);
 }
 
 .caballo {
     position: absolute;
-    left: 0;
-    font-size: 2.5em;
+    left: 10px;
+    font-size: 2.8em;
     transition: left 0.1s linear;
     z-index: 3;
-    filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.5));
+    filter: drop-shadow(0 0 8px rgba(0,0,0,0.6)) drop-shadow(0 0 3px rgba(255,255,255,0.3));
 }
 
 .numero {
     position: absolute;
-    left: 10px;
+    left: -35px;
     background: var(--gradient-cyber);
     border-radius: 50%;
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: bold;
     z-index: 2;
     color: white;
+    border: 2px solid var(--neon-cyan);
 }
 
 .caballo-btn {

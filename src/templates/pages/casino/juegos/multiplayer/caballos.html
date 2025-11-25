@@ -102,46 +102,93 @@
 
 {% block scripts %}
 <style>
-/* Estilos locales para la pista y caballos (necesarios para animación) */
+/* Estilos mejorados para la pista y caballos con cesped */
 .pista-carrera {
   position: relative;
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(0,243,255,0.06);
-  padding: 20px;
+  background: linear-gradient(135deg, #1a5f2a 0%, #2d8f3f 50%, #1a5f2a 100%);
+  border: 3px solid var(--neon-cyan);
   border-radius: 12px;
-  min-height: 220px;
+  padding: 15px;
+  min-height: 280px;
   overflow: hidden;
+  box-shadow: var(--shadow-hologram), inset 0 0 30px rgba(0,0,0,0.4);
 }
+
+.pista-carrera::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    repeating-linear-gradient(90deg, rgba(20, 120, 40, 0.3) 0px, rgba(20, 120, 40, 0.3) 2px, transparent 2px, transparent 4px),
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 1px, transparent 1px, transparent 2px);
+  pointer-events: none;
+  z-index: 1;
+}
+
 .pista-carrera .meta {
   position: absolute;
-  right: 8px;
-  top: 8px;
-  bottom: 8px;
-  width: 6px;
-  background: linear-gradient(180deg, rgba(0,243,255,0.6), rgba(138,43,226,0.6));
+  right: 5px;
+  top: 5px;
+  bottom: 5px;
+  width: 8px;
+  background: linear-gradient(180deg, var(--neon-yellow) 0%, var(--neon-orange) 50%, var(--neon-yellow) 100%);
   border-radius: 4px;
-}
-.carril {
-  position: relative;
-  height: 48px;
-  margin: 12px 0;
-  border-bottom: 1px dashed rgba(255,255,255,0.03);
-}
-.caballo {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 28px;
+  box-shadow: var(--glow-yellow-button), inset 0 0 5px rgba(255,255,255,0.5);
   z-index: 2;
 }
-.carril .numero {
+
+.carril {
+  position: relative;
+  height: 60px;
+  margin: 8px 0;
+  background: linear-gradient(90deg, 
+    rgba(100, 200, 100, 0.2) 0%, 
+    rgba(120, 220, 120, 0.3) 50%, 
+    rgba(100, 200, 100, 0.2) 100%);
+  border: 2px solid rgba(0, 243, 255, 0.4);
+  border-radius: 8px;
+  padding: 0 10px;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.3), 0 2px 5px rgba(0,0,0,0.2);
+  overflow: hidden;
+  z-index: 2;
+}
+
+.carril:nth-child(odd) {
+  background: linear-gradient(90deg, 
+    rgba(80, 180, 80, 0.25) 0%, 
+    rgba(100, 200, 100, 0.35) 50%, 
+    rgba(80, 180, 80, 0.25) 100%);
+}
+
+.caballo {
   position: absolute;
-  left: -28px;
+  left: 10px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--neon-cyan);
-  font-weight: 700;
+  font-size: 2.8em;
+  z-index: 3;
+  filter: drop-shadow(0 0 8px rgba(0,0,0,0.6)) drop-shadow(0 0 3px rgba(255,255,255,0.3));
+}
+
+.carril .numero {
+  position: absolute;
+  left: -35px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--gradient-cyber);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  z-index: 2;
+  color: white;
+  border: 2px solid var(--neon-cyan);
 }
 </style>
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
@@ -295,12 +342,12 @@ function reiniciarCarrera() {
 // Animación sencilla y sincronizada: mueve los elementos hasta meta en 'duracion' ms.
 function animarCarreraMultijugador(ganador, duracion) {
   const pista = document.querySelector('.pista-carrera');
-  const meta = pista.offsetWidth - 80;
+  const meta = pista.offsetWidth - 50; // Margen para no pasar la meta
   // Resetear posiciones
   for (let i = 1; i <= 4; i++) {
     const el = document.getElementById(`caballo${i}`);
     el.style.transition = 'none';
-    el.style.left = '0px';
+    el.style.left = '10px';
   }
   // Forzar reflow
   void document.body.offsetWidth;
