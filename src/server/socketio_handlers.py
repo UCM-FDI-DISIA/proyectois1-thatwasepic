@@ -4,6 +4,7 @@ from flask_socketio import join_room, leave_room, emit, disconnect
 from models import db, SalaMultijugador, UsuarioSala
 from datetime import datetime
 import json
+from endpoints.protected.api.juegos.multiplayer.caballos.socket_handlers import register_caballos_handlers
 
 def contar_jugadores_conectados(sala_id):
     """Contar solo jugadores realmente conectados a la sala"""
@@ -286,3 +287,7 @@ def register_socketio_handlers(socketio):
             'message': message,
             'timestamp': datetime.utcnow().isoformat()
         }, room=f'sala_{sala_id}')
+    
+    # Registrar handlers específicos de Caballos multijugador
+    # Necesitamos pasar socketio y app (que se pasa luego desde app.py)
+    # Por ahora, registramos aquí pero register_caballos_handlers se llamará desde app.py

@@ -72,6 +72,14 @@ try:
 except ImportError as e:
     print(f"⚠️  No se pudieron cargar los handlers de SocketIO: {e}")
 
+# Registrar handlers específicos de juegos multijugador
+try:
+    from endpoints.protected.api.juegos.multiplayer.caballos.socket_handlers import register_caballos_handlers
+    register_caballos_handlers(socketio, app)
+    print("✅ Handlers de Caballos multijugador registrados")
+except ImportError as e:
+    print(f"⚠️  No se pudieron cargar los handlers de Caballos: {e}")
+
 # Registrar flatpages
 pages = FlatPages(app)
 

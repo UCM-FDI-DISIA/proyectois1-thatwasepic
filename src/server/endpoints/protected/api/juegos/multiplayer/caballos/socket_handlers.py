@@ -119,20 +119,30 @@ def register_caballos_handlers(socketio, app):
         emit('start_race', {'ganador': ganador, 'duracion': duracion_ms}, room=room_name)
         print(f"✅ Emitido start_race: ganador={ganador}, duracion={duracion_ms}ms, room={room_name}")
 
-        # Enviar resultados después de la duración para que los clientes muestren los saldos
+        # Capturar socketio en variable local para el thread
+        _socketio = socketio
+        _room_name = room_name
+        _ganador = ganador
+        _resultados = resultados
+        _duracion_ms = duracion_ms
+        
+        # Enviar resultados después de la duración usando start_background_task
         def delayed_emit():
-            print(f"⏳ Esperando {duracion_ms}ms antes de emitir race_result...")
-            time.sleep(duracion_ms / 1000.0)
-            print(f"✅ Emitiendo race_result a room {room_name}: ganador={ganador}, resultados={resultados}")
-            # Usar socketio.emit directamente - debe funcionar con skip_sid=False
+            print(f"⏳ Esperando {_duracion_ms}ms antes de emitir race_result...")
+            _socketio.sleep(_duracion_ms / 1000.0)
+            print(f"✅ A punto de emitir race_result a room {_room_name}")
+            print(f"   Datos: ganador={_ganador}, resultados={_resultados}")
+            # Usar socketio.server para emitir sin contexto de cliente
             try:
-                socketio.emit('race_result', 
-                              {'ganador': ganador, 'resultados': resultados}, 
-                              room=room_name,
-                              namespace='/')
-                print("✅ race_result emitido exitosamente")
+                _socketio.server.emit('race_result', 
+                                      {'ganador': _ganador, 'resultados': _resultados}, 
+                                      room=_room_name,
+                                      namespace='/')
+                print(f"✅ race_result emitido exitosamente al room {_room_name}")
             except Exception as e:
-                print(f"❌ Error emitiendo race_result: {e}")
+                print(f"❌ Error al emitir race_result: {e}")
+                import traceback
+                traceback.print_exc()
 
-        threading.Thread(target=delayed_emit, daemon=True).start()
+        _socketio.start_background_task(delayed_emit)
 

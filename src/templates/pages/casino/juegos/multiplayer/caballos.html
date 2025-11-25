@@ -214,7 +214,21 @@ socket.on('todos_apostaron', () => {
 });
 
 socket.on('connect', () => {
+  console.log('✅ Socket conectado, uniéndose a la sala...');
   socket.emit('join_caballos_room', { sala_id: salaId });
+});
+
+// Escuchar errores generales
+socket.on('error_general', (data) => {
+  console.error('❌ Error del servidor:', data.message);
+  alert('Error: ' + data.message);
+});
+
+// Escuchar errores de apuesta
+socket.on('error_apuesta', (data) => {
+  console.error('❌ Error en apuesta:', data.message);
+  alert('Error: ' + data.message);
+  document.getElementById('btn-apostar').disabled = false;
 });
 
 document.getElementById('btn-iniciar').onclick = function() {
