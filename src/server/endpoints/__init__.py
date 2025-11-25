@@ -14,3 +14,12 @@ def register_blueprints(app):
         except ModuleNotFoundError:
             # No todos los subpaquetes tendrán un routes.py
             continue
+
+    # Forzar importación del blueprint de caballos multiplayer si no se detecta automáticamente
+    try:
+        from .protected.api.juegos.multiplayer.caballos import routes as caballos_routes
+        if hasattr(caballos_routes, 'bp'):
+            app.register_blueprint(caballos_routes.bp)
+            print("✅ Registrado blueprint: caballos multiplayer (forzado)")
+    except Exception as e:
+        print(f"❌ Error registrando blueprint caballos multiplayer: {e}")

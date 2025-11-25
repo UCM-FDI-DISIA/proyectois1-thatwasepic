@@ -167,7 +167,7 @@ def sala(sala_id):
         elif sala.juego == 'ruleta':
             return redirect(f'/ruleta/sala/{sala_id}')
         elif sala.juego == 'caballos':
-            return redirect(f'/caballos/sala/{sala_id}')
+            return redirect(f'/api/multijugador/caballos/sala/{sala_id}')
         else:
             return redirect(f'/multijugador/partida/{sala.juego}/{sala_id}')
     
