@@ -304,6 +304,62 @@
     </div>
 </div>
 
+<!-- Historial de Ingresos de Fondos -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card animated-translateY">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>💵 Historial de Ingresos de Fondos</span>
+                <span class="badge bg-primary">{{ pagination.total }} transacciones</span>
+            </div>
+            <div class="card-body">
+                <!-- Lista de todos los ingresos -->
+                <div id="ingresosContent">
+                    {% include "partials/tabla_ingresos.html" %}
+                </div>
+
+                <!-- Resumen de ingresos -->
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card bg-dark">
+                            <div class="card-body text-center">
+                                <h6 class="text-muted">Total Ingresado</h6>
+                                <h4 class="balance-positive">
+                                    ${{ "%.2f"|format(total_ingresado) }}
+                                </h4>
+                                <small class="text-muted">
+                                    {{ pagination.total }} transacciones
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-dark">
+                            <div class="card-body text-center">
+                                <h6 class="text-muted">Último Ingreso</h6>
+                                <h4 class="balance-neutral">
+                                    {% if ingresos_fondos %}
+                                    ${{ "%.2f"|format(ingresos_fondos[0].cantidad) }}
+                                    {% else %}
+                                    $0.00
+                                    {% endif %}
+                                </h4>
+                                <small class="text-muted">
+                                    {% if ingresos_fondos %}
+                                    {{ ingresos_fondos[0].fecha.strftime('%d/%m/%Y') }}
+                                    {% else %}
+                                    Sin registros
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Resumen Financiero -->
 <div class="row mt-4">
     <div class="col-md-6">
@@ -380,3 +436,62 @@
         </div>
     </div>
 </div>
+
+{% block partial_scripts %}
+<script>
+// Función para actualizar la UI después de agregar fondos
+function actualizarUIdespuesDeIngreso(response) {
+    if (response.actualizar_ui) {
+        console.log('Actualizando UI después de agregar fondos');
+        
+        // Recargar la página para mostrar los datos actualizados
+        setTimeout(() => {
+            // Mantener la pestaña activa al recargar
+            const tabActiva = document.querySelector('.nav-link.active').id;
+            let tabParam = '';
+            
+            if (tabActiva === 'todos-tab') {
+                tabParam = '?tab=todos';
+            }
+            
+            window.location.href = window.location.pathname + tabParam;
+        }, 1000);
+        
+        // Mostrar notificación
+        mostrarNotificacion(response.mensaje, 'success');
+    }
+}
+
+// Función de notificación
+function mostrarNotificacion(mensaje, tipo) {
+    const notificacion = document.createElement('div');
+    notificacion.className = `alert alert-${tipo} alert-dismissible fade show position-fixed`;
+    notificacion.style.cssText = `
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+    `;
+    notificacion.innerHTML = `
+        <i class="fas fa-${tipo === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notificacion);
+    
+    setTimeout(() => {
+        if (notificacion.parentNode) {
+            notificacion.remove();
+        }
+    }, 5000);
+}
+
+// Escuchar eventos de fondos agregados
+document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('fondosAgregados', function(e) {
+        actualizarUIdespuesDeIngreso(e.detail);
+    });
+});
+</script>
+{% endblock %}

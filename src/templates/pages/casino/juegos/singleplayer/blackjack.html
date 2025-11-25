@@ -201,7 +201,7 @@ Blackjack (individual)
           <div class="topbar-left">
             <div style="display:flex;flex-direction:column;gap:2px;min-width:140px">
               <small>SALDO</small>
-              <div class="money">&euro;<span id="balance">0.00</span></div>
+              <div class="money">&euro;<span id="balance-juego">0.00</span></div>
             </div>
             <div style="display:flex;flex-direction:column;gap:2px;min-width:140px">
               <small>&Uacute;LTIMO RESULTADO</small>
@@ -400,19 +400,26 @@ const ENABLE_SPLIT = true;           // permitir 1 separación
 const DECKS = 6;                     // mazos
 // ================== ESTADO ==================
 let balance = 0; // se cargará desde el backend
+let balanceAntesRonda = 0; // para mostrar la variación real en "ÚLTIMO RESULTADO"
 // Cargar saldo real del usuario
 fetch('/api/balance')
   .then(r => r.json())
   .then(d => {
     if (typeof d.balance === 'number') {
       balance = d.balance;
-      const $bal = document.getElementById('balance');
-      if ($bal) $bal.textContent = balance.toFixed(2);
-      const $stat = document.getElementById('stat-saldo');
-      if ($stat) $stat.textContent = balance.toFixed(2);
+      actualizarSaldoUI(balance);
     }
   })
   .catch(()=>{ /* opcional: silenciar error si no hay sesión */ });
+
+function actualizarSaldoUI(valor){
+  const balJuego = document.getElementById('balance-juego');
+  if (balJuego) balJuego.textContent = valor.toFixed(2);
+  const balNavbar = document.getElementById('balance');
+  if (balNavbar) balNavbar.textContent = valor.toFixed(2);
+  const balStat = document.getElementById('stat-saldo');
+  if (balStat) balStat.textContent = valor.toFixed(2);
+}
 
 let juegoActivo = false;
 let deck = [];
@@ -558,8 +565,7 @@ function actualizarMarcadores(){
   if(manosJugador.length>1){ indi.textContent=`Mano ${indiceManoActual+1} de ${manosJugador.length}`; }
   else { indi.textContent=''; }
 
-  document.getElementById('balance').textContent = balance.toFixed(2);
-  document.getElementById('stat-saldo').textContent = balance.toFixed(2);
+  actualizarSaldoUI(balance);
 }
 
 function actualizarEstadisticas() {
@@ -568,7 +574,7 @@ function actualizarEstadisticas() {
   document.getElementById('stat-derrotas').textContent = estadisticas.derrotas;
   document.getElementById('stat-empates').textContent = estadisticas.empates;
   document.getElementById('stat-blackjacks').textContent = estadisticas.blackjacks;
-  document.getElementById('stat-saldo').textContent = balance.toFixed(2);
+  actualizarSaldoUI(balance);
 }
 
 function bloquearAcciones(bloq=true){
@@ -646,6 +652,8 @@ function iniciarBlackjack(){
   const cantidad = parseFloat(document.getElementById('cantidad').value||'0');
   if(!cantidad || cantidad<=0) return alert('INGRESA UNA CANTIDAD VÁLIDA');
   if(cantidad>balance) return alert('FONDOS INSUFICIENTES');
+
+  balanceAntesRonda = balance; // guardar saldo previo para mostrar el último resultado
 
   // Reset de ronda
   document.getElementById('resultado').innerHTML='';
@@ -930,10 +938,7 @@ function resolverResultadoGlobal(){
       // Sincronizamos con el saldo del servidor (fuente de la verdad)
       balance = data.nuevo_balance;
     }
-    const $bal = document.getElementById('balance');
-    if ($bal) $bal.textContent = balance.toFixed(2);
-    const $stat = document.getElementById('stat-saldo');
-    if ($stat) $stat.textContent = balance.toFixed(2);
+    actualizarSaldoUI(balance);
   })
   .catch(err => console.error('Error al persistir la ronda:', err))
   .finally(() => {
@@ -941,10 +946,20 @@ function resolverResultadoGlobal(){
   });
 }
 
+function actualizarUltimoResultado(deltaReal){
+  const el = document.getElementById('ultimo-resultado');
+  if(!el) return;
+  const signo = deltaReal>0 ? '+' : (deltaReal<0 ? '-' : '');
+  el.textContent = `${signo}€${Math.abs(deltaReal).toFixed(2)}`;
+  el.style.color = deltaReal>0 ? 'var(--neon-green)' : (deltaReal<0 ? '#ff6b6b' : '#c7c7c7');
+}
+
 
 function finDeRonda(tipo, delta, detalle){
   juegoActivo=false;
   bloquearAcciones(true);
+  const deltaReal = balance - balanceAntesRonda;
+  actualizarUltimoResultado(deltaReal);
   mostrarResultadoUI({tipo, delta, detalle});
 }
 

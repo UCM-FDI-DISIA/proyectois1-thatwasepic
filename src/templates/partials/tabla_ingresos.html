@@ -13,8 +13,8 @@
                 {% for ingreso in ingresos_fondos %}
                 <tr>
                     <td><small>{{ ingreso.fecha.strftime('%d/%m/%Y %H:%M') }}</small></td>
-                    <td class="text-success fw-bold">+${{ "%.2f"|format(ingreso.cantidad) }}</td>
-                    <td><span class="badge bg-info">{{ ingreso.metodo|title }}</span></td>
+                    <td><span class="balance-positive">+${{ "%.2f"|format(ingreso.cantidad) }}</span></td>
+                    <td><span class="badge rounded-pill text-bg-info">{{ ingreso.metodo|title }}</span></td>
                     <td><small class="text-muted">{{ ingreso.descripcion }}</small></td>
                 </tr>
                 {% endfor %}

@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, Blueprint, render_template
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from models import db, User, Estadistica, IngresoFondos
+from models import db, User, Estadistica
 from endpoints.protected.ui.admin.utils import is_admin_user
 
 bp = Blueprint('perfil', __name__)
@@ -9,20 +9,6 @@ bp = Blueprint('perfil', __name__)
 @login_required
 def home():
     stats = Estadistica.query.filter_by(user_id=current_user.id).all()
-    
-    # Obtener el parámetro de pestaña activa
-    tab_activa = request.args.get('tab', 'recientes')
-    page = request.args.get('page', 1, type=int)
-    per_page = 8
-    
-    # Obtener historial de ingresos de fondos con paginación
-    ingresos_pagination = IngresoFondos.query.filter_by(user_id=current_user.id)\
-        .order_by(IngresoFondos.fecha.desc())\
-        .paginate(page=page, per_page=per_page, error_out=False)
-    
-    ingresos_fondos = ingresos_pagination.items
-    total_ingresado = db.session.query(db.func.sum(IngresoFondos.cantidad))\
-        .filter_by(user_id=current_user.id).scalar() or 0
     
     if request.method == 'POST':
         nuevo_username = request.form.get('username')
@@ -55,8 +41,5 @@ def home():
     
     return render_template('pages/casino/perfil/perfil.html', 
                          user=current_user, 
-                         stats=stats, 
-                         ingresos_fondos=ingresos_fondos,
-                         total_ingresado=total_ingresado,
-                         pagination=ingresos_pagination,
+                         stats=stats,
                          is_admin=is_admin_user)
