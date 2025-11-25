@@ -1,0 +1,326 @@
+{% extends "pages/casino/base.html" %}
+{% block title %}Carrera de Caballos Multijugador{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-10">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h4>🏇 Carrera de Caballos (Multijugador) — Sala {{ sala.id }}</h4>
+        <button class="btn btn-info btn-sm" onclick="mostrarAyuda()">❓ HELP</button>
+      </div>
+      <div class="card-body">
+        <div class="text-center mb-4">
+          <h5>Balance: $<span id="balance">{{ "%.2f"|format(current_user.balance) }}</span></h5>
+        </div>
+        <div class="mb-3">
+          <strong>Jugadores en la sala:</strong>
+          <span id="jugadores-lista" class="badge bg-primary"></span>
+        </div>
+        <!-- Información de caballos (igual que singleplayer) -->
+        <div class="row mb-4">
+          <div class="col-12">
+            <h5>Información de los Caballos</h5>
+            <div class="row">
+              <div class="col-md-3 mb-3">
+                <div class="card h-100"><div class="card-body text-center"><h5>🐎 Relámpago</h5><div class="progress mb-2"><div class="progress-bar bg-success" role="progressbar" style="width: 85%"></div></div><small>Velocidad: 85%</small><div class="progress mb-2"><div class="progress-bar bg-info" role="progressbar" style="width: 70%"></div></div><small>Resistencia: 70%</small><div class="mt-2"><span class="badge bg-secondary">Multiplicador: 1.5x</span></div></div></div>
+              </div>
+              <div class="col-md-3 mb-3">
+                <div class="card h-100"><div class="card-body text-center"><h5>🐴 Trueno</h5><div class="progress mb-2"><div class="progress-bar bg-success" role="progressbar" style="width: 75%"></div></div><small>Velocidad: 75%</small><div class="progress mb-2"><div class="progress-bar bg-info" role="progressbar" style="width: 80%"></div></div><small>Resistencia: 80%</small><div class="mt-2"><span class="badge bg-secondary">Multiplicador: 2x</span></div></div></div>
+              </div>
+              <div class="col-md-3 mb-3">
+                <div class="card h-100"><div class="card-body text-center"><h5>🏇 Centella</h5><div class="progress mb-2"><div class="progress-bar bg-success" role="progressbar" style="width: 65%"></div></div><small>Velocidad: 65%</small><div class="progress mb-2"><div class="progress-bar bg-info" role="progressbar" style="width: 85%"></div></div><small>Resistencia: 85%</small><div class="mt-2"><span class="badge bg-secondary">Multiplicador: 3x</span></div></div></div>
+              </div>
+              <div class="col-md-3 mb-3">
+                <div class="card h-100"><div class="card-body text-center"><h5>🎠 Azabache</h5><div class="progress mb-2"><div class="progress-bar bg-success" role="progressbar" style="width: 45%"></div></div><small>Velocidad: 45%</small><div class="progress mb-2"><div class="progress-bar bg-info" role="progressbar" style="width: 95%"></div></div><small>Resistencia: 95%</small><div class="mt-2"><span class="badge bg-secondary">Multiplicador: 6x</span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Selección de apuesta -->
+        <div class="row mb-4">
+          <div class="col-md-4">
+            <label for="cantidad" class="form-label">Cantidad a apostar:</label>
+            <input type="number" class="form-control" id="cantidad" min="1" max="{{ current_user.balance }}" step="1" value="10">
+          </div>
+          <div class="col-md-8">
+            <label class="form-label">Selecciona un caballo:</label>
+            <div class="d-flex gap-2 flex-wrap">
+              <button class="btn btn-outline-primary caballo-btn" onclick="seleccionarCaballo(1)">🐎 Relámpago (1.5x)</button>
+              <button class="btn btn-outline-success caballo-btn" onclick="seleccionarCaballo(2)">🐴 Trueno (2x)</button>
+              <button class="btn btn-outline-danger caballo-btn" onclick="seleccionarCaballo(3)">🏇 Centella (3x)</button>
+              <button class="btn btn-outline-warning caballo-btn" onclick="seleccionarCaballo(4)">🎠 Azabache (6x)</button>
+            </div>
+          </div>
+        </div>
+        <!-- Pista de carrera -->
+        <div class="pista-carrera mb-4">
+          <div class="meta"></div>
+          <div class="carril" id="carril1"><div class="caballo" id="caballo1">🐎</div><div class="numero">1</div></div>
+          <div class="carril" id="carril2"><div class="caballo" id="caballo2">🐴</div><div class="numero">2</div></div>
+          <div class="carril" id="carril3"><div class="caballo" id="caballo3">🏇</div><div class="numero">3</div></div>
+          <div class="carril" id="carril4"><div class="caballo" id="caballo4">🎠</div><div class="numero">4</div></div>
+        </div>
+        <!-- Controles -->
+        <div class="text-center">
+          <button class="btn btn-primary btn-lg me-2" id="btn-apostar" onclick="apostarCaballo()">Apostar</button>
+          <button class="btn btn-success btn-lg me-2" id="btn-iniciar" style="display:none;">Iniciar Carrera</button>
+          <button class="btn btn-secondary btn-lg" onclick="reiniciarCarrera()">🔄 Reiniciar</button>
+        </div>
+        <div id="info-apuesta" class="text-center mt-3 fw-bold"></div>
+        <div id="resultado" class="mt-4"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal de Ayuda (igual que singleplayer) -->
+<div class="modal fade" id="modalAyuda" tabindex="-1" aria-labelledby="modalAyudaLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalAyudaLabel">🏇 Ayuda - Carrera de Caballos</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <h6>Descripción del juego “Carrera de Caballos”</h6>
+        <p>Comenzarás viendo tu balance actual y una sección con información de los cuatro caballos disponibles —Relámpago, Trueno, Centella y Azabache—, cada uno con su velocidad, resistencia y multiplicador de ganancia.</p>
+        <h6>A continuación sigue estos pasos:</h6>
+        <ol>
+          <li><strong>Elige la cantidad a apostar</strong> (limitada por tu saldo).</li>
+          <li><strong>Selecciona un caballo</strong> al que deseas apostar.</li>
+          <li><strong>Pulsa “Apostar”</strong> para confirmar tu apuesta.</li>
+          <li><strong>Cuando todos hayan apostado, el creador podrá iniciar la carrera.</strong></li>
+        </ol>
+        <p>La carrera será visible para todos los jugadores a la vez. ¡Que gane el mejor caballo!</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Entendido</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+/* Estilos locales para la pista y caballos (necesarios para animación) */
+.pista-carrera {
+  position: relative;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(0,243,255,0.06);
+  padding: 20px;
+  border-radius: 12px;
+  min-height: 220px;
+  overflow: hidden;
+}
+.pista-carrera .meta {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  bottom: 8px;
+  width: 6px;
+  background: linear-gradient(180deg, rgba(0,243,255,0.6), rgba(138,43,226,0.6));
+  border-radius: 4px;
+}
+.carril {
+  position: relative;
+  height: 48px;
+  margin: 12px 0;
+  border-bottom: 1px dashed rgba(255,255,255,0.03);
+}
+.caballo {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 28px;
+  z-index: 2;
+}
+.carril .numero {
+  position: absolute;
+  left: -28px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--neon-cyan);
+  font-weight: 700;
+}
+</style>
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+// ... Lógica JS adaptada de singleplayer y coinflip/blackjack multiplayer ...
+// Variables de estado
+let caballoSeleccionado = null;
+let carreraEnCurso = false;
+let salaId = Number("{{ sala.id }}");
+let esCreador = {{ 'true' if sala.creador_id == current_user.id else 'false' }};
+esCreador = (esCreador === true || esCreador === 'true');
+const socket = io();
+const myId = Number("{{ current_user.id }}");
+let apuestas = {};
+let jugadores = [];
+
+function mostrarAyuda() {
+  const modal = new bootstrap.Modal(document.getElementById('modalAyuda'));
+  modal.show();
+}
+
+function seleccionarCaballo(numero) {
+  if (carreraEnCurso) return;
+  caballoSeleccionado = numero;
+  document.querySelectorAll('.caballo-btn').forEach(btn => {
+    btn.classList.remove('btn-primary', 'btn-success', 'btn-danger', 'btn-warning');
+    btn.classList.add('btn-outline-primary', 'btn-outline-success', 'btn-outline-danger', 'btn-outline-warning');
+  });
+  const btnSeleccionado = document.querySelector(`.caballo-btn:nth-child(${numero})`);
+  btnSeleccionado.className = btnSeleccionado.className.replace('btn-outline-', 'btn-');
+  document.getElementById('info-apuesta').innerHTML = `Apuestas por: ${['Relámpago','Trueno','Centella','Azabache'][numero-1]}`;
+}
+
+function apostarCaballo() {
+  const cantidad = parseFloat(document.getElementById('cantidad').value);
+  if (!caballoSeleccionado) { alert('Selecciona un caballo primero'); return; }
+  if (!cantidad || cantidad <= 0) { alert('Ingresa una cantidad válida'); return; }
+  if (carreraEnCurso) return;
+  socket.emit('caballos_place_bet', { sala_id: salaId, caballo: caballoSeleccionado, cantidad });
+  // Disable betting controls locally until server responds
+  document.getElementById('btn-apostar').disabled = true;
+}
+
+socket.on('estado_sala_actualizado', data => {
+  apuestas = data.apuestas;
+  jugadores = data.jugadores;
+  document.getElementById('jugadores-lista').textContent = jugadores.map(j => j.username).join(', ');
+  // Mostrar apuestas recibidas
+  let info = '';
+  for (const uid in apuestas) {
+    const ap = apuestas[uid];
+    info += `<div>${ap.username} ha apostado por ${['Relámpago','Trueno','Centella','Azabache'][ap.caballo-1]}</div>`;
+  }
+  document.getElementById('info-apuesta').innerHTML = info;
+  // Si todos han apostado y eres el creador, mostrar botón iniciar
+  if (Object.keys(apuestas).length === jugadores.length && esCreador) {
+    document.getElementById('btn-iniciar').style.display = '';
+    document.getElementById('btn-iniciar').disabled = false;
+  } else {
+    document.getElementById('btn-iniciar').style.display = 'none';
+  }
+});
+
+// Cuando todos han apostado, el servidor emite este evento
+socket.on('todos_apostaron', () => {
+  if (esCreador) {
+    document.getElementById('btn-iniciar').style.display = '';
+    document.getElementById('btn-iniciar').disabled = false;
+  }
+});
+
+socket.on('connect', () => {
+  console.log('✅ Socket conectado, uniéndose a la sala...');
+  socket.emit('join_caballos_room', { sala_id: salaId });
+});
+
+// Escuchar errores generales
+socket.on('error_general', (data) => {
+  console.error('❌ Error del servidor:', data.message);
+  alert('Error: ' + data.message);
+});
+
+// Escuchar errores de apuesta
+socket.on('error_apuesta', (data) => {
+  console.error('❌ Error en apuesta:', data.message);
+  alert('Error: ' + data.message);
+  document.getElementById('btn-apostar').disabled = false;
+});
+
+document.getElementById('btn-iniciar').onclick = function() {
+  if (!esCreador) return;
+  socket.emit('iniciar_carrera', { sala_id: salaId });
+  document.getElementById('btn-iniciar').disabled = true;
+};
+
+// Servidor emitirá 'start_race' con el ganador previsto y la duración (ms)
+socket.on('start_race', data => {
+  const ganador = Number(data.ganador);
+  const duracion = Number(data.duracion) || 4000;
+  carreraEnCurso = true;
+  document.getElementById('btn-apostar').disabled = true;
+  document.getElementById('btn-iniciar').disabled = true;
+  animarCarreraMultijugador(ganador, duracion);
+});
+
+// Servidor envía resultados después de la carrera
+socket.on('race_result', data => {
+  console.log('📦 Recibido race_result:', data);
+  carreraEnCurso = false;
+  const ganador = Number(data.ganador);
+  const resultados = data.resultados || {};
+  console.log('🎯 MI ID:', myId, 'Resultados:', resultados);
+  // Mostrar resultado general
+  const gano = resultados[myId] ? resultados[myId].has_ganado : false;
+  const nuevo_balance = resultados[myId] ? resultados[myId].nuevo_balance : null;
+  console.log('💰 Gané:', gano, 'Nuevo balance:', nuevo_balance);
+  document.getElementById('resultado').innerHTML =
+    (gano ? `<div class="alert alert-success text-center"><h4>¡GANASTE! 🎉</h4><p>Ganador: ${['Relámpago','Trueno','Centella','Azabache'][ganador-1]}</p><p>Nuevo saldo: ${nuevo_balance !== null ? nuevo_balance.toFixed(2) : ''}</p></div>`
+         : `<div class="alert alert-danger text-center"><h4>Has perdido 😞</h4><p>Ganador: ${['Relámpago','Trueno','Centella','Azabache'][ganador-1]}</p><p>Nuevo saldo: ${nuevo_balance !== null ? nuevo_balance.toFixed(2) : ''}</p></div>`);
+
+  // Actualizar balance mostrado si nos dan nuevo saldo
+  if (nuevo_balance !== null) {
+    document.getElementById('balance').textContent = Number(nuevo_balance).toFixed(2);
+    document.getElementById('cantidad').max = Number(nuevo_balance).toFixed(2);
+  }
+
+  // Reactivar botones
+  document.getElementById('btn-apostar').disabled = false;
+  document.getElementById('btn-iniciar').disabled = false;
+});
+
+// Reiniciar estado y posiciones de la carrera
+function reiniciarCarrera() {
+  caballoSeleccionado = null;
+  carreraEnCurso = false;
+
+  document.querySelectorAll('.caballo-btn, .caballo').forEach(el => {
+    el.classList.remove('caballo-seleccionado', 'caballo-ganador');
+  });
+  document.querySelectorAll('.caballo').forEach(caballo => {
+    caballo.style.transition = 'none';
+    caballo.style.left = '0px';
+  });
+
+  document.getElementById('info-apuesta').innerHTML = '';
+  document.getElementById('resultado').innerHTML = '';
+  document.getElementById('btn-apostar').disabled = false;
+  document.getElementById('btn-iniciar').disabled = false;
+}
+
+// Animación sencilla y sincronizada: mueve los elementos hasta meta en 'duracion' ms.
+function animarCarreraMultijugador(ganador, duracion) {
+  const pista = document.querySelector('.pista-carrera');
+  const meta = pista.offsetWidth - 80;
+  // Resetear posiciones
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById(`caballo${i}`);
+    el.style.transition = 'none';
+    el.style.left = '0px';
+  }
+  // Forzar reflow
+  void document.body.offsetWidth;
+
+  // Animar: ganador llega en 'duracion', los demás un poco después
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById(`caballo${i}`);
+    let t = duracion;
+    if (i !== ganador) t = duracion + 800 + Math.random() * 800; // llegan después
+    el.style.transition = `left ${t}ms linear`;
+    // mover
+    setTimeout(() => { el.style.left = `${meta}px`; }, 20);
+  }
+}
+
+// Evitar que el usuario introduzca más que su balance
+document.getElementById('cantidad').addEventListener('input', function() {
+  const balance = parseFloat(document.getElementById('balance').textContent) || 0;
+  if (parseFloat(this.value) > balance) this.value = balance;
+});
+
+</script>
+{% endblock %}
