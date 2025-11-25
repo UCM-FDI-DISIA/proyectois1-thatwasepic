@@ -1,5 +1,5 @@
 <div class="table-responsive">
-    <table class="table table-hover">
+    <table class="table">
         <thead>
             <tr>
                 <th>Fecha</th>
@@ -9,8 +9,8 @@
             </tr>
         </thead>
         <tbody>
-            {% if ingresos_fondos %}
-                {% for ingreso in ingresos_fondos %}
+            {% if ingresos.items %}
+                {% for ingreso in ingresos.items %}
                 <tr>
                     <td><small>{{ ingreso.fecha.strftime('%d/%m/%Y %H:%M') }}</small></td>
                     <td><span class="balance-positive">+${{ "%.2f"|format(ingreso.cantidad) }}</span></td>
@@ -30,41 +30,44 @@
     </table>
 </div>
 
-{% if pagination and pagination.pages > 1 %}
-<nav aria-label="Paginación de ingresos">
-    <ul class="pagination justify-content-center mt-4">
-        {% if pagination.has_prev %}
-        <li class="page-item">
-            <a class="page-link" href="javascript:void(0)" onclick="cambiarPagina({{ pagination.prev_num }})">
-                <i class="fas fa-chevron-left"></i> Anterior
-            </a>
+{% if ingresos and ingresos.pages > 1 %}
+<nav aria-label="Paginación de ingresos" class="mt-3">
+  <ul class="pagination justify-content-center mb-0">
+
+    <!-- Botón anterior -->
+    <li class="page-item {% if not ingresos.has_prev %}disabled{% endif %}">
+      <a class="page-link" 
+         href="?page={{ ingresos.prev_num if ingresos.has_prev else 1 }}"
+         aria-label="Anterior">
+        &laquo;
+      </a>
+    </li>
+
+    <!-- Números de página -->
+    {% for page_num in ingresos.iter_pages(left_edge=1, left_current=2, right_current=2, right_edge=1) %}
+      {% if page_num %}
+        <li class="page-item {% if page_num == ingresos.page %}active{% endif %}">
+          <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
         </li>
-        {% endif %}
-        
-        {% for page_num in pagination.iter_pages() %}
-            {% if page_num %}
-                <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
-                    <a class="page-link" href="javascript:void(0)" onclick="cambiarPagina({{ page_num }})">
-                        {{ page_num }}
-                    </a>
-                </li>
-            {% else %}
-                <li class="page-item disabled">
-                    <span class="page-link">...</span>
-                </li>
-            {% endif %}
-        {% endfor %}
-        
-        {% if pagination.has_next %}
-        <li class="page-item">
-            <a class="page-link" href="javascript:void(0)" onclick="cambiarPagina({{ pagination.next_num }})">
-                Siguiente <i class="fas fa-chevron-right"></i>
-            </a>
+      {% else %}
+        <li class="page-item disabled">
+          <span class="page-link">…</span>
         </li>
-        {% endif %}
-    </ul>
+      {% endif %}
+    {% endfor %}
+
+    <!-- Botón siguiente -->
+    <li class="page-item {% if not ingresos.has_next %}disabled{% endif %}">
+      <a class="page-link"
+         href="?page={{ ingresos.next_num if ingresos.has_next else ingresos.pages }}"
+         aria-label="Siguiente">
+        &raquo;
+      </a>
+    </li>
+
+  </ul>
 </nav>
-{% elif pagination and pagination.pages == 1 %}
+{% elif ingresos and ingresos.pages == 1 %}
 <div class="text-center text-muted small mt-3">
     Mostrando todos los resultados (1 página)
 </div>

@@ -1,9 +1,10 @@
 # routes.py - Versión actualizada con edición y eliminación
-from flask import Blueprint, render_template, flash, redirect, url_for, request, jsonify
+from flask import Blueprint, render_template, request, flash, redirect, url_for, request, jsonify
 from flask_login import login_required, current_user
 from models import db, User, Apuesta, Estadistica, SalaMultijugador, UsuarioSala, IngresoFondos
 from endpoints.protected.ui.admin.utils import require_admin
 from datetime import datetime, timedelta
+from endpoints.protected.ui.general.estadisticas.routes import obtener_pagina_transacciones
 
 bp = Blueprint('admin_usuarios', __name__)
 
@@ -201,19 +202,15 @@ def detalle_usuario(user_id):
             .order_by(UsuarioSala.fecha_union.desc())\
             .all()
 
-        # Obtener el parámetro de pestaña activa
-        tab_activa = request.args.get('tab', 'recientes')
-        page = request.args.get('page', 1, type=int)
-        per_page = 8
-        
         # Obtener historial de ingresos de fondos con paginación
-        ingresos_pagination = IngresoFondos.query.filter_by(user_id=current_user.id)\
-            .order_by(IngresoFondos.fecha.desc())\
-            .paginate(page=page, per_page=per_page, error_out=False)
-        
-        ingresos_fondos = ingresos_pagination.items
+        ingresos_pag = obtener_pagina_transacciones(8)
+
         total_ingresado = db.session.query(db.func.sum(IngresoFondos.cantidad))\
             .filter_by(user_id=current_user.id).scalar() or 0
+
+        # Necesario para actualización automática de la lista de transacciones.
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return render_template("partials/tabla_ingresos.html", ingresos=ingresos_pag)
         
         return render_template('pages/admin/usuarios/usuarios_detalle.html',
                                 user=usuario,
@@ -222,10 +219,10 @@ def detalle_usuario(user_id):
                                 salas_creadas=salas_creadas,
                                 salas_unidas=salas_unidas,
                                 now=datetime.now(),
-                                ingresos_fondos=ingresos_fondos,
                                 total_ingresado=total_ingresado,
-                                pagination=ingresos_pagination,
-                                admin_page=True)
+                                ingresos=ingresos_pag,
+                                admin_page=True,
+                                realtime_required=True)
                              
     except Exception as e:
         flash(f'Error al cargar el detalle del usuario: {str(e)}', 'error')

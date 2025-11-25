@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from models import db, Apuesta, Estadistica, IngresoFondos
 from datetime import datetime
+from endpoints.protected.ui.general.estadisticas.routes import obtener_pagina_transacciones
 
 bp = Blueprint('agregar_fondos', __name__, url_prefix='/api')
 
@@ -35,19 +36,15 @@ def agregar_fondos():
         db.session.add(nuevo_ingreso)
         db.session.commit()
         
-        # Obtener los últimos 8 ingresos para actualizar la tabla
-        ultimos_ingresos = IngresoFondos.query.filter_by(user_id=current_user.id)\
-            .order_by(IngresoFondos.fecha.desc())\
-            .limit(8).all()
-        
         # Calcular nuevo total
         nuevo_total = db.session.query(db.func.sum(IngresoFondos.cantidad))\
             .filter_by(user_id=current_user.id).scalar() or 0
         
         total_transacciones = IngresoFondos.query.filter_by(user_id=current_user.id).count()
-        
-        html_tabla = render_template('partials/tabla_ingresos_recientes.html', 
-                                    ingresos_fondos=ultimos_ingresos)
+
+        # Obtener historial de ingresos de fondos con paginación
+        ingresos_pag = obtener_pagina_transacciones(8)
+        html_tabla = render_template("partials/tabla_ingresos.html", ingresos=ingresos_pag)
         
         return jsonify({
             'nuevo_balance': current_user.balance,

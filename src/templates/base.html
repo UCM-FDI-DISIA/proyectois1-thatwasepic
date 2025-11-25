@@ -95,9 +95,9 @@
     <script src="{{ url_for('static', filename='js/motivational_messages.js') }}"></script>
     <script src="{{ url_for('static', filename='js/motivational_system.js') }}"></script>
 
-
     {% if realtime_required %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='js/realtime_update.js') }}"></script>
     {% endif %}
 
     {% block base_scripts %}{% endblock %}

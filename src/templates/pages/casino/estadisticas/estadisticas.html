@@ -1,5 +1,7 @@
 {% extends "pages/casino/base.html" %}
 
+{% import "partials/estadisticas.html" as parcial_estadisticas with context %}
+
 {% block title %}
 Estadísticas
 {% endblock %}
@@ -39,6 +41,10 @@ Estadísticas
     </div>
 </div>
 
-{% include "partials/estadisticas.html" %}
+{{ parcial_estadisticas.content() }}
 
+{% endblock %}
+
+{% block scripts %}
+{{ parcial_estadisticas.scripts() }}
 {% endblock %}

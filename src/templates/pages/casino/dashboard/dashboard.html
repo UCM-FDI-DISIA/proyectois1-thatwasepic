@@ -240,7 +240,15 @@ Dashboard
 
 {% block scripts %}
 <!-- Para actualización automática de la lista de salas multijugador -->
-<script src="{{ url_for('static', filename='js/salas_auto_reload.js') }}"></script>
+<script>
+    // Crear instancia de actualizador de contenedor de la lista de salas de espera.
+    const salasContainerUpd = new ContainerUpdater('#salas-container');
+
+    // Añadir actualización sin recarga con el paginador.
+    addPaginationUpdate(salasContainerUpd);
+    // Añadir recarga automática cada 20 segundos.
+    addAutoReload(salasContainerUpd, 20000);
+</script>
 
 <style>
     .mb-6 {

@@ -1,3 +1,5 @@
+{% macro content() %}
+
 {% set admin_page = admin_page or false %}
 
 {% macro game_emoji(game) -%}
@@ -310,7 +312,7 @@
         <div class="card animated-translateY">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span>💵 Historial de Ingresos de Fondos</span>
-                <span class="badge bg-primary">{{ pagination.total }} transacciones</span>
+                <span class="badge bg-primary">{{ ingresos.total }} transacciones</span>
             </div>
             <div class="card-body">
                 <!-- Lista de todos los ingresos -->
@@ -328,7 +330,7 @@
                                     ${{ "%.2f"|format(total_ingresado) }}
                                 </h4>
                                 <small class="text-muted">
-                                    {{ pagination.total }} transacciones
+                                    {{ ingresos.total }} transacciones
                                 </small>
                             </div>
                         </div>
@@ -436,26 +438,22 @@
         </div>
     </div>
 </div>
+{% endmacro %}
 
-{% block partial_scripts %}
+{% macro scripts() %}
+<!-- Para actualización automática de la lista de transacciones -->
 <script>
+// Crear instancia de actualizador de contenedor de la lista de transacciones.
+const ingresosContainerUpd = new ContainerUpdater('#ingresosContent');
+
+// Añadir actualización sin recarga con el paginador.
+addPaginationUpdate(ingresosContainerUpd);
+
 // Función para actualizar la UI después de agregar fondos
 function actualizarUIdespuesDeIngreso(response) {
     if (response.actualizar_ui) {
-        console.log('Actualizando UI después de agregar fondos');
-        
-        // Recargar la página para mostrar los datos actualizados
-        setTimeout(() => {
-            // Mantener la pestaña activa al recargar
-            const tabActiva = document.querySelector('.nav-link.active').id;
-            let tabParam = '';
-            
-            if (tabActiva === 'todos-tab') {
-                tabParam = '?tab=todos';
-            }
-            
-            window.location.href = window.location.pathname + tabParam;
-        }, 1000);
+        // Actualizar lista de transacciones.
+        ingresosContainerUpd.updateContainer();
         
         // Mostrar notificación
         mostrarNotificacion(response.mensaje, 'success');
@@ -494,4 +492,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-{% endblock %}
+{% endmacro %}

@@ -1,5 +1,7 @@
 {% extends "pages/admin/base.html" %}
 
+{% import "partials/estadisticas.html" as parcial_estadisticas with context %}
+
 {% block title %}
 Usuario: {{ user.username }}
 {% endblock %}
@@ -134,6 +136,10 @@ Usuario: {{ user.username }}
 
 {% include "partials/acciones_usuario.html" %}
 
-{% include "partials/estadisticas.html" %}
+{{ parcial_estadisticas.content() }}
 
+{% endblock %}
+
+{% block scripts %}
+{{ parcial_estadisticas.scripts() }}
 {% endblock %}

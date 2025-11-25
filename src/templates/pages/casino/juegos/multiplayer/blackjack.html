@@ -11,47 +11,64 @@ Blackjack (multijugador)
   --casino-green-dark:#082b20;
   --casino-gold:var(--neon-cyan);
   --casino-gold-soft:#00aeca;
-  --neon-cyan:#00f3ff;
-  --neon-green:#2ecc71;
-  --neon-red:#ff5a5a;
-  --neon-pink:#ff5af1;
-  --neon-purple:#9b59b6;
-  --gradient-cyber: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
-  --border-radius-cyber: 12px;
+  --border-radius-cyber: var(--border-radius-button, 12px);
 }
 *{box-sizing:border-box}
-.card{background:linear-gradient(180deg,#0f1417 0%, #0b1113 100%);border:1px solid rgba(0,243,255,.18);box-shadow:0 0 0 1px rgba(0,243,255,.15), 0 8px 30px rgba(0,0,0,.4);border-radius:14px}
-.card .card-body{padding:16px}
+.blackjack-shell{
+  color:var(--text-light);
+  font-family: var(--font-family-body), 'Saira', sans-serif;
+}
+.blackjack-shell .card{
+  background: linear-gradient(180deg,#0f1417 0%, #0b1113 100%);
+  border:1px solid rgba(0,243,255,.18);
+  box-shadow:0 0 0 1px rgba(0,243,255,.15), 0 8px 30px rgba(0,0,0,.4);
+  border-radius:var(--border-radius-card,14px);
+}
+.blackjack-shell .card .card-body{padding:16px}
+.blackjack-shell .text-cyan{color:var(--casino-gold)!important}
+.blackjack-shell .text-gradient{background:linear-gradient(90deg,var(--casino-gold),#fff);-webkit-background-clip:text;background-clip:text;color:transparent}
 
-/* Mesa holo (mismo estilo que individual) */
-.holo-table{
+/* Topbar */
+.topbar{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  padding:10px 14px 6px;
+  border-bottom:1px dashed rgba(212,175,55,.25);
+  background:rgba(18,25,27,.8);
+  border-radius:10px;
+}
+.topbar-left,.topbar-center,.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-left{flex:1;min-width:220px;flex-wrap:wrap}
+.topbar-left small, .topbar-right small{opacity:.85;color:#c7c7c7}
+.topbar-left .money{font-weight:800;font-size:0.95rem}
+.topbar-center{flex:1;justify-content:center;text-align:center;min-width:200px}
+.topbar-center .estado{font-weight:900;letter-spacing:1px;font-size:1.05rem;color:#ff8c1a}
+.topbar-right{flex:1;justify-content:flex-end;flex-wrap:wrap;min-width:200px}
+
+/* Mesa */
+.holo-table {
   background: linear-gradient(135deg, rgba(0, 243, 255, 0.05), rgba(255, 0, 255, 0.05));
   border: 2px solid var(--neon-cyan);
   border-radius: var(--border-radius-cyber);
-  padding: 26px 18px 120px;
-  position: relative;
-  overflow:hidden;
+  padding: 40px 20px 120px;
+  position: relative; overflow:hidden;
 }
-.holo-table::before{
-  content:'';
-  position:absolute;inset:0;
-  background:
-    linear-gradient(90deg, transparent 95%, rgba(0, 243, 255, 0.1) 100%),
-    linear-gradient(0deg, transparent 95%, rgba(0, 243, 255, 0.1) 100%);
-  background-size:50px 50px;
-  pointer-events:none;
+.holo-table::before {
+  content:'';position:absolute;inset:0;background:
+  linear-gradient(90deg, transparent 95%, rgba(0, 243, 255, 0.1) 100%),
+  linear-gradient(0deg, transparent 95%, rgba(0, 243, 255, 0.1) 100%);
+  background-size:50px 50px;pointer-events:none;
+  opacity:0.7;
 }
-.mesa-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
-  gap:14px;
-}
+.dealer-row{display:flex;justify-content:center;margin-bottom:18px}
 .player-section{
-  background:rgba(11,17,19,.65);
-  border:1px solid rgba(0,243,255,.18);
+  background:rgba(0,243,255,.04);
+  border:1px solid rgba(0,243,255,.24);
   border-radius:12px;
   padding:12px;
-  box-shadow:0 6px 24px rgba(0,0,0,.4);
+  box-shadow:0 0 12px rgba(0,243,255,.15);
 }
 .player-section.turno{
   outline:2px solid var(--neon-cyan);
@@ -61,67 +78,133 @@ Blackjack (multijugador)
   display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;
 }
 .player-header h5,.player-header h6{margin:0;font-size:1rem;letter-spacing:.6px;color:#e7e7e7}
-.puntos-display{font-family:'Orbitron',monospace;font-size:.85rem;font-weight:700;padding:6px 10px;border:1px solid var(--neon-cyan);color:var(--neon-cyan);background:rgba(0,243,255,.08);border-radius:8px}
-.cartas-container-holo{display:flex;gap:10px;flex-wrap:wrap;min-height:120px;align-items:center}
-.carta-holo{width:96px;height:136px;position:relative;transition:all .3s ease;perspective:1000px}
+.puntos-display{font-family:'Orbitron',monospace;font-size:.9rem;font-weight:700;padding:6px 10px;border:1px solid var(--casino-gold);color:var(--casino-gold);background:rgba(212,175,55,.08);border-radius:8px}
+.cartas-container-holo{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;min-height:150px;align-items:center}
+.carta-holo{width:110px;height:158px;position:relative;transition:all .3s ease;perspective:1000px}
 .carta-contenido{width:100%;height:100%;background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:12px;display:flex;flex-direction:column;justify-content:space-between;padding:12px;position:relative;z-index:2;box-shadow:0 0 20px rgba(0,243,255,.3);border:2px solid var(--neon-cyan)}
 .carta-borde-holo{position:absolute;inset:-4px;border:2px solid var(--neon-cyan);border-radius:16px;transition:all .3s ease;z-index:1}
 .carta-pattern{position:absolute;inset:0;background:
   radial-gradient(circle at 30% 30%, rgba(0,243,255,.1) 0%, transparent 50%),
   radial-gradient(circle at 70% 70%, rgba(255,0,255,.1) 0%, transparent 50%);border-radius:12px;z-index:1}
-.carta-valor{font-size:1.3em;font-weight:800;font-family:'Orbitron',monospace;color:var(--neon-cyan);text-shadow:0 0 10px currentColor}
-.carta-palo{font-size:2.2em;text-align:center;text-shadow:0 0 15px currentColor}
-.carta-corner{position:absolute;bottom:8px;right:8px;font-size:.95em;font-weight:700;color:var(--neon-cyan)}
+.carta-valor{font-size:1.4em;font-weight:800;font-family:'Orbitron',monospace;color:var(--neon-cyan);text-shadow:0 0 10px currentColor}
+.carta-palo{font-size:2.5em;text-align:center;text-shadow:0 0 15px currentColor}
+.carta-corner{position:absolute;bottom:10px;right:10px;font-size:1em;font-weight:700;color:var(--neon-cyan)}
 .carta-oculta .carta-contenido{background:linear-gradient(135deg,#2a1a2e,#26213e);border-color:var(--neon-purple)}
 .carta-secreta{display:flex;align-items:center;justify-content:center;height:100%;font-size:2em;color:var(--neon-purple)}
+
+.players-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+  gap:14px;
+}
+.player-mini .cartas-container-holo{min-height:130px}
+.player-mini .carta-holo{width:96px;height:136px}
 .player-meta{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:.9rem;opacity:.9}
 .badge-estado{padding:3px 8px;border-radius:999px;font-weight:700;font-size:.8rem;border:1px solid rgba(0,243,255,.4);color:var(--neon-cyan);background:rgba(0,243,255,.1)}
-.top-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;}
-.top-actions input{min-width:120px;}
+.badge-wait{color:#ffa500;border-color:#ffa500;background:rgba(255,165,0,.12)}
+.badge-play{color:var(--neon-green);border-color:var(--neon-green);background:rgba(46,204,113,.12)}
+.badge-stand{color:#ff5a5a;border-color:#ff5a5a;background:rgba(255,90,90,.12)}
+.badge-bust{color:#c47bff;border-color:#c47bff;background:rgba(196,123,255,.14)}
+.text-bust{color:#c47bff;font-weight:700}
+
+.controls-panel{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.controls-panel .form-control{min-width:140px}
+.controls-panel .btn{font-weight:800;letter-spacing:0.5px}
+
+/* Stats */
+.stats-panel {
+  background: rgba(11, 17, 19, 0.6);
+  border: 1px solid rgba(212,175,55,.2);
+  border-radius: 10px;
+  padding: 8px;
+  margin-top: 8px;
+}
+.stats-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 6px;
+}
+.stat-item {
+  text-align: center;
+  padding: 6px;
+  background: rgba(212,175,55,.05);
+  border-radius: 6px;
+}
+.stat-value {
+  font-family: 'Orbitron', monospace;
+  font-weight: 700;
+  color: var(--casino-gold);
+  font-size: 0.95rem;
+}
+.stat-label {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  margin-bottom: 2px;
+}
 
 @media (max-width:768px){
-  .carta-holo{width:84px;height:118px}
-  .puntos-display{font-size:.8rem}
+  .carta-holo{width:88px;height:128px}
+  .topbar{flex-direction:column;align-items:flex-start}
+  .topbar-right{width:100%;justify-content:flex-start}
+  .topbar-center{width:100%;order:3;justify-content:center}
 }
 </style>
 
-<div class="container py-4">
-  <div class="card mb-3">
-    <div class="card-body">
-      <div class="d-flex justify-content-between flex-wrap gap-2 align-items-center">
-        <div>
-          <h3 class="mb-1">Blackjack Multijugador – {{ sala.nombre }}</h3>
-          <div class="text-muted small">Comparte este c\u00f3digo para que se unan desde &quot;Salas de espera&quot;.</div>
+<div class="blackjack-shell">
+  <div class="container py-4">
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="topbar">
+          <div class="topbar-left">
+            <div style="display:flex;flex-direction:column;gap:2px;min-width:170px">
+              <small>SALA</small>
+              <div class="money">{{ sala.nombre }}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:2px;min-width:140px">
+              <small>CÓDIGO</small>
+              <div class="money">{{ sala.id }}</div>
+            </div>
+          </div>
+          <div class="topbar-center">
+            <div class="estado" id="estado-sala">EN ESPERA</div>
+          </div>
+          <div class="topbar-right">
+            <a href="{{ url_for('salas_espera.lobby') }}" class="btn btn-global exit small">Volver a salas</a>
+            <a href="{{ url_for('dashboard.home') }}" class="btn btn-global small">Dashboard</a>
+          </div>
         </div>
-        <div class="puntos-display">C\u00f3digo: {{ sala.id }}</div>
+
+        <div class="controls-panel">
+          <input id="apuesta" type="number" min="1" step="1" placeholder="Apuesta" class="form-control" style="max-width:160px;">
+          <button id="btnApostar" class="btn btn-cta btn-sm">APOSTAR</button>
+          <button id="btnIniciar" class="btn btn-success btn-sm">INICIAR</button>
+          <button id="btnHit" class="btn btn-action-green btn-sm" disabled>PEDIR</button>
+          <button id="btnStand" class="btn btn-action-red btn-sm" disabled>PLANTARSE</button>
+          <div id="revancha-actions" style="display:none; gap:8px; align-items:center;">
+            <button id="btnRevanchaYes" class="btn btn-warning btn-sm">Jugar otra (Sí)</button>
+            <button id="btnRevanchaNo" class="btn btn-global exit btn-sm">Salir (No)</button>
+          </div>
+          <span id="contador" class="puntos-display" style="border-color:rgba(0,243,255,.35);background:rgba(0,243,255,.08);color:#ff8c1a;"></span>
+        </div>
+        <div id="aviso-apuestas" class="text-warning small mt-2" style="display:none;"></div>
+        <div id="info-revancha" class="text-info small mt-1" style="display:none;"></div>
       </div>
     </div>
-  </div>
 
-  <div class="top-actions">
-    <input id="apuesta" type="number" min="1" step="1" placeholder="Apuesta" class="form-control" style="max-width:160px;">
-    <button id="btnApostar" class="btn btn-cta btn-sm">APOSTAR</button>
-    <button id="btnIniciar" class="btn btn-success btn-sm">INICIAR</button>
-    <button id="btnHit" class="btn btn-action-green btn-sm" disabled>PEDIR</button>
-    <button id="btnStand" class="btn btn-action-red btn-sm" disabled>PLANTARSE</button>
-    <div id="revancha-actions" style="display:none; gap:8px; align-items:center;">
-      <button id="btnRevanchaYes" class="btn btn-warning btn-sm">Jugar otra (Sí)</button>
-      <button id="btnRevanchaNo" class="btn btn-global exit btn-sm">Salir (No)</button>
+    <div class="card">
+      <div class="card-body">
+        <div class="holo-table">
+          <div class="dealer-row" id="dealer"></div>
+          <div class="players-grid" id="jugadores"></div>
+        </div>
+      </div>
     </div>
-    <span id="contador" class="puntos-display" style="border-color:rgba(0,243,255,.35);background:rgba(0,243,255,.08);color:#ff8c1a;"></span>
-  </div>
-  <div id="aviso-apuestas" class="text-warning small mb-2" style="display:none;"></div>
-  <div id="info-revancha" class="text-info small mb-2" style="display:none;"></div>
 
-  <div class="holo-table">
-    <div id="dealer"></div>
-    <div class="mesa-grid" id="jugadores"></div>
+    <details class="mt-3">
+      <summary>Debug JSON</summary>
+      <pre id="estado" class="bg-light p-3" style="max-height:420px;overflow:auto;"></pre>
+    </details>
   </div>
-
-  <details class="mt-3">
-    <summary>Debug JSON</summary>
-    <pre id="estado" class="bg-light p-3" style="max-height:420px;overflow:auto;"></pre>
-  </details>
 </div>
 
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
@@ -131,6 +214,7 @@ Blackjack (multijugador)
   const socket = io();
 
   let lastState = null, timerHandle = null;
+  const statsCache = {};
 
   // ===== Helpers de cartas en estilo holo =====
   function isRoja(s){ return s === '♥' || s === '♦'; }
@@ -170,8 +254,84 @@ Blackjack (multijugador)
     });
   }
 
+  function safeNum(obj, key){
+    return (obj && typeof obj[key] === 'number') ? obj[key] : null;
+  }
+
+  function toNumber(v, fallback=0){
+    const n = (typeof v === 'number') ? v : parseFloat(v);
+    return Number.isFinite(n) ? n : fallback;
+  }
+
+  function valOrZero(stats, key){
+    return toNumber(stats ? stats[key] : undefined, 0);
+  }
+
+  function pickStat(stats, keys){
+    for(const k of keys){
+      if (stats && stats[k] !== undefined && stats[k] !== null){
+        return toNumber(stats[k], 0);
+      }
+    }
+    return 0;
+  }
+
+  function resolveStats(st, uid, jugador){
+    const uidStr = String(uid);
+    const pools = [
+      jugador.estadisticas,
+      jugador.stats,
+      st.estadisticas,
+      st.stats,
+      st.estadisticas_jugadores,
+      st.stats_jugadores,
+      st.resumen_estadisticas,
+      st.resumen,
+      st.resumen_stats,
+      st.estadisticas_globales
+    ];
+
+    for (const pool of pools){
+      if (!pool) continue;
+      if (pool[uid] !== undefined) return pool[uid];
+      if (pool[uidStr] !== undefined) return pool[uidStr];
+    }
+    return jugador.estadisticas
+        || jugador.stats
+        || (st.estadisticas && (st.estadisticas[uid] || st.estadisticas[String(uid)]))
+        || (st.stats && (st.stats[uid] || st.stats[String(uid)]))
+        || (st.estadisticas_jugadores && (st.estadisticas_jugadores[uid] || st.estadisticas_jugadores[String(uid)]))
+        || (st.stats_jugadores && (st.stats_jugadores[uid] || st.stats_jugadores[String(uid)]))
+        || {};
+  }
+
+  function fmtEuros(n){
+    const num = toNumber(n, 0);
+    if (Number.isFinite(num)) return `€${num.toFixed(2)}`;
+    return '€0.00';
+  }
+
+  function estadoBadgeClass(texto){
+    const t = (texto || '').toString().toLowerCase();
+    if (t.includes('espera')) return 'badge-wait';
+    if (t.includes('jueg')) return 'badge-play';
+    if (t.includes('plant')) return 'badge-stand';
+    if (t.includes('pasa')) return 'badge-bust';
+    return '';
+  }
+
   function render(st){
     document.getElementById('estado').textContent = JSON.stringify(st, null, 2);
+
+    // Estado general de la sala
+    const estadoMap = {
+      esperando_apuestas: 'ESPERANDO APUESTAS',
+      turnos: 'EN JUEGO',
+      crupier: 'CRUPIER',
+      fin: 'FIN DE RONDA'
+    };
+    const estadoEl = document.getElementById('estado-sala');
+    if (estadoEl){ estadoEl.textContent = estadoMap[st.fase] || (st.fase||''); }
 
     // Aviso apuestas pendientes
     const avisoApuestas = document.getElementById('aviso-apuestas');
@@ -198,16 +358,16 @@ Blackjack (multijugador)
     const ocultar = (fase === 'turnos' && dealerHand.length>=2);
 
     dealerEl.innerHTML = `
-      <div class="player-section">
-        <div class="player-header">
-          <h5>CRUPIER</h5>
-          <div class="puntos-display">Total: <span id="dealer-total"></span></div>
+      <div class="player-section" style="max-width:520px; width:100%;">
+        <div class="player-header" style="justify-content:center; gap:14px;">
+          <h4 class="text-gradient">CRUPIER</h4>
+          <div class="puntos-display" id="dealer-total">PUNTOS: ??</div>
         </div>
         <div class="cartas-container-holo" id="dealer-cards"></div>
       </div>`;
     renderMano(document.getElementById('dealer-cards'), dealerHand, ocultar);
-    document.getElementById('dealer-total').textContent =
-      (fase === 'crupier' || fase === 'fin') ? (st.dealer_total ?? '') : '??';
+    const dealerPts = (fase === 'crupier' || fase === 'fin') ? (st.dealer_total ?? '??') : '??';
+    document.getElementById('dealer-total').textContent = `PUNTOS: ${dealerPts}`;
 
     // Jugadores
     const cont = document.getElementById('jugadores');
@@ -219,20 +379,59 @@ Blackjack (multijugador)
       const j = st.jugadores[String(uid)];
       if(!j) return;
       const wrap = document.createElement('div');
-      wrap.className = 'player-section' + ((fase==='turnos' && turno===uid)?' turno':'');
+      wrap.className = 'player-section player-mini' + ((fase==='turnos' && turno===uid)?' turno':'');
+
+      let stats = resolveStats(st, uid, j);
+      if (stats && Object.keys(stats).length){ statsCache[uid] = stats; }
+      else if (statsCache[uid]) { stats = statsCache[uid]; }
+
+      const estadoTexto = j.estado || '';
+      const badgeClass = estadoBadgeClass(estadoTexto);
+      const totalPts = toNumber(j.total, '??');
+      const esBust = estadoTexto.toLowerCase().includes('pasa') || (j.resultado||'').toLowerCase().includes('burst');
+      const resultadoTexto = esBust ? 'Se ha pasado' : (j.resultado || '');
+      const badgeFinalClass = esBust ? 'badge-bust' : badgeClass;
+      const badgeText = esBust ? 'Se ha pasado' : estadoTexto;
+
       wrap.innerHTML = `
         <div class="player-header">
           <h6>${j.username}</h6>
-          <div class="badge-estado">${j.estado || ''}</div>
+          <div class="puntos-display">PUNTOS: ${Number.isFinite(totalPts)?totalPts:'??'}</div>
         </div>
         <div class="player-meta">
-          <span>Apuesta: <strong>${j.apuesta ?? 0}</strong></span>
-          <span>Saldo: ${j.balance ?? 0}</span>
+          <span>Apuesta: <strong>${fmtEuros(j.apuesta ?? 0)}</strong></span>
+          <span>Saldo: ${fmtEuros(j.balance ?? 0)}</span>
         </div>
         <div class="cartas-container-holo mt-2" id="mano-${uid}"></div>
         <div class="player-meta mt-2">
-          <span>Total: <strong>${j.total ?? '-'}</strong></span>
+          <span class="${esBust ? 'text-bust' : ''}">${resultadoTexto}</span>
+          <span class="badge-estado ${badgeFinalClass}">${badgeText}</span>
+        </div>
+        <div class="stats-panel stats-mini">
+          <div class="stats-mini-grid">
+            <div class="stat-item">
+              <div class="stat-label">Partidas</div>
+              <div class="stat-value">${pickStat(stats,['partidasJugadas','partidas_jugadas','partidas','jugadas','games_played','total_partidas'])}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Victorias</div>
+              <div class="stat-value">${pickStat(stats,['victorias','ganadas','wins'])}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Derrotas</div>
+              <div class="stat-value">${pickStat(stats,['derrotas','perdidas','losses'])}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Empates</div>
+              <div class="stat-value">${pickStat(stats,['empates','pushes','empatadas','ties'])}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Blackjacks</div>
+              <div class="stat-value">${pickStat(stats,['blackjacks','bjs','blackjacks_totales'])}</div>
+            </div>
+          </div>
         </div>`;
+
       cont.appendChild(wrap);
       renderMano(document.getElementById(`mano-${uid}`), j.mano, false);
     });

@@ -180,12 +180,19 @@ Inicio
     mask-repeat: no-repeat;
     mask-position: top;
     mask-mode: luminance;
-    height: 18em;
-    max-height: 25vh;
+    aspect-ratio: 9 / 4;
     align-content: end;
     mask-image: url({{ url_for('static', filename='img/logo.png') }});
     filter: hue-rotate(-60deg) brightness(125%);
     animation: hueShift 3s linear infinite alternate;
+    transition: all 0.5s ease;
+    cursor: zoom-in;
+}
+
+#logo:active {
+    max-width: min(70vh, 95%);
+    aspect-ratio: 1 / 1;
+    cursor: zoom-out;
 }
 
 @keyframes hueShift {
