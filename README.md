@@ -3,6 +3,7 @@
     <h1>LogBait</h1>
     <p>🎰 Plataforma de Apuestas Online</p>
     <a href="https://logbait.pythonanywhere.com/">logbait.pythonanywhere.com</a>
+    <a href="https://logbait.onrender.com/">logbait.onrender.com</a>
 </div>
 <br>
 
