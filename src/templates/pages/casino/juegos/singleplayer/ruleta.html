@@ -163,6 +163,9 @@ async function apiPOST(url, body){ const r=await fetch(url,{method:'POST', heade
 
 /* ================== SVG RUEDA ================== */
 const gNums=document.getElementById('numbers'); const ball=document.getElementById('ball'); const R_OUT=190, R_TEXT=165;
+let wheelAngleState = 0; // mantiene el ángulo absoluto de la rueda para animaciones continuas
+let ballAngleState = -90; // ángulo de la bola (descansa arriba)
+
 EURO_SEQ.forEach((n,idx)=>{
   const a0=(2*Math.PI/EURO_SEQ.length)*idx-Math.PI/2;
   const a1=(2*Math.PI/EURO_SEQ.length)*(idx+1)-Math.PI/2;
@@ -578,43 +581,55 @@ document.getElementById('spinBtn').onclick = async () => {
 
 function spinAnimTo(resultIdx){
   return new Promise(resolve=>{
-      const start=performance.now();
-      // Obtener rotación actual de la rueda (si ya está alineada por una jugada
-      // previa) para que la animación sea continua y el final coincida con lo
-      // calculado. Si no hay transform, usar valor aleatorio.
-      let baseWheel = 0;
-      try{
-        const cur = gNums.getAttribute('transform')||'';
-        const m = cur.match(/rotate\((-?\d+(?:\.\d+)?)\)/);
-        if(m && m[1]) baseWheel = parseFloat(m[1]); else baseWheel = Math.random()*360;
-      }catch(e){ baseWheel = Math.random()*360; }
+    const start = performance.now();
+    const per = 360 / EURO_SEQ.length;
+    const targetWheelBase = -((resultIdx + 0.5) * per); // centro del pocket arriba
+    const norm = (v)=>((v % 360) + 360) % 360;
 
-      // Calculamos el ángulo final exacto para que el pocket centrado sea el
-      // correspondiente a resultIdx. Usamos (idx + 0.5) para apuntar al centro
-      // de la casilla. Después garantizamos varias vueltas completas antes de
-      // aterrizar en ese ángulo para una animación natural.
-      const per = 360 / EURO_SEQ.length;
-      const desiredFinal = -((resultIdx + 0.5) * per); // grados
+    // Calcular ángulo inicial de rueda y destino con varias vueltas para un giro natural
+    const startWheel = wheelAngleState;
+    const deltaToTarget = norm(targetWheelBase - norm(startWheel));
+    const wheelTurns = 6; // vueltas completas antes de aterrizar
+    const wheelTotal = 360 * wheelTurns + deltaToTarget;
+    const targetWheelAbs = startWheel + wheelTotal;
 
-      // Duración y giros: dejamos varias vueltas completas (e.g., 5) y añadimos
-      // el delta necesario para acabar exactamente en desiredFinal desde baseWheel.
-      const fullTurns = 5; // número de vueltas completas
-      const baseNorm = ((baseWheel % 360) + 360) % 360;
-      const delta = ((desiredFinal - baseNorm) % 360 + 360) % 360;
-      const spinWheel = 360 * fullTurns + delta;
+    // Animación de bola: la bola gira más rápido que la rueda y va perdiendo
+    // ventaja angular (lead) hasta quedar encima del pocket ganador sin salto.
+    const targetBallAng = -90; // la bola descansa arriba
+    const startCX = parseFloat(ball.getAttribute('cx') || '0');
+    const startCY = parseFloat(ball.getAttribute('cy') || '-170');
+    const startR = Math.hypot(startCX, startCY) || 170;
+    const targetR = 150;
+    const leadStart = -720 - Math.random()*360; // la bola arranca adelantada varias vueltas
+    const wobbleMag = 4;
 
-      const spinBall = 3000+Math.random()*1200;
-      const duration=5200+Math.random()*1000;
-    function easeOutQuint(t){ return 1-Math.pow(1-t,5); }
+    const duration = 5200 + Math.random() * 800;
+    const easeOutQuint = (t)=>1-Math.pow(1-t,5);
+
     function frame(now){
-      const t=Math.min(1,(now-start)/duration);
-      const wheelAngle=baseWheel+easeOutQuint(t)*spinWheel;
-      gNums.setAttribute('transform',`rotate(${wheelAngle})`);
-      const wobble=(1-t)*6*Math.sin(now/80)+(1-t)*3*Math.sin(now/43);
-      const ballAngle=-(easeOutQuint(t)*spinBall)+wobble;
-      const rad=(ballAngle-90)*Math.PI/180; const r=170-30*easeOutQuint(t)+2*Math.sin(now/60);
-      ball.setAttribute('cx',(r*Math.cos(rad)).toFixed(2)); ball.setAttribute('cy',(r*Math.sin(rad)).toFixed(2));
-      if(t<1){ requestAnimationFrame(frame); } else { alignToPocket(resultIdx); resolve(); }
+      const t = Math.min(1, (now - start) / duration);
+      const eased = easeOutQuint(t);
+
+      const wheelAngle = startWheel + eased * wheelTotal;
+      gNums.setAttribute('transform', `rotate(${wheelAngle})`);
+
+      const wobble = (1 - t) * wobbleMag * Math.sin(now / 70);
+      const ballAngle = targetBallAng + (1 - eased) * leadStart + wobble;
+      const rad = ballAngle * Math.PI / 180;
+      const r = startR - eased * (startR - targetR) - (1 - t) * 2 * Math.sin(now / 60);
+      ball.setAttribute('cx', (r * Math.cos(rad)).toFixed(2));
+      ball.setAttribute('cy', (r * Math.sin(rad)).toFixed(2));
+
+      if(t < 1){ requestAnimationFrame(frame); }
+      else {
+        wheelAngleState = targetWheelAbs;
+        ballAngleState = targetBallAng;
+        gNums.setAttribute('transform', `rotate(${targetWheelAbs})`);
+        const rad2 = targetBallAng * Math.PI / 180;
+        ball.setAttribute('cx', (targetR * Math.cos(rad2)).toFixed(2));
+        ball.setAttribute('cy', (targetR * Math.sin(rad2)).toFixed(2));
+        resolve();
+      }
     }
     requestAnimationFrame(frame);
   });
@@ -622,13 +637,13 @@ function spinAnimTo(resultIdx){
 
 function alignToPocket(resultIdx){
   const per = 360 / EURO_SEQ.length;
-  // Para centrar la casilla usamos el punto medio: (idx + 0.5)
   const finalWheel = -((resultIdx + 0.5) * per);
+  wheelAngleState = finalWheel;
   gNums.setAttribute('transform', `rotate(${finalWheel})`);
 
-  // La bola debe quedar ligeramente antes del centro (pequeño offset)
-  const finalBallAng = -90 - 4; // en grados: top (-90) menos un pequeño ajuste
+  const finalBallAng = -90;
   const r2 = 150; const rad2 = finalBallAng * Math.PI / 180;
+  ballAngleState = finalBallAng;
   ball.setAttribute('cx', (r2 * Math.cos(rad2)).toFixed(2));
   ball.setAttribute('cy', (r2 * Math.sin(rad2)).toFixed(2));
 }
@@ -668,7 +683,7 @@ function settle(number){
   }catch(e){ console.warn('Test PAYOUT:', e.message); }
 })();
 
-let _ruletaPoll = setInterval(()=>refreshState(), 5000);
+// Desactivamos el refresco periódico para evitar parpadeos de saldo mientras se juega.
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) refreshState(); });
 </script>
 
