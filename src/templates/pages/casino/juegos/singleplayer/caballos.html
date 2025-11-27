@@ -1,34 +1,118 @@
-{% extends "pages/casino/base.html" %}
+{% extends "pages/casino/juegos/base.html" %}
 
 {% block title %}
 Carrera de caballos
 {% endblock %}
 
-{% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-10">
-        <div class="card hover-card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h4 class="mb-0">🏇 Carrera de Caballos</h4>
-                <!-- Botón HELP con estilo cyber -->
-                <button class="btn btn-info btn-sm" onclick="mostrarAyuda()" style="background: var(--gradient-cyber); border: none;">
-                    ❓ HELP
-                </button>
+{% block game_title %}
+Carrera de caballos
+{% endblock %}
+
+{% set has_navbar_stats = true %}
+{% block game_navbar_stats %}
+<!-- Panel de Control -->
+<div class="row">
+    <div class="col">
+        <div class="small text-center text-uppercase text-nowrap">
+            <i class="fas fa-coins me-2"></i>Balance inicial
+            <div class="h4 mb-0 balance-positive">
+                $<span id="balance-inicial">{{ "%.2f"|format(current_user.balance) }}</span>
             </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="small text-center text-uppercase text-nowrap">
+            <i class="fas fa-info me-2"></i>Información
+            <br>
+            <button class="btn btn-outline-primary btn-sm" onclick="mostrarAyuda()">
+                <i class="fas fa-question me-2"></i>Ayuda
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content_fluid %}
+<!-- Pista de carrera mejorada -->
+<div class="row">
+    <div class="pista-carrera mb-4">
+        <div class="meta"></div>
+        {% for i in range(1, 5) %}
+        <div class="carril" id="carril{{ i }}">
+            <div class="caballo" id="caballo{{ i }}">
+                {{ ["🐎", "🐴", "🏇", "🎠"][i-1] }}
+            </div>
+            <div class="numero">{{ i }}</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
             <div class="card-body">
-                <!-- Balance con estilo digital -->
-                <div class="text-center mb-4">
-                    <div class="digital-display d-inline-block p-3">
-                        <div class="text-small text-uppercase">
-                            <i class="fas fa-coins me-2"></i>BALANCE ACTUAL
+                <!-- Selección de apuesta -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <label for="cantidad" class="form-label text-cyan">
+                            <i class="fas fa-money-bill-wave me-2"></i>Cantidad a apostar:
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark text-light">
+                                <i class="fas fa-dollar-sign"></i>
+                            </span>
+                            <input type="number" class="form-control" id="cantidad" 
+                                   min="1" max="{{ current_user.balance }}" step="1" value="10">
                         </div>
-                        <div class="h2 mb-0 balance-positive">
-                            $<span id="balance">{{ "%.2f"|format(current_user.balance) }}</span>
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label text-cyan">
+                            <i class="fas fa-horse me-2"></i>Selecciona un caballo:
+                        </label>
+                        <div class="d-flex gap-2 flex-wrap">
+                            {% for caballo in [
+                                {"id": 1, "nombre": "Relámpago", "multiplicador": 1.5, "emoji": "🐎", "color": "primary"},
+                                {"id": 2, "nombre": "Trueno", "multiplicador": 2.0, "emoji": "🐴", "color": "success"},
+                                {"id": 3, "nombre": "Centella", "multiplicador": 3.0, "emoji": "🏇", "color": "danger"},
+                                {"id": 4, "nombre": "Azabache", "multiplicador": 6.0, "emoji": "🎠", "color": "warning"}
+                            ] %}
+                            <button class="btn btn-outline-{{ caballo.color }} caballo-btn" 
+                                    onclick="seleccionarCaballo({{ caballo.id }})">
+                                {{ caballo.emoji }} {{ caballo.nombre }} ({{ caballo.multiplicador }}x)
+                            </button>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
+
+                <!-- Controles -->
+                <div class="text-center">
+                    <button class="btn btn-primary btn-lg me-2" onclick="iniciarCarrera()" id="btn-carrera">
+                        <i class="fas fa-flag-checkered me-2"></i>🏁 Iniciar Carrera
+                    </button>
+                    <button class="btn btn-outline-primary btn-lg" onclick="reiniciarCarrera()">
+                        <i class="fas fa-redo me-2"></i>🔄 Reiniciar
+                    </button>
+                </div>
+
+                <!-- Información de apuesta -->
+                <div id="info-apuesta" class="text-center mt-3 fw-bold text-cyan"></div>
                 
-                <!-- Información de caballos con cards mejoradas -->
+                <div id="resultado" class="mt-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 mt-4">
+        <div class="card">
+            <div class="card-header">
+                🏇 INFORMACIÓN DE LOS CABALLOS
+            </div>
+            <div class="card-body">
+<!-- Información de caballos con cards mejoradas -->
                 <div class="row mb-4">
                     <div class="col-12">
                         <h5 class="text-cyan mb-3">🏇 INFORMACIÓN DE LOS CABALLOS</h5>
@@ -65,68 +149,6 @@ Carrera de caballos
                         </div>
                     </div>
                 </div>
-                
-                <!-- Selección de apuesta -->
-                <div class="row mb-4">
-                    <div class="col-md-4">
-                        <label for="cantidad" class="form-label text-cyan">
-                            <i class="fas fa-money-bill-wave me-2"></i>Cantidad a apostar:
-                        </label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-dark text-light">
-                                <i class="fas fa-dollar-sign"></i>
-                            </span>
-                            <input type="number" class="form-control" id="cantidad" 
-                                   min="1" max="{{ current_user.balance }}" step="1" value="10">
-                        </div>
-                    </div>
-                    <div class="col-md-8">
-                        <label class="form-label text-cyan">
-                            <i class="fas fa-horse me-2"></i>Selecciona un caballo:
-                        </label>
-                        <div class="d-flex gap-2 flex-wrap">
-                            {% for caballo in [
-                                {"id": 1, "nombre": "Relámpago", "multiplicador": 1.5, "emoji": "🐎", "color": "primary"},
-                                {"id": 2, "nombre": "Trueno", "multiplicador": 2.0, "emoji": "🐴", "color": "success"},
-                                {"id": 3, "nombre": "Centella", "multiplicador": 3.0, "emoji": "🏇", "color": "danger"},
-                                {"id": 4, "nombre": "Azabache", "multiplicador": 6.0, "emoji": "🎠", "color": "warning"}
-                            ] %}
-                            <button class="btn btn-outline-{{ caballo.color }} caballo-btn" 
-                                    onclick="seleccionarCaballo({{ caballo.id }})">
-                                {{ caballo.emoji }} {{ caballo.nombre }} ({{ caballo.multiplicador }}x)
-                            </button>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Pista de carrera mejorada -->
-                <div class="pista-carrera mb-4">
-                    <div class="meta"></div>
-                    {% for i in range(1, 5) %}
-                    <div class="carril" id="carril{{ i }}">
-                        <div class="caballo" id="caballo{{ i }}">
-                            {{ ["🐎", "🐴", "🏇", "🎠"][i-1] }}
-                        </div>
-                        <div class="numero">{{ i }}</div>
-                    </div>
-                    {% endfor %}
-                </div>
-
-                <!-- Controles -->
-                <div class="text-center">
-                    <button class="btn btn-primary btn-lg me-2" onclick="iniciarCarrera()" id="btn-carrera">
-                        <i class="fas fa-flag-checkered me-2"></i>🏁 Iniciar Carrera
-                    </button>
-                    <button class="btn btn-outline-primary btn-lg" onclick="reiniciarCarrera()">
-                        <i class="fas fa-redo me-2"></i>🔄 Reiniciar
-                    </button>
-                </div>
-
-                <!-- Información de apuesta -->
-                <div id="info-apuesta" class="text-center mt-3 fw-bold text-cyan"></div>
-                
-                <div id="resultado" class="mt-4"></div>
             </div>
         </div>
     </div>
@@ -170,7 +192,7 @@ Carrera de caballos
                 </p>
             </div>
             <div class="modal-footer">
-                <button type="button class="btn btn-primary" data-bs-dismiss="modal">
+                <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">
                     <i class="fas fa-check me-2"></i>Entendido
                 </button>
             </div>
@@ -401,13 +423,12 @@ document.getElementById('cantidad').addEventListener('input', function() {
 /* Solo estilos específicos de la carrera - el resto usa tus estilos globales */
 .pista-carrera {
     background: linear-gradient(135deg, #1a5f2a 0%, #2d8f3f 50%, #1a5f2a 100%);
-    border: 3px solid var(--neon-cyan);
-    border-radius: var(--border-radius-card);
+    border-top: 1px solid var(--neon-cyan);
+    border-bottom: 1px solid var(--neon-cyan);
     padding: 15px;
     position: relative;
     height: 340px;
     overflow: hidden;
-    box-shadow: var(--shadow-hologram), inset 0 0 30px rgba(0,0,0,0.4);
     background-attachment: fixed;
 }
 
