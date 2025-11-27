@@ -1,42 +1,71 @@
-{% extends "pages/casino/base.html" %}
+{% extends "pages/casino/juegos/base.html" %}
 
 {% block title %}
 Tragaperras
 {% endblock %}
 
-{% block content %}
-<div class="row justify-content-center">
-    <div class="col-xl-8">
-        <div class="card game-card">
-            <div class="card-header">
-                <i class="fas fa-sliders-h me-2"></i><!--Nombre superior -->
-                Tragaperras (Slots Machine)
-            </div>
-            <div class="card-body">
-                <!-- Panel de Control -->
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <div class="digital-display text-center mb-3">
-                            <div class="text-small text-uppercase" style="color: var(--neon-green);">
-                                <i class="fas fa-coins me-2"></i>BALANCE INICIAL
-                            </div>
-                            <div class="h3 mb-0 text-gradient fw-bold">
-                                $<span id="balance">{{ "%.2f"|format(current_user.balance) }}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="digital-display text-center mb-3">
-                            <div class="text-small text-uppercase" style="color: var(--neon-cyan);">
-                                <i class="fas fa-bolt me-2"></i>ÚLTIMO PREMIO
-                            </div>
-                            <div class="h3 mb-0 text-gradient fw-bold" id="ultimo-premio">
-                                $0.00
-                            </div>
-                        </div>
-                    </div>
-                </div>
+{% block game_title %}
+Tragaperras
+{% endblock %}
 
+{% set has_navbar_stats = true %}
+{% block game_navbar_stats %}
+<!-- Panel de Control -->
+<div class="row">
+    <div class="col">
+        <div class="text-center">
+            <div class="small text-uppercase text-nowrap" style="color: var(--neon-green);">
+                <i class="fas fa-coins me-2"></i>Balance inicial
+            </div>
+            <div class="h5 mb-0 text-gradient fw-bold">
+                $<span id="balance-inicial">{{ "%.2f"|format(current_user.balance) }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="text-center">
+            <div class="small text-uppercase text-nowrap" style="color: var(--neon-cyan);">
+                <i class="fas fa-bolt me-2"></i>Último premio
+            </div>
+            <div class="h5 mb-0 text-gradient fw-bold" id="ultimo-premio">
+                $0.00
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content_fluid %}
+<!-- Máquina Tragaperras -->
+<div class="row">
+    <div class="tragaperras-container mb-5">
+        <div class="rodillos">
+            <div class="rodillo" id="rodillo1">
+                <div class="simbolo-container">
+                    <div class="simbolo">🍒</div>
+                </div>
+            </div>
+            <div class="rodillo" id="rodillo2">
+                <div class="simbolo-container">
+                    <div class="simbolo">🍋</div>
+                </div>
+            </div>
+            <div class="rodillo" id="rodillo3">
+                <div class="simbolo-container">
+                    <div class="simbolo">🍊</div>
+                </div>
+            </div>
+        </div>
+        <div class="linea-pago"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card game-card">
+            <div class="card-body">
                 <!-- Controles de Apuesta -->
                 <div class="row mb-4">
                     <div class="col-md-6">
@@ -58,80 +87,62 @@ Tragaperras
                     </div>
                 </div>
 
-                <!-- Máquina Tragaperras -->
-                <div class="tragaperras-container mb-5">
-                    <div class="rodillos">
-                        <div class="rodillo" id="rodillo1">
-                            <div class="simbolo-container">
-                                <div class="simbolo">🍒</div>
-                            </div>
-                        </div>
-                        <div class="rodillo" id="rodillo2">
-                            <div class="simbolo-container">
-                                <div class="simbolo">🍋</div>
-                            </div>
-                        </div>
-                        <div class="rodillo" id="rodillo3">
-                            <div class="simbolo-container">
-                                <div class="simbolo">🍊</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="linea-pago"></div>
-                </div>
-
                 <!-- Resultados -->
                 <div id="resultado" class="text-center"></div>
+            </div>
+        </div>
+    </div>
+</div>
 
-                <!-- Tabla de Pagos -->
-                <div class="card mt-4">
-                    <div class="card-header">
-                        <i class="fas fa-table me-2"></i>TABLA DE PREMIOS
+<div class="row">
+    <div class="col-12">
+        <!-- Tabla de Pagos -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <i class="fas fa-table me-2"></i>TABLA DE PREMIOS
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4 mb-3">
+                        <div class="premio-item">
+                            <div class="simbolos-combinacion">7️⃣7️⃣7️⃣</div>
+                            <div class="premio-valor text-success">50x</div>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <div class="row text-center">
-                            <div class="col-md-4 mb-3">
-                                <div class="premio-item">
-                                    <div class="simbolos-combinacion">7️⃣7️⃣7️⃣</div>
-                                    <div class="premio-valor text-success">50x</div>
-                                </div>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <div class="premio-item">
-                                    <div class="simbolos-combinacion">💎💎💎</div>
-                                    <div class="premio-valor text-success">30x</div>
-                                </div>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <div class="premio-item">
-                                    <div class="simbolos-combinacion">⭐⭐⭐</div>
-                                    <div class="premio-valor text-success">20x</div>
-                                </div>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <div class="premio-item">
-                                    <div class="simbolos-combinacion">🍒🍒🍒</div>
-                                    <div class="premio-valor text-warning">10x</div>
-                                </div>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <div class="premio-item">
-                                    <div class="simbolos-combinacion">🍋🍋🍋</div>
-                                    <div class="premio-valor text-warning">8x</div>
-                                </div>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <div class="premio-item">
-                                    <div class="simbolos-combinacion">🍊🍊🍊</div>
-                                    <div class="premio-valor text-warning">6x</div>
-                                </div>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <div class="premio-item">
-                                    <div class="simbolos-combinacion">❓❓❓</div>
-                                    <div class="premio-valor text-info">2x (2 igual)</div>
-                                </div>
-                            </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="premio-item">
+                            <div class="simbolos-combinacion">💎💎💎</div>
+                            <div class="premio-valor text-success">30x</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="premio-item">
+                            <div class="simbolos-combinacion">⭐⭐⭐</div>
+                            <div class="premio-valor text-success">20x</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="premio-item">
+                            <div class="simbolos-combinacion">🍒🍒🍒</div>
+                            <div class="premio-valor text-warning">10x</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="premio-item">
+                            <div class="simbolos-combinacion">🍋🍋🍋</div>
+                            <div class="premio-valor text-warning">8x</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="premio-item">
+                            <div class="simbolos-combinacion">🍊🍊🍊</div>
+                            <div class="premio-valor text-warning">6x</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="premio-item">
+                            <div class="simbolos-combinacion">❓❓❓</div>
+                            <div class="premio-valor text-info">2x (2 igual)</div>
                         </div>
                     </div>
                 </div>
@@ -419,10 +430,9 @@ document.addEventListener('DOMContentLoaded', function() {
 <style>
 .tragaperras-container {
     background: linear-gradient(135deg, #2d2d4d, #1a1a2e);
-    border: 3px solid var(--neon-cyan);
-    border-radius: 20px;
+    border-top: 1px solid var(--neon-cyan);
+    border-bottom: 1px solid var(--neon-cyan);
     padding: 40px;
-    box-shadow: var(--glow-cyan);
     position: relative;
     overflow: hidden;
     transition: all 0.3s ease;
