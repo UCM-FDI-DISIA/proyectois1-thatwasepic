@@ -62,9 +62,36 @@ def avanzar_turno(st):
     st['turno_idx'] = None
     st['fase'] = 'crupier'
 
+def serializar_stats(stats_obj):
+    """Devuelve un diccionario con las estadisticas normalizadas."""
+    if not stats_obj:
+        base = {
+            "partidas_jugadas": 0,
+            "partidas_ganadas": 0,
+            "apuesta_total": 0.0,
+            "ganancia_total": 0.0,
+        }
+    else:
+        base = {
+            "partidas_jugadas": stats_obj.partidas_jugadas or 0,
+            "partidas_ganadas": stats_obj.partidas_ganadas or 0,
+            "apuesta_total": float(stats_obj.apuesta_total or 0),
+            "ganancia_total": float(stats_obj.ganancia_total or 0),
+        }
+    perdidas = max(0, base["partidas_jugadas"] - base["partidas_ganadas"])
+    base.update({
+        "victorias": base["partidas_ganadas"],
+        "ganadas": base["partidas_ganadas"],
+        "derrotas": perdidas,
+        "perdidas": perdidas,
+        "empates": max(0, base["partidas_jugadas"] - base["partidas_ganadas"] - perdidas),
+    })
+    return base
+
 def emitir_estado(sala_id):
     st = salas_blackjack[sala_id]
     room = f"blackjack_sala_{sala_id}"
+    stats_por_jugador = st.get("estadisticas_jugadores", {})
     emit("estado_blackjack", {
         "jugadores": {
             str(uid): {
@@ -73,7 +100,8 @@ def emitir_estado(sala_id):
                 "apuesta": j["apuesta"],
                 "mano": j["mano"],
                 "estado": j["estado"],
-                "total": valor_mano(j["mano"])
+                "total": valor_mano(j["mano"]),
+                "estadisticas": stats_por_jugador.get(uid) or stats_por_jugador.get(str(uid))
             } for uid, j in st["jugadores"].items()
         },
         "dealer": st["dealer"],
@@ -83,6 +111,7 @@ def emitir_estado(sala_id):
         "fase": st["fase"],
         "deadline_ts": st["deadline_ts"],
         "votos_revancha": list(st["votos_revancha"]),
+        "estadisticas_jugadores": {str(uid): stats for uid, stats in stats_por_jugador.items()},
     }, room=room)
 
 # ================== Temporizador de turnos ==================
@@ -194,6 +223,9 @@ def ejecutar_crupier_y_resolver(sala_id):
             if pago_total > apuesta_monto:
                 stats.partidas_ganadas += 1
 
+            st.setdefault("estadisticas_jugadores", {})[uid] = serializar_stats(stats)
+            st["jugadores"][uid]["estadisticas"] = st["estadisticas_jugadores"][uid]
+
             emit("balance_update", {"balance": float(user.balance)}, room=f"blackjack_sala_{sala_id}")
 
 
@@ -221,6 +253,7 @@ def register_blackjack_handlers(socketio, app):
             "fase": "esperando_apuestas",
             "deadline_ts": None,
             "votos_revancha": set(),
+            "estadisticas_jugadores": {},
             "_timer_activo": False
         })
 
@@ -240,6 +273,11 @@ def register_blackjack_handlers(socketio, app):
                 "estado": "espera"
             }
             st["orden_turnos"].append(current_user.id)
+
+        # Enviar estadisticas actuales del jugador para mostrarlas en el cliente
+        stats_actuales = Estadistica.query.filter_by(user_id=current_user.id, juego="blackjack").first()
+        st["estadisticas_jugadores"][current_user.id] = serializar_stats(stats_actuales)
+        st["jugadores"][current_user.id]["estadisticas"] = st["estadisticas_jugadores"][current_user.id]
 
         emitir_estado(sala_id)
 
