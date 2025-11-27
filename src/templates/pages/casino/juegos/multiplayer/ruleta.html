@@ -197,7 +197,6 @@
       </svg>
       <div class="controls">
         <button id="spinBtn" class="btn btn-primary btn-neon">Girar</button>
-        <button id="confirmBtn" class="btn btn-primary btn-neon">Confirmar apuesta</button>
         <button id="undoBtn" class="btn btn-outline-primary btn-neon-secondary">Deshacer</button>
         <button id="clearBtn" class="btn btn-outline-primary btn-neon-secondary">Borrar</button>
         <button id="dupBtn" class="btn btn-primary btn-neon">Doblar jugada</button>
@@ -239,7 +238,7 @@
       <div class="log" id="log"></div>
       <div style="margin-top:8px; display:flex; gap:6px; align-items:center;">
         <input id="chat-input" type="text" placeholder="Escribe un mensaje..." style="flex:1; padding:8px; border-radius:8px; border:1px solid rgba(255,255,255,.08); background:rgba(0,0,0,.2); color:var(--text)">
-        <button id="chat-send" class="btn">Enviar</button>
+        <button id="chat-send" class="btn btn-primary btn-neon">Enviar</button>
       </div>
     </section>
 
@@ -313,6 +312,9 @@ let usedColors = new Set();
 let stats = { won: 0, lost: 0 };
 let salaId = parseInt("{{ sala.id }}");
 let recentBets = []; // {usuario_id, username, labels, amount_cents, resolved:false, payout_euros?, win_euros?}
+let wheelAngleState = 0; // ángulo absoluto de rueda para animaciones continuas
+let ballAngleState = -90; // ángulo de bola (reposo arriba)
+let localCountdown = null;
 
 function initWheel(){
   const gNums = document.getElementById('numbers');
@@ -860,13 +862,17 @@ socket.on("apuesta_recibida", (data) => {
 socket.on("ruleta_girada", (data) => {
   if(!data) return;
   spinning = false;
+  if(localCountdown){ clearInterval(localCountdown); localCountdown=null; }
   document.getElementById("spinBtn").disabled = false;
   if(data.result !== undefined){
+    const resultNumber = data.result;
+    let resultIdx = EURO_SEQ.indexOf(resultNumber);
+    if(resultIdx < 0) resultIdx = Math.floor(Math.random() * EURO_SEQ.length);
     // animate spin (returns a promise)
     try{
-      spinAnimTo(data.result).then(()=>{
+      spinAnimTo(resultIdx).then(()=>{
         // After animation completes, show result & per-player summaries
-        log(`🎲 Resultado: <b>${data.result}</b>`);
+        log(`🎲 Resultado: <b>${resultNumber}</b>`);
         const tEl = document.getElementById('spinTimer'); if(tEl) tEl.textContent = '—';
 
         // Mostrar las ganancias/pérdidas por jugador en el log (y actualizar mi balance local si aparece)
@@ -916,23 +922,68 @@ socket.on("ruleta_girada", (data) => {
   }
 });
 
+// Ack del servidor al intentar girar (para mostrar esperas o errores)
+socket.on('spin_ack', (data) => {
+  if(!data) return;
+  if(data.ok === false){
+    spinning = false;
+    const btn = document.getElementById("spinBtn"); if(btn) btn.disabled = false;
+    if(localCountdown){ clearInterval(localCountdown); localCountdown=null; }
+    const tEl = document.getElementById('spinTimer'); if(tEl) tEl.textContent = '—';
+    if(data.message) log(`⚠️ ${data.message}`);
+    return;
+  }
+  if(data.ok === true && data.spun === false){
+    const ready = data.players_ready ?? 0;
+    const need = data.players_needed ?? '?';
+    log(`⌛ Esperando jugadores listos (${ready}/${need})`);
+    kickoffLocalCountdown(15);
+  }
+});
+
 // Mostrar cuenta regresiva para el giro
 socket.on('spin_countdown', (data) => {
   try{
+    if(localCountdown){ clearInterval(localCountdown); localCountdown=null; }
     const el = document.getElementById('spinTimer');
     if(!el) return;
     if(!data || data.seconds_remaining === undefined){ el.textContent = '—'; return; }
     const s = parseInt(data.seconds_remaining);
-    if(s > 0) el.textContent = `${s}s`;
-    else el.textContent = 'Girando...';
+    if(s > 0){
+      el.textContent = `${s}s`;
+    } else {
+      el.textContent = 'Girando...';
+      if(!countdownForceSent){
+        countdownForceSent = true;
+        socket.emit("ruleta_spin", { sala_id: salaId, force: true });
+      }
+    }
   }catch(e){ console.error('spin_countdown handler error', e); }
 });
 
 // Mostrar mensajes de chat entrantes
 socket.on('new_ruleta_message', (data) => {
   if(!data) return;
+  // Evitar mostrar el mensaje de resultado del sistema antes de que acabe la animación;
+  // el mensaje se mostrará en ruleta_girada tras el spin.
+  if(typeof data.message === 'string' && data.username === 'Sistema' && data.message.startsWith('Resultado:')) return;
   const ts = data.timestamp ? new Date(data.timestamp).toLocaleTimeString() : '';
   log(`<small style="color:var(--badge-fg)">[${ts}]</small> <b>${data.username}</b>: ${data.message}`);
+});
+
+// Avisos de espera de jugadores listos
+socket.on('spin_wait', (data) => {
+  if(!data) return;
+  const ready = data.players_ready ?? 0;
+  const need = data.players_needed ?? '?';
+  log(`⌛ Esperando jugadores listos (${ready}/${need})`);
+});
+
+// Aviso de que alguien pidió giro con su apuesta
+socket.on('spin_notice', (data) => {
+  if(!data) return;
+  const amt = data.bet_cents ? centsToEuro(data.bet_cents) : '';
+  log(`✅ ${data.username} apuesta: ${amt} y pide giro`);
 });
 
 function updatePlayersList(players){
@@ -989,38 +1040,50 @@ function spinAnimTo(resultIdx){
     const gNums = document.getElementById('numbers');
     const ball = document.getElementById('ball');
     const start = performance.now();
-
-    // get current wheel rotation (degrees) if any
-    let baseWheel = 0;
-    try{
-      const cur = gNums.getAttribute('transform') || '';
-      const m = cur.match(/rotate\((-?\d+(?:\.\d+)?)\)/);
-      if(m && m[1]) baseWheel = parseFloat(m[1]); else baseWheel = Math.random()*360;
-    }catch(e){ baseWheel = Math.random()*360; }
-
     const per = 360 / EURO_SEQ.length;
-    const desiredFinal = -((resultIdx + 0.5) * per);
+    const targetWheelBase = -((resultIdx + 0.5) * per); // centro del pocket arriba
+    const norm = (v)=>((v % 360) + 360) % 360;
 
-    const fullTurns = 5;
-    const baseNorm = ((baseWheel % 360) + 360) % 360;
-    const delta = ((desiredFinal - baseNorm) % 360 + 360) % 360;
-    const spinWheel = 360 * fullTurns + delta;
+    const startWheel = wheelAngleState;
+    const deltaToTarget = norm(targetWheelBase - norm(startWheel));
+    const wheelTurns = 6; // vueltas completas antes de aterrizar
+    const wheelTotal = 360 * wheelTurns + deltaToTarget;
+    const targetWheelAbs = startWheel + wheelTotal;
 
-    const spinBall = 3000 + Math.random()*1200;
-    const duration = 5200 + Math.random()*1000;
+    // La bola gira más rápido que la rueda y pierde ventaja de forma suave
+    const targetBallAng = -90;
+    const startCX = parseFloat(ball.getAttribute('cx') || '0');
+    const startCY = parseFloat(ball.getAttribute('cy') || '-170');
+    const startR = Math.hypot(startCX, startCY) || 170;
+    const targetR = 150;
+    const leadStart = -720 - Math.random()*360; // adelanto inicial de varias vueltas
+    const wobbleMag = 4;
 
-    function easeOutQuint(t){ return 1 - Math.pow(1-t,5); }
+    const duration = 5200 + Math.random() * 800;
+    const easeOutQuint = (t)=>1 - Math.pow(1-t,5);
 
     function frame(now){
       const t = Math.min(1, (now - start) / duration);
-      const wheelAngle = baseWheel + easeOutQuint(t) * spinWheel;
+      const eased = easeOutQuint(t);
+
+      const wheelAngle = startWheel + eased * wheelTotal;
       gNums.setAttribute('transform', `rotate(${wheelAngle})`);
-      const wobble = (1-t) * 6 * Math.sin(now/80) + (1-t) * 3 * Math.sin(now/43);
-      const ballAngle = -(easeOutQuint(t) * spinBall) + wobble;
-      const rad = (ballAngle - 90) * Math.PI / 180;
-      const r = 170 - 30 * easeOutQuint(t) + 2 * Math.sin(now/60);
+
+      const wobble = (1 - t) * wobbleMag * Math.sin(now / 70);
+      const ballAngle = targetBallAng + (1 - eased) * leadStart + wobble;
+      const rad = ballAngle * Math.PI / 180;
+      const r = startR - eased * (startR - targetR) - (1 - t) * 2 * Math.sin(now / 60);
       if(ball){ ball.setAttribute('cx', (r * Math.cos(rad)).toFixed(2)); ball.setAttribute('cy', (r * Math.sin(rad)).toFixed(2)); }
-      if(t < 1){ requestAnimationFrame(frame); } else { alignToPocket(resultIdx); resolve(); }
+
+      if(t < 1){ requestAnimationFrame(frame); }
+      else {
+        wheelAngleState = targetWheelAbs;
+        ballAngleState = targetBallAng;
+        gNums.setAttribute('transform', `rotate(${targetWheelAbs})`);
+        const rad2 = targetBallAng * Math.PI / 180;
+        if(ball){ ball.setAttribute('cx', (targetR * Math.cos(rad2)).toFixed(2)); ball.setAttribute('cy', (targetR * Math.sin(rad2)).toFixed(2)); }
+        resolve();
+      }
     }
     requestAnimationFrame(frame);
   });
@@ -1031,9 +1094,11 @@ function alignToPocket(resultIdx){
   const ball = document.getElementById('ball');
   const per = 360 / EURO_SEQ.length;
   const finalWheel = -((resultIdx + 0.5) * per);
+  wheelAngleState = finalWheel;
   gNums.setAttribute('transform', `rotate(${finalWheel})`);
-  const finalBallAng = -90 - 4; // slight offset
+  const finalBallAng = -90;
   const r2 = 150; const rad2 = finalBallAng * Math.PI / 180;
+  ballAngleState = finalBallAng;
   if(ball){ ball.setAttribute('cx', (r2 * Math.cos(rad2)).toFixed(2)); ball.setAttribute('cy', (r2 * Math.sin(rad2)).toFixed(2)); }
 }
 
@@ -1045,29 +1110,47 @@ document.getElementById("exitBtn").addEventListener("click", () => {
   }
 });
 
-document.getElementById("confirmBtn").addEventListener("click", () => {
+function kickoffLocalCountdown(seconds=15){
+  const el = document.getElementById('spinTimer');
+  if(!el) return;
+  if(localCountdown){ clearInterval(localCountdown); }
+  countdownForceSent = false;
+  let t = seconds;
+  el.textContent = `${t}s`;
+  localCountdown = setInterval(()=>{
+    t -= 1;
+    if(t < 0){
+      clearInterval(localCountdown); localCountdown=null;
+      el.textContent = 'Girando...';
+      return;
+    }
+    el.textContent = `${t}s`;
+  }, 1000);
+}
+
+document.getElementById("spinBtn").addEventListener("click", () => {
+  if(spinning) return;
   const total = bets.reduce((sum, b) => sum + (b.amount || 0), 0);
   if(total > bank){ log("❌ Saldo insuficiente"); return; }
-  if(total === 0){ log("❌ Ninguna apuesta para confirmar"); return; }
+  if(total === 0){ log("❌ Ninguna apuesta para girar"); return; }
+
+  // Enviar apuestas al pulsar girar y pedir giro inmediatamente (server gestiona ready y countdown)
   socket.emit("ruleta_place_bet", { sala_id: salaId, apuestas: bets, color: myColor });
+  setTimeout(()=> socket.emit("ruleta_spin", { sala_id: salaId }), 30); // leve margen para que registre la apuesta
+  spinning = true;
+  document.getElementById("spinBtn").disabled = true;
+  kickoffLocalCountdown(15);
+
   // Guardar copia de la última jugada
   lastBets = bets.map(b => ({ type: b.type, label: b.label, amount: b.amount || 0, set: new Set(Array.from(b.set || [])) }));
   const totalEuro = (total/100).toFixed(2);
-  log(`✅ <span style="font-weight:bold;">${myUsername} confirmó: ${totalEuro}€</span>`);
-  document.getElementById("spinBtn").disabled = false;
+  log(`✅ <span style="font-weight:bold;">${myUsername} apuesta: ${totalEuro}€ y pide giro</span>`);
 
   // add to recent bets list for stats
   const labels = bets.map(b => b.label || '');
   recentBets.unshift({ usuario_id: myUserId, username: myUsername, labels: labels, amount_cents: total, resolved: false });
   if(recentBets.length>20) recentBets.pop();
   updateRecentBetsUI();
-});
-
-document.getElementById("spinBtn").addEventListener("click", () => {
-  if(spinning) return;
-  spinning = true;
-  document.getElementById("spinBtn").disabled = true;
-  socket.emit("ruleta_spin", { sala_id: salaId });
 });
 
 // Chat sending

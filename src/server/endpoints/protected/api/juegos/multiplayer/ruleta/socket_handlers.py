@@ -120,7 +120,7 @@ def register_ruleta_handlers(socketio, app):
         socketio.emit('ruleta_girada', {'result': result_number, 'results': results}, room=room_name)
         socketio.emit('estado_sala_actualizado', {'sala_id': sala_id, 'jugadores': st['jugadores'], 'apuestas_count': len(st['apuestas']), 'estado': st['estado']}, room=room_name)
 
-    def start_spin_countdown(sala_id, seconds=30):
+    def start_spin_countdown(sala_id, seconds=15):
         st = salas_ruleta.setdefault(sala_id, {'jugadores': [], 'estado': 'esperando', 'apuestas': []})
         if st.get('countdown_thread'):
             return
@@ -315,17 +315,11 @@ def register_ruleta_handlers(socketio, app):
             'summary': {'labels': labels, 'amount_cents': total_cents}
         }, room=room_name)
         emit('estado_sala_actualizado', {'sala_id': sala_id, 'jugadores': st['jugadores'], 'apuestas_count': len(st['apuestas']), 'estado': st['estado']}, room=room_name)
-        # arrancar temporizador de 30s si no existe (mostrar cuenta regresiva a clientes)
-        try:
-            if not st.get('countdown_thread') and len(st.get('apuestas', []))>0:
-                print(f"[ruleta] iniciando countdown para sala {sala_id}")
-                start_spin_countdown(sala_id, seconds=30)
-        except Exception as e:
-            print('Error starting countdown:', e)
 
     @socketio.on('ruleta_spin')
     def handle_spin(data):
         sala_id = data.get('sala_id')
+        force = bool(data.get('force'))
         sala = SalaMultijugador.query.get(sala_id)
         if not sala:
             emit('error', {'message': 'Sala no encontrada'}, room=request.sid)
@@ -341,19 +335,65 @@ def register_ruleta_handlers(socketio, app):
             if a['usuario_id'] == current_user.id:
                 a['has_spun'] = True
 
-        # chequear si todos listos o 30s desde la primera apuesta
-        # Considerar el número de jugadores actualmente conectados en la sala
-        required = len(st['jugadores']) if len(st.get('jugadores', [])) > 0 else sala.capacidad
-        ready_count = sum(1 for j in st['jugadores'] if j.get('ready'))
-        created_at = None
-        if st['apuestas']:
-            # tomar timestamp de la primera apuesta
-            created_at = datetime.fromisoformat(st['apuestas'][0].get('submitted_at'))
-        elapsed = (datetime.utcnow() - created_at).total_seconds() if created_at else 0
-        auto_spin = elapsed >= 30
+        # Aviso a toda la sala de quién ha pedido giro y cuánto lleva apostado
+        try:
+            my_bet_cents = 0
+            for a in st.get('apuestas', []):
+                if a.get('usuario_id') == current_user.id:
+                    my_bet_cents = a.get('amount_cents', 0)
+                    break
+            socketio.emit('spin_notice', {
+                'sala_id': sala_id,
+                'usuario_id': current_user.id,
+                'username': current_user.username,
+                'bet_cents': my_bet_cents
+            }, room=room_name)
+        except Exception:
+            pass
 
-        if ready_count < required and not auto_spin:
-            emit('spin_ack', {'ok': True, 'spun': False, 'players_ready': ready_count, 'players_needed': required, 'seconds_elapsed': int(elapsed)}, room=request.sid)
+        # Si se fuerza (countdown agotado), girar sin más siempre que existan apuestas
+        if force:
+            if not st.get('apuestas'):
+                emit('spin_ack', {'ok': False, 'message': 'No hay apuestas en la sala'}, room=request.sid)
+                return
+            try:
+                st['spin_countdown_cancel'] = True
+            except Exception:
+                pass
+            perform_spin(sala_id)
+            return
+
+        # chequear si todos los que apostaron están listos o si ya expiró el tiempo
+        bettors_ids = {a.get('usuario_id') for a in st.get('apuestas', []) if a.get('usuario_id')}
+        total_bettors = len(bettors_ids)
+        if total_bettors == 0:
+            emit('spin_ack', {'ok': False, 'message': 'Debes tener apuesta para girar'}, room=request.sid)
+            return
+
+        ready_count = sum(1 for j in st['jugadores'] if j.get('ready') and j.get('id') in bettors_ids)
+
+        # Si solo hay un apostador, iniciar countdown y dejar que el giro ocurra al expirar
+        if total_bettors == 1:
+            try:
+                if not st.get('countdown_thread'):
+                    print(f"[ruleta] iniciando countdown 15s (solo un apostador)")
+                    start_spin_countdown(sala_id, seconds=15)
+            except Exception as e:
+                print('Error starting countdown from spin (1 bettor):', e)
+            emit('spin_ack', {'ok': True, 'spun': False, 'players_ready': ready_count, 'players_needed': 2}, room=request.sid)
+            emit('estado_sala_actualizado', {'sala_id': sala_id, 'jugadores': st['jugadores'], 'apuestas_count': len(st['apuestas']), 'estado': st['estado']}, room=room_name)
+            return
+
+        # Si hay 2+ apostadores pero falta alguno por pulsar, arrancar countdown compartido
+        if ready_count < total_bettors:
+            try:
+                if not st.get('countdown_thread'):
+                    print(f"[ruleta] iniciando countdown 15s para sala {sala_id} (faltan jugadores listos)")
+                    start_spin_countdown(sala_id, seconds=15)
+            except Exception as e:
+                print('Error starting countdown from spin:', e)
+            emit('spin_ack', {'ok': True, 'spun': False, 'players_ready': ready_count, 'players_needed': total_bettors}, room=request.sid)
+            socketio.emit('spin_wait', {'players_ready': ready_count, 'players_needed': total_bettors}, room=room_name)
             emit('estado_sala_actualizado', {'sala_id': sala_id, 'jugadores': st['jugadores'], 'apuestas_count': len(st['apuestas']), 'estado': st['estado']}, room=room_name)
             return
 
