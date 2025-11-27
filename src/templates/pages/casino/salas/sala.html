@@ -1,5 +1,7 @@
 {% extends "pages/casino/base.html" %}
 
+{% import "partials/sala_contents.html" as parcial_sala with context %}
+
 {% block title %}
 Sala: {{ sala.nombre }}
 {% endblock %}
@@ -34,9 +36,7 @@ Sala: {{ sala.nombre }}
                     <h4 class="mb-0"><i class="fas fa-users me-2"></i>Jugadores Conectados</h4>
                 </div>
                 <div class="card-body">
-                    <div id="jugadores-container" class="row g-2">
-                        <!-- Se actualizará dinámicamente -->
-                    </div>
+                    {{ parcial_sala.content_lista_usuarios() }}
                 </div>
             </div>
 
@@ -46,15 +46,7 @@ Sala: {{ sala.nombre }}
                     <h4 class="mb-0"><i class="fas fa-comments me-2"></i>Chat de Sala</h4>
                 </div>
                 <div class="card-body">
-                    <div id="chat-messages" style="height: 200px; overflow-y: auto; border: 1px solid var(--neon-cyan); border-radius: 8px; padding: 10px; margin-bottom: 10px; background: rgba(0,0,0,0.3);">
-                        <!-- Mensajes del chat -->
-                    </div>
-                    <div class="input-group">
-                        <input type="text" id="chat-input" class="form-control" placeholder="Escribe un mensaje...">
-                        <button class="btn btn-primary" onclick="enviarMensaje()">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </div>
+                    {{ parcial_sala.content_chat() }}
                 </div>
             </div>
 
@@ -83,13 +75,16 @@ Sala: {{ sala.nombre }}
         </div>
     </div>
 </div>
+{% endblock %}
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+{% block scripts %}
+{{ parcial_sala.scripts() }}
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const salaId = {{ sala.id }};
     const esCreador = {{ 'true' if sala.creador_id == current_user.id else 'false' }};
-    const socket = io();
+    const socket = window.socket;
 
     // Unirse a la sala
     socket.emit('join_room', { sala_id: salaId });
@@ -100,23 +95,6 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 // Actualizar contador de jugadores
                 actualizarContadorJugadores(data.sala.jugadores_actuales, data.sala.capacidad);
-                
-                // Actualizar lista de jugadores
-                const container = document.getElementById('jugadores-container');
-                container.innerHTML = data.jugadores.map(jugador => `
-                    <div class="col-md-6">
-                        <div class="card translucent-card ${jugador.es_creador ? 'border-primary' : ''}">
-                            <div class="card-body py-2">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-user${jugador.es_creador ? '-crown' : ''} me-2" 
-                                       style="color: ${jugador.es_creador ? 'var(--neon-cyan)' : 'var(--text-light)'};"></i>
-                                    <span class="flex-grow-1">${jugador.username}</span>
-                                    ${jugador.es_creador ? '<span class="badge bg-primary">Creador</span>' : ''}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
 
                 // Actualizar botón de iniciar
                 const btnIniciar = document.getElementById('btn-iniciar');
@@ -180,56 +158,15 @@ document.addEventListener('DOMContentLoaded', function() {
         alert('Error: ' + data.error);
     });
 
-    // Chat
-    function enviarMensaje() {
-        const input = document.getElementById('chat-input');
-        const message = input.value.trim();
-        
-        if (message) {
-            console.log('📤 Enviando mensaje de chat:', message);
-            socket.emit('chat_message', {
-                sala_id: salaId,
-                message: message,
-                timestamp: new Date().toISOString()
-            });
-            input.value = '';
-        }
-    }
-
-    socket.on('new_message', (data) => {
-        agregarMensajeChat(data.username, data.message, 'user');
-    });
-
     // Eventos de SocketIO
     socket.on('user_joined', (data) => {
         console.log('Usuario se unió:', data);
         actualizarEstadoSala();
-        agregarMensajeChat('Sistema', `${data.username} se unió a la sala`, 'system');
     });
 
     socket.on('user_left', (data) => {
         console.log('Usuario salió:', data);
         actualizarEstadoSala();
-        agregarMensajeChat('Sistema', `${data.username} salió de la sala`, 'system');
-    });
-
-    function agregarMensajeChat(usuario, mensaje, tipo) {
-        const chat = document.getElementById('chat-messages');
-        const mensajeDiv = document.createElement('div');
-        mensajeDiv.className = `chat-message ${tipo}`;
-        mensajeDiv.innerHTML = `
-            <strong>${usuario}:</strong> ${mensaje}
-            <small class="text-muted">${new Date().toLocaleTimeString()}</small>
-        `;
-        chat.appendChild(mensajeDiv);
-        chat.scrollTop = chat.scrollHeight;
-    }
-
-    // Permitir enviar mensaje con Enter
-    document.getElementById('chat-input').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            enviarMensaje();
-        }
     });
 
     // Actualizar cada 3 segundos (como fallback)
@@ -237,27 +174,4 @@ document.addEventListener('DOMContentLoaded', function() {
     actualizarEstadoSala(); // Carga inicial
 });
 </script>
-
-<style>
-.chat-message {
-    margin-bottom: 8px;
-    padding: 8px;
-    border-radius: 8px;
-}
-
-.chat-message.user {
-    background: rgba(0, 243, 255, 0.1);
-    border-left: 3px solid var(--neon-cyan);
-}
-
-.chat-message.system {
-    background: rgba(255, 0, 255, 0.1);
-    border-left: 3px solid var(--neon-pink);
-    font-style: italic;
-}
-
-.border-primary {
-    border: 2px solid var(--neon-cyan) !important;
-}
-</style>
 {% endblock %}

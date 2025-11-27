@@ -98,6 +98,9 @@
     {% if realtime_required %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
     <script src="{{ url_for('static', filename='js/realtime_update.js') }}"></script>
+    <script>
+    window.socket = io();
+    </script>
     {% endif %}
 
     {% block base_scripts %}{% endblock %}

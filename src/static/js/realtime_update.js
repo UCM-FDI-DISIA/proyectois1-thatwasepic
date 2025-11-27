@@ -56,7 +56,7 @@ function addPaginationUpdate(containerInstance) {
 // Actualización de contenido al interaccionar con botones de paginación
 function addAutoReload(containerInstance, timeInterval) {
     document.addEventListener('DOMContentLoaded', function() {
-        const socket = io();
+        const socket = window.socket;
 
         // Inicializar los eventos de Socket.IO
         socket.on('user_joined', (data) => {

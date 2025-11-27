@@ -1,0 +1,132 @@
+{% macro content_chat() %}
+<div id="chat-messages" style="height: 200px; overflow-y: auto; border: 1px solid var(--neon-cyan); border-radius: 8px; padding: 10px; margin-bottom: 10px; background: rgba(0,0,0,0.3);">
+    <!-- Mensajes del chat -->
+</div>
+<div class="input-group">
+    <input type="text" id="chat-input" class="form-control" placeholder="Escribe un mensaje...">
+    <button id="chatEnviarMensaje" class="btn btn-primary">
+        <i class="fas fa-paper-plane"></i>
+    </button>
+</div>
+{% endmacro %}
+
+{% macro content_lista_usuarios() %}
+<div id="jugadores-container">
+    <!-- Se actualizará dinámicamente -->
+</div>
+{% endmacro %}
+
+{% macro scripts() %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const salaId = {{ sala.id }};
+    const esCreador = {{ 'true' if sala.creador_id == current_user.id else 'false' }};
+    const socket = window.socket;
+
+    function actualizarListaJugadores() {
+        fetch(`/api/multijugador/estado-sala/${salaId}`)
+            .then(response => response.json())
+            .then(data => {                
+                // Actualizar lista de jugadores
+                const container = document.getElementById('jugadores-container');
+                container.innerHTML = data.jugadores.map(jugador => `
+                    <div class="col-md-6">
+                        <div class="card translucent-card ${jugador.es_creador ? 'border-primary' : ''}">
+                            <div class="card-body py-2">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-user${jugador.es_creador ? '-crown' : ''} me-2" 
+                                       style="color: ${jugador.es_creador ? 'var(--neon-cyan)' : 'var(--text-light)'};"></i>
+                                    <span class="flex-grow-1">${jugador.username}</span>
+                                    ${jugador.es_creador ? '<span class="badge bg-primary">Creador</span>' : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // Chat
+    function enviarMensaje() {
+        const input = document.getElementById('chat-input');
+        const message = input.value.trim();
+        
+        if (message) {
+            console.log('📤 Enviando mensaje de chat:', message);
+            socket.emit('chat_message', {
+                sala_id: salaId,
+                message: message,
+                timestamp: new Date().toISOString()
+            });
+            input.value = '';
+        }
+    }
+
+    document.getElementById("chatEnviarMensaje").addEventListener("click", function () {
+        enviarMensaje();
+    });
+
+    socket.on('new_message', (data) => {
+        agregarMensajeChat(data.username, data.message, 'user');
+    });
+
+    // Eventos de SocketIO
+    socket.on('user_joined', (data) => {
+        actualizarListaJugadores();
+        agregarMensajeChat('Sistema', `${data.username} se unió a la sala`, 'system');
+    });
+
+    socket.on('user_left', (data) => {
+        actualizarListaJugadores();
+        agregarMensajeChat('Sistema', `${data.username} salió de la sala`, 'system');
+    });
+
+    function agregarMensajeChat(usuario, mensaje, tipo) {
+        const chat = document.getElementById('chat-messages');
+        const mensajeDiv = document.createElement('div');
+        mensajeDiv.className = `chat-message ${tipo}`;
+        mensajeDiv.innerHTML = `
+            <strong>${usuario}:</strong> ${mensaje}
+            <small class="text-muted">${new Date().toLocaleTimeString()}</small>
+        `;
+        chat.appendChild(mensajeDiv);
+        chat.scrollTop = chat.scrollHeight;
+    }
+
+    // Permitir enviar mensaje con Enter
+    document.getElementById('chat-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            enviarMensaje();
+        }
+    });
+
+    // Actualizar cada 3 segundos (como fallback)
+    setInterval(actualizarListaJugadores, 3000);
+    actualizarListaJugadores();
+});
+</script>
+
+<style>
+.chat-message {
+    margin-bottom: 8px;
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.chat-message.user {
+    background: rgba(0, 243, 255, 0.1);
+    border-left: 3px solid var(--neon-cyan);
+}
+
+.chat-message.system {
+    background: rgba(255, 0, 255, 0.1);
+    border-left: 3px solid var(--neon-pink);
+    font-style: italic;
+}
+
+.border-primary {
+    border: 2px solid var(--neon-cyan) !important;
+}
+</style>
+{% endmacro %}

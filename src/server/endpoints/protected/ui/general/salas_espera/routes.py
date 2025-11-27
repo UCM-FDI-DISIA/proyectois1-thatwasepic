@@ -32,6 +32,7 @@ def limpiar_salas_antiguas():
     ).all()
     
     for usuario_sala in usuarios_desconectados:
+        print(f"🧹 Limpieza: eliminando usuario desconectado {usuario_sala.usuario_id}")
         sala = SalaMultijugador.query.get(usuario_sala.sala_id)
         if sala:
             sala.jugadores_actuales -= 1
@@ -46,11 +47,12 @@ def limpiar_salas_antiguas():
     salas_a_eliminar = salas_terminadas + salas_vacias
     
     for sala in salas_a_eliminar:
+        print(f"🧹 Limpieza: eliminando sala vacía {sala.id}")
         db.session.delete(sala)
     
     if salas_a_eliminar or usuarios_desconectados:
         db.session.commit()
-        print(f"🧹 Limpieza: {len(salas_a_eliminar)} salas, {len(usuarios_desconectados)} usuarios")
+        print(f"🧹 Limpieza: resumen: {len(salas_a_eliminar)} salas, {len(usuarios_desconectados)} usuarios")
 
 def obtener_pagina_salas(num_por_pagina):
     limpiar_salas_antiguas()
@@ -171,7 +173,7 @@ def sala(sala_id):
         else:
             return redirect(f'/multijugador/partida/{sala.juego}/{sala_id}')
     
-    return render_template('pages/casino/salas/sala.html', sala=sala)
+    return render_template('pages/casino/salas/sala.html', sala=sala, realtime_required=True)
 
 @bp.route('/salas-espera/salir-sala/<int:sala_id>', methods=['POST'])
 @login_required
