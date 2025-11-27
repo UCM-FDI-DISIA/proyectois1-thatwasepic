@@ -4,6 +4,7 @@ from flask_login import current_user
 from flask_socketio import join_room, leave_room, emit
 from models import db, User, SalaMultijugador, Apuesta, Estadistica
 from flask import request
+from sqlalchemy import func
 
 
 # ================== Estado en memoria por sala ==================

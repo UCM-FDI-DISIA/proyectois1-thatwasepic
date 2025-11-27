@@ -110,6 +110,19 @@ Blackjack (multijugador)
 .controls-panel{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
 .controls-panel .form-control{min-width:140px}
 .controls-panel .btn{font-weight:800;letter-spacing:0.5px}
+.btn-global{
+  background: var(--gradient-cyber);
+  border:1px solid var(--neon-cyan);
+  color:#fff;
+  box-shadow:var(--glow-cyan-button);
+}
+.btn-global:hover{filter:brightness(1.05)}
+.btn-global.exit{
+  background:transparent;
+  border:1px solid rgba(255,255,255,.45);
+  color:var(--text-light);
+  box-shadow:none;
+}
 
 /* Stats */
 .stats-panel {
