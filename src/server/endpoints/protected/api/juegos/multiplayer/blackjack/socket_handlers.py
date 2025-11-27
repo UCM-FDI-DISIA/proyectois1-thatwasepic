@@ -63,8 +63,9 @@ def avanzar_turno(st):
     st['turno_idx'] = None
     st['fase'] = 'crupier'
 
-def serializar_stats(stats_obj):
+def serializar_stats(stats_obj, extras=None):
     """Devuelve un diccionario con las estadisticas normalizadas."""
+    extras = extras or {}
     if not stats_obj:
         base = {
             "partidas_jugadas": 0,
@@ -79,20 +80,96 @@ def serializar_stats(stats_obj):
             "apuesta_total": float(stats_obj.apuesta_total or 0),
             "ganancia_total": float(stats_obj.ganancia_total or 0),
         }
-    perdidas = max(0, base["partidas_jugadas"] - base["partidas_ganadas"])
+
+    empates = extras.get("empates", 0)
+    perdidas = extras.get("perdidas")
+    if perdidas is None:
+        perdidas = max(0, base["partidas_jugadas"] - base["partidas_ganadas"] - empates)
+
     base.update({
         "victorias": base["partidas_ganadas"],
         "ganadas": base["partidas_ganadas"],
         "derrotas": perdidas,
         "perdidas": perdidas,
-        "empates": max(0, base["partidas_jugadas"] - base["partidas_ganadas"] - perdidas),
+        "empates": empates,
+        "blackjacks": extras.get("blackjacks", 0),
     })
     return base
+
+def _stats_base():
+    """Estadisticas en cero para una sala recien creada (no arrastrar de otras salas)."""
+    return {
+        "partidas_jugadas": 0,
+        "partidas_ganadas": 0,
+        "ganancia_total": 0.0,
+        "apuesta_total": 0.0,
+        "victorias": 0,
+        "ganadas": 0,
+        "derrotas": 0,
+        "perdidas": 0,
+        "empates": 0,
+        "blackjacks": 0,
+    }
+
+def _refrescar_aliases(stats_dict):
+    perdidas = max(0, stats_dict["partidas_jugadas"] - stats_dict["partidas_ganadas"] - stats_dict.get("empates", 0))
+    stats_dict["victorias"] = stats_dict["partidas_ganadas"]
+    stats_dict["ganadas"] = stats_dict["partidas_ganadas"]
+    stats_dict["derrotas"] = perdidas
+    stats_dict["perdidas"] = perdidas
+    stats_dict["empates"] = stats_dict.get("empates", 0)
+    return stats_dict
+
+def refrescar_estadisticas_jugadores(st):
+    """
+    Carga las estadisticas consolidadas de blackjack para los jugadores de la sala
+    y las deja en memoria para emitirlas al cliente.
+    """
+    uids = list(st["jugadores"].keys())
+    if not uids:
+        st["estadisticas_jugadores"] = {}
+        return st["estadisticas_jugadores"]
+
+    conteos = {uid: {"empates": 0, "perdidas": 0, "blackjacks": 0} for uid in uids}
+    rows = db.session.query(
+        Apuesta.user_id,
+        Apuesta.resultado,
+        func.count(Apuesta.id)
+    ).filter(
+        Apuesta.user_id.in_(uids),
+        Apuesta.juego.in_(["blackjack", "blackjack_multijugador"])
+    ).group_by(Apuesta.user_id, Apuesta.resultado).all()
+
+    for uid, res, count in rows:
+        res_low = (res or "").lower()
+        if "empate" in res_low:
+            conteos[uid]["empates"] = count
+        elif "perd" in res_low:
+            conteos[uid]["perdidas"] = count
+        elif "blackjack" in res_low:
+            conteos[uid]["blackjacks"] = count
+
+    stats_db = Estadistica.query.filter(
+        Estadistica.user_id.in_(uids),
+        Estadistica.juego == "blackjack"
+    ).all()
+    stats_map = {s.user_id: s for s in stats_db}
+
+    payload = {
+        uid: serializar_stats(stats_map.get(uid), conteos.get(uid, {}))
+        for uid in uids
+    }
+    st["estadisticas_jugadores"] = payload
+    for uid, stats in payload.items():
+        if uid in st["jugadores"]:
+            st["jugadores"][uid]["estadisticas"] = stats
+    return payload
 
 def emitir_estado(sala_id):
     st = salas_blackjack[sala_id]
     room = f"blackjack_sala_{sala_id}"
     stats_por_jugador = st.get("estadisticas_jugadores", {})
+    stats_payload = {str(uid): stats for uid, stats in stats_por_jugador.items()}
     emit("estado_blackjack", {
         "jugadores": {
             str(uid): {
@@ -112,7 +189,13 @@ def emitir_estado(sala_id):
         "fase": st["fase"],
         "deadline_ts": st["deadline_ts"],
         "votos_revancha": list(st["votos_revancha"]),
-        "estadisticas_jugadores": {str(uid): stats for uid, stats in stats_por_jugador.items()},
+        "estadisticas_jugadores": stats_payload,
+        "stats_jugadores": stats_payload,
+        "estadisticas": stats_payload,
+        "stats": stats_payload,
+        "resumen_estadisticas": stats_payload,
+        "resumen": stats_payload,
+        "resumen_stats": stats_payload,
     }, room=room)
 
 # ================== Temporizador de turnos ==================
@@ -224,8 +307,17 @@ def ejecutar_crupier_y_resolver(sala_id):
             if pago_total > apuesta_monto:
                 stats.partidas_ganadas += 1
 
-            st.setdefault("estadisticas_jugadores", {})[uid] = serializar_stats(stats)
-            st["jugadores"][uid]["estadisticas"] = st["estadisticas_jugadores"][uid]
+            # Estadisticas en memoria POR SALA (reiniciadas cuando la sala es nueva)
+            stats_mem = st.setdefault("estadisticas_jugadores", {}).setdefault(uid, _stats_base())
+            stats_mem["partidas_jugadas"] += 1
+            stats_mem["apuesta_total"] += apuesta_monto
+            stats_mem["ganancia_total"] += pago_total
+            if pago_total > apuesta_monto:
+                stats_mem["partidas_ganadas"] += 1
+            elif pago_total == apuesta_monto:
+                stats_mem["empates"] = stats_mem.get("empates", 0) + 1
+            _refrescar_aliases(stats_mem)
+            st["jugadores"][uid]["estadisticas"] = stats_mem
 
             emit("balance_update", {"balance": float(user.balance)}, room=f"blackjack_sala_{sala_id}")
 
@@ -275,9 +367,8 @@ def register_blackjack_handlers(socketio, app):
             }
             st["orden_turnos"].append(current_user.id)
 
-        # Enviar estadisticas actuales del jugador para mostrarlas en el cliente
-        stats_actuales = Estadistica.query.filter_by(user_id=current_user.id, juego="blackjack").first()
-        st["estadisticas_jugadores"][current_user.id] = serializar_stats(stats_actuales)
+        # Estadisticas por sala arrancan en 0 (no reutilizar de otras salas)
+        st["estadisticas_jugadores"].setdefault(current_user.id, _stats_base())
         st["jugadores"][current_user.id]["estadisticas"] = st["estadisticas_jugadores"][current_user.id]
 
         emitir_estado(sala_id)
@@ -297,6 +388,8 @@ def register_blackjack_handlers(socketio, app):
             st["jugadores"].pop(uid, None)
         if uid in st["orden_turnos"]:
             st["orden_turnos"].remove(uid)
+        if "estadisticas_jugadores" in st:
+            st["estadisticas_jugadores"].pop(uid, None)
         if not st["jugadores"]:
             salas_blackjack.pop(sala_id, None)
         else:
