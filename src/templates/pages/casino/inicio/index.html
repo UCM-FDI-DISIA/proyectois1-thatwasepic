@@ -63,7 +63,7 @@ Inicio
     </div>
 
     <!-- Poker -->
-    <div class="col-12 col-lg-4 col-md-6">
+    <div class="col-12 col-xxl-3 col-lg-6 col-md-6">
         <div class="card hover-card clickable h-100 animated-rotate" data-game="poker">
             <img src="{{ url_for('static', filename='img/poker.jpeg') }}" alt="Poker" class="game-image">
             <div class="card-body text-center game-content">
@@ -76,7 +76,7 @@ Inicio
     </div>
 
     <!-- Carreras de Caballos -->
-    <div class="col-12 col-lg-4 col-md-6">
+    <div class="col-12 col-xxl-3 col-lg-6 col-md-6">
         <div class="card hover-card clickable h-100 animated-rotate" data-game="horseracing">
             <img src="{{ url_for('static', filename='img/caballos.jpeg') }}" alt="Carreras de Caballos" class="game-image">
             <div class="card-body text-center game-content">
@@ -89,13 +89,26 @@ Inicio
     </div>
 
     <!-- Tragaperras -->
-    <div class="col-12 col-lg-4 col-md-6">
+    <div class="col-12 col-xxl-3 col-lg-6 col-md-6">
         <div class="card hover-card clickable h-100 animated-rotate" data-game="slots">
             <img src="{{ url_for('static', filename='img/slots.jpeg') }}" alt="Tragaperras" class="game-image">
             <div class="card-body text-center game-content">
                 <h3 class="card-title game-title">Tragaperras</h3>
                 <p class="game-description">
                     Tragaperras: el clásico de los casinos reinventado. Gira los rodillos, combina símbolos y descubre premios sorprendentes. Colores, sonido y emoción en cada tirada… ¡la suerte podría cambiarte en un segundo! 🎰✨
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quiniela -->
+    <div class="col-12 col-xxl-3 col-lg-6">
+        <div class="card hover-card clickable h-100 animated-rotate" data-game="slots">
+            <img src="{{ url_for('static', filename='img/quiniela.jpeg') }}" alt="Tragaperras" class="game-image">
+            <div class="card-body text-center game-content">
+                <h3 class="card-title game-title">Quiniela deportiva</h3>
+                <p class="game-description">
+                    Quiniela deportiva: el emocionante juego donde predices el resultado de los partidos. Selecciona tus equipos favoritos y sube la adrenalina mientras esperas el pitido final. Ideal para los aficionados al deporte que disfrutan de la estrategia y la anticipación. 💪⚽🏀
                 </p>
             </div>
         </div>
@@ -223,7 +236,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'coinflip': 'Coinflip: un juego rápido y emocionante donde apuestas por cara o cruz. Simple pero lleno de adrenalina: elige tu lado, mira girar la moneda y descubre si la suerte está de tu parte. Perfecto para quienes buscan acción instantánea y resultados al momento.',
         'poker': 'Póker: el legendario juego de estrategia, habilidad y nervios de acero. Forma la mejor mano posible, apuesta con inteligencia y lee a tus oponentes para llevarte el bote. Ideal para quienes disfrutan de la táctica y el desafío mental en cada ronda. ♣️♥️',
         'horseracing': 'Carrera de caballos: vive la emoción de las pistas apostando por tu corcel favorito. Observa la intensidad de cada tramo, siente la adrenalina en la recta final y celebra la victoria cuando tu caballo cruza la meta. 🏇💨',
-        'slots': 'Tragaperras: el clásico de los casinos reinventado. Gira los rodillos, combina símbolos y descubre premios sorprendentes. Colores, sonido y emoción en cada tirada… ¡la suerte podría cambiarte en un segundo! 🎰✨'
+        'slots': 'Tragaperras: el clásico de los casinos reinventado. Gira los rodillos, combina símbolos y descubre premios sorprendentes. Colores, sonido y emoción en cada tirada… ¡la suerte podría cambiarte en un segundo! 🎰✨',
+        'quiniela': 'Quiniela Deportiva: el emocionante juego donde predices el resultado de los partidos. Selecciona tus equipos favoritos y sube la adrenalina mientras esperas el pitido final. Ideal para los aficionados al deporte que disfrutan de la estrategia y la anticipación. 💪⚽🏀'
     };
 
     gameCards.forEach(card => {
