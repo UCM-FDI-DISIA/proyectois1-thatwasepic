@@ -1,89 +1,92 @@
-{% extends "pages/casino/base.html" %}
+{% extends "pages/casino/juegos/base.html" %}
 
 {% block title %}
 Quiniela
 {% endblock %}
 
+{% block game_title %}
+Quiniela Deportiva
+{% endblock %}
+
+{% set has_navbar_stats = true %}
+{% block game_navbar_stats %}
+<!-- Panel de Control -->
+<div class="row">
+    <div class="col">
+        <div class="text-center">
+            <div class="small text-uppercase text-nowrap" style="color: var(--neon-green);">
+                <i class="fas fa-coins me-1"></i>Balance inicial
+            </div>
+            <div class="h5 mb-0 text-gradient fw-bold text-nowrap text-truncate">
+                $<span id="balance-inicial">{{ "%.2f"|format(current_user.balance) }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="text-center">
+            <div class="small text-uppercase text-nowrap" style="color: var(--neon-cyan);">
+                <i class="fas fa-trophy me-1"></i>Última ganancia
+            </div>
+            <div class="h5 mb-0 text-gradient fw-bold text-nowrap text-truncate" id="ultima-ganancia">
+                $0.00
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="text-center">
+            <div class="small text-uppercase text-nowrap" style="color: var(--neon-pink);">
+                <i class="fas fa-flag me-1"></i>Liga actual
+            </div>
+            <div class="h5 mb-0 text-gradient fw-bold text-nowrap text-truncate" id="liga-actual">
+                No seleccionada
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-xl-12">
-        <div class="card game-card">
+        <!-- Selector de Liga y Configuración -->
+        <div class="card mb-4">
             <div class="card-header">
-                <i class="fas fa-futbol me-2"></i>
-                Quiniela Deportiva - Múltiples Ligas
+                <i class="fas fa-cogs me-2"></i>CONFIGURACIÓN DE QUINIELA
             </div>
             <div class="card-body">
-                <!-- Panel de Control -->
-                <div class="row mb-4">
-                    <div class="col-md-4">
-                        <div class="digital-display text-center mb-3">
-                            <div class="text-small text-uppercase" style="color: var(--neon-green);">
-                                <i class="fas fa-coins me-2"></i>BALANCE ACTUAL
-                            </div>
-                            <div class="h3 mb-0 text-gradient fw-bold">
-                                $<span id="balance">{{ "%.2f"|format(current_user.balance) }}</span>
-                            </div>
-                        </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="select-liga" class="form-label">
+                            <i class="fas fa-trophy me-2"></i>SELECCIONAR LIGA
+                        </label>
+                        <select class="form-select" id="select-liga">
+                            <option value="">Cargando ligas...</option>
+                        </select>
                     </div>
                     <div class="col-md-4">
-                        <div class="digital-display text-center mb-3">
-                            <div class="text-small text-uppercase" style="color: var(--neon-cyan);">
-                                <i class="fas fa-trophy me-2"></i>ÚLTIMA GANANCIA
-                            </div>
-                            <div class="h3 mb-0 text-gradient fw-bold" id="ultima-ganancia">
-                                $0.00
-                            </div>
-                        </div>
+                        <label for="num-partidos" class="form-label">
+                            <i class="fas fa-list-ol me-2"></i>NÚMERO DE PARTIDOS
+                        </label>
+                        <select class="form-select" id="num-partidos">
+                            <option value="10">10 Partidos</option>
+                            <option value="15" selected>15 Partidos</option>
+                            <option value="20">20 Partidos</option>
+                            <option value="25">25 Partidos</option>
+                        </select>
                     </div>
-                    <div class="col-md-4">
-                        <div class="digital-display text-center mb-3">
-                            <div class="text-small text-uppercase" style="color: var(--neon-pink);">
-                                <i class="fas fa-flag me-2"></i>LIGA ACTUAL
-                            </div>
-                            <div class="h4 mb-0 text-gradient fw-bold" id="liga-actual">
-                                Selecciona Liga
-                            </div>
-                        </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button class="btn btn-primary w-100" onclick="generarPartidos()" id="btn-generar">
+                            <i class="fas fa-sync-alt me-2"></i>Generar
+                        </button>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <!-- Selector de Liga y Configuración -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <i class="fas fa-cogs me-2"></i>CONFIGURACIÓN DE QUINIELA
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="select-liga" class="form-label">
-                                    <i class="fas fa-trophy me-2"></i>SELECCIONAR LIGA
-                                </label>
-                                <select class="form-select" id="select-liga">
-                                    <option value="">Cargando ligas...</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="num-partidos" class="form-label">
-                                    <i class="fas fa-list-ol me-2"></i>NÚMERO DE PARTIDOS
-                                </label>
-                                <select class="form-select" id="num-partidos">
-                                    <option value="10">10 Partidos</option>
-                                    <option value="15" selected>15 Partidos</option>
-                                    <option value="20">20 Partidos</option>
-                                    <option value="25">25 Partidos</option>
-                                </select>
-                            </div>
-                            <div class="col-md-2 d-flex align-items-end">
-                                <button class="btn btn-primary w-100" onclick="generarPartidos()" id="btn-generar">
-                                    <i class="fas fa-sync-alt me-2"></i>Generar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Controles de Apuesta -->
-                <div class="row mb-4">
+        <!-- Controles de Apuesta -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
                     <div class="col-md-6">
                         <label for="cantidad" class="form-label">
                             <i class="fas fa-money-bill-wave me-2"></i>CANTIDAD A APOSTAR
@@ -93,7 +96,7 @@ Quiniela
                                 <i class="fas fa-dollar-sign"></i>
                             </span>
                             <input type="number" class="form-control" id="cantidad" 
-                                   min="1" max="{{ current_user.balance }}" step="1" value="10">
+                                    min="1" max="{{ current_user.balance }}" step="1" value="10">
                         </div>
                     </div>
                     <div class="col-md-6 d-flex align-items-end">
@@ -102,52 +105,52 @@ Quiniela
                         </button>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <!-- Panel de Partidos -->
-                <div class="card mb-4">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <span>
-                            <i class="fas fa-list-ol me-2"></i>PARTIDOS DE LA JORNADA
-                        </span>
-                        <span class="badge bg-cyan" id="contador-partidos">0 partidos generados</span>
-                    </div>
-                    <div class="card-body">
-                        <div id="partidos-container" class="row g-3">
-                            <div class="col-12 text-center py-5">
-                                <div class="text-muted">
-                                    <i class="fas fa-futbol fa-3x mb-3"></i>
-                                    <h5>Selecciona una liga y genera partidos para comenzar</h5>
-                                    <p>Elige entre múltiples ligas internacionales</p>
-                                </div>
-                            </div>
+        <!-- Panel de Partidos -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>
+                    <i class="fas fa-list-ol me-2"></i>PARTIDOS DE LA JORNADA
+                </span>
+                <span class="badge bg-cyan" id="contador-partidos">0 partidos generados</span>
+            </div>
+            <div class="card-body">
+                <div id="partidos-container" class="row g-3">
+                    <div class="col-12 text-center py-5">
+                        <div class="text-muted">
+                            <i class="fas fa-futbol fa-3x mb-3"></i>
+                            <h5>Selecciona una liga y genera partidos para comenzar</h5>
+                            <p>Elige entre múltiples ligas internacionales</p>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <!-- Resultados -->
-                <div id="resultado" class="text-center"></div>
+        <!-- Resultados -->
+        <div id="resultado" class="text-center"></div>
 
-                <!-- Tabla de Premios -->
-                <div class="card mt-4">
-                    <div class="card-header">
-                        <i class="fas fa-award me-2"></i>TABLA DE PREMIOS
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-dark table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Aciertos</th>
-                                        <th>Premio</th>
-                                        <th>Probabilidad Aprox.</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabla-premios-body">
-                                    <!-- Se generará dinámicamente -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+        <!-- Tabla de Premios -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <i class="fas fa-award me-2"></i>TABLA DE PREMIOS
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover">
+                        <thead>
+                            <tr>
+                                <th>Aciertos</th>
+                                <th>Premio</th>
+                                <th>Probabilidad Aprox.</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-premios-body">
+                            <!-- Se generará dinámicamente -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
