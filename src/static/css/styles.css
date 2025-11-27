@@ -549,6 +549,15 @@ html {
   text-shadow: var(--glow-grey-button);
 }
 
+.stat-number {
+  font-size: 1.5rem;
+  font-weight: bold;
+  font-family: var(--font-family-title);
+  background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 /* === COLORES DE TEXTO === */
 .text-cyan { color: var(--neon-cyan); }
 .text-pink { color: var(--neon-pink); }
