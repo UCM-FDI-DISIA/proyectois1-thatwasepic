@@ -42,7 +42,19 @@
 /* === VARIABLES DE BOOTSTRAP === */
 body {
   --bs-font-sans-serif: var(--font-family-body), var(--bs-font-sans-serif);
+
+  --bs-border-radius: var(--border-radius-button);
+  --bs-border-radius-sm: var(--border-radius-button);
+  --bs-border-radius-lg: var(--border-radius-button);
+  --bs-border-radius-xl: var(--border-radius-button);
+  --bs-border-radius-xxl: var(--border-radius-button);
+}
+
+[data-bs-theme=dark] body {
   --bs-body-color: var(--text-light);
+  --bs-body-bg: rgba(30, 30, 61, 0.9);
+  --bs-primary: var(--neon-cyan);
+  --bs-primary-text-emphasis: var(--neon-cyan);
 }
 
 body {
@@ -279,6 +291,15 @@ a.navbar-brand:hover {
   background: rgba(0, 243, 255, 0.06);
   border-width: 0;
   box-shadow: none;
+}
+
+/* === ACCORDIONS === */
+.accordion {
+  background: var(--gradient-dark);
+}
+
+.accordion-item, .accordion-button {
+  background: none;
 }
 
 /* === ALERTAS === */
