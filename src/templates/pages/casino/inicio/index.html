@@ -1,28 +1,63 @@
 {% extends "pages/casino/base.html" %}
 
+{% set hide_bg_cyber_grid = true %}
+
 {% block title %}
 Inicio
 {% endblock %}
 
-{% block content %}
-<!-- Fondo simple -->
-<div class="simple-background"></div>
-
+{% block base_content %}
 <!-- Sección de juegos -->
-<div class="fade-out-gradient animated-translateY">
-    <div id="logo" class="mx-auto"></div>
-</div>
-<div class="text-center">
-    <div>
-        <h2 class="hero-title">Nuestros Juegos</h2>
-        <p class="hero-subtitle mt-4">
-            Explora todos los juegos que LogBait te ofrece.
-        </p>
+<div class="container-fluid mt-5 animated-translateY">
+    <div class="row justify-content-center position-relative">
+        <div class="hero-bg fade-in-gradient position-absolute"></div>
+        <div class="col-12 col-md-8">
+            <div class="container">
+                <div class="fade-out-gradient animated-translateY">
+                    <div id="logo" class="mx-auto"></div>
+                </div>
+                <div class="text-center mb-3">
+                    <h2 class="hero-title animated-translateY">Bienvenido a LogBait</h2>
+                    <div class="animated-translateY">
+                        <p class="hero-subtitle mt-4">
+                            Transforma tus conocimientos sobre el juego. Con LogBait, puedes convertirte en un experto apostador en un entorno seguro y educativo.
+                        </p>
+                        <a href="{{ url_for('flatpage', path='faq') }}" class="text-uppercase link-underline link-underline-opacity-0 link-underline-opacity-75-hover">
+                            Más sobre LogBait<i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row position-relative" style="min-height: 7em;">
+        <div class="hero-bg-bottom position-absolute"></div>
+        <div class="d-flex flex-column align-items-center justify-content-end">
+            <a id="showContentButton" type="button" class="btn btn-primary btn-lg rounded-circle animated-rotate" style="aspect-ratio: 1 / 1; line-height: 2em; margin-bottom: -1.4em;" href="#gamesSection">
+                <i class="fa-solid fa-arrow-down"></i>
+            </a>
+        </div>
     </div>
 </div>
 
-<div class="row g-4 mt-3 mb-5">
+<div id="gamesSection" class="pt-5">
+    {{ super() }}
+</div></div>
+{% endblock %}
 
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 text-center">
+        <div class="animated-translateY">
+            <h1 class="text-cyan">Nuestros Juegos</h1>
+            <p class="hero-subtitle mt-4">
+                Explora todos los juegos que LogBait te ofrece.
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-3 mb-5 justify-content-center">
     <!-- Blackjack -->
     <div class="col-12 col-lg-4 col-md-6">
         <div class="card hover-card clickable h-100 animated-rotate" data-game="blackjack">
@@ -171,19 +206,31 @@ Inicio
 </div>
 
 <style>
-.simple-background {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    background: 
-        linear-gradient(135deg, #0a0a0f 0%, #151520 50%, #1a1a2e 100%);
+:root {
+    --simple-background: linear-gradient(90deg, #0a0a0f 0%, #151520 50%, #1a1a2e 100%);
 }
 
 .fade-out-gradient {
     mask-image: linear-gradient(rgb(0,0,0) 0%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0.0) 100%);
+}
+
+.fade-in-gradient {
+    mask-image: linear-gradient(rgba(0,0,0, 0.0) 0%, rgba(0,0,0,0.3) 50%, rgb(0,0,0) 100%);
+}
+
+.hero-bg {
+    inset: 0;
+    background: var(--simple-background);
+    z-index: -1;
+}
+
+.hero-bg-bottom {
+    background: top/min(150%, 40em) no-repeat url(/static/img/index_hero_bg.png), var(--simple-background);
+    inset: 0;
+    border-bottom-left-radius: 80% 100%;
+    border-bottom-right-radius: 80% 100%;
+    box-shadow: var(--shadow-hologram);
+    z-index: -2;
 }
 
 #logo {
@@ -208,9 +255,18 @@ Inicio
     cursor: zoom-out;
 }
 
+#showContentButton {
+    animation: btnFloat 1s ease infinite alternate;
+}
+
 @keyframes hueShift {
     0% { filter: hue-rotate(-60deg) brightness(125%); }
     100% { filter: hue-rotate(60deg) brightness(125%); }
+}
+
+@keyframes btnFloat {
+    0% { transform: translateY(-5px); }
+    100% { transform: translateY(5px) }
 }
 
 .game-image {

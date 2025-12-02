@@ -72,7 +72,7 @@ body {
 }
 
 /* === CUADRÍCULA Y PARTÍCULAS DE FONDO === */
-body::before,
+.bg-cyber-grid::before,
 body::after {
   content: '';
   position: fixed;
@@ -84,7 +84,7 @@ body::after {
   z-index: -1;
 }
 
-body::before {
+.bg-cyber-grid::before {
   background-image:
     linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
