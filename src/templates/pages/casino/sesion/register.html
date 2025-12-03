@@ -21,7 +21,7 @@ Registrarse
                     </div>
                     <div class="mb-2">
                         <label for="email" class="form-label mb-1 fw-bold">Correo electrónico</label>
-                        <input type="email" class="form-control p-2" id="email" name="email" required>
+                        <input type="email" class="form-control p-2" id="email" name="email" {% if email %}value="{{ email }}"{% endif %} required>
                     </div>
                     <div class="mb-4">
                         <label for="password" class="form-label mb-1 fw-bold">Contraseña</label>

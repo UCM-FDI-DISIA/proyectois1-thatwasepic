@@ -9,22 +9,53 @@ Inicio
 {% block base_content %}
 <!-- Sección de juegos -->
 <div class="container-fluid mt-5 animated-translateY">
-    <div class="row justify-content-center position-relative">
+    <div class="row position-relative">
         <div class="hero-bg fade-in-gradient position-absolute"></div>
-        <div class="col-12 col-md-8">
-            <div class="container">
-                <div class="fade-out-gradient animated-translateY">
-                    <div id="logo" class="mx-auto"></div>
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-12 col-md-8">
+                    <div class="fade-out-gradient animated-translateY">
+                        <div id="logo" class="mx-auto"></div>
+                    </div>
+                    <div class="text-center mb-4">
+                        <h2 class="hero-title animated-translateY">Bienvenido a LogBait</h2>
+                        <div class="animated-translateY">
+                            <p class="hero-subtitle mt-4">
+                                Transforma tus conocimientos sobre el juego. Con LogBait, puedes convertirte en un experto apostador en un entorno seguro y educativo.
+                            </p>
+                            <a href="{{ url_for('flatpage', path='faq') }}" class="text-uppercase link-underline link-underline-opacity-0 link-underline-opacity-75-hover">
+                                Más sobre LogBait<i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
                 </div>
-                <div class="text-center mb-3">
-                    <h2 class="hero-title animated-translateY">Bienvenido a LogBait</h2>
-                    <div class="animated-translateY">
-                        <p class="hero-subtitle mt-4">
-                            Transforma tus conocimientos sobre el juego. Con LogBait, puedes convertirte en un experto apostador en un entorno seguro y educativo.
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="animated-translateY text-center mb-4">
+                        {% if current_user.is_authenticated %}
+                        <p class="mb-1 text-muted small">
+                            Ya has iniciado sesión.
                         </p>
-                        <a href="{{ url_for('flatpage', path='faq') }}" class="text-uppercase link-underline link-underline-opacity-0 link-underline-opacity-75-hover">
-                            Más sobre LogBait<i class="fas fa-arrow-right ms-1"></i>
+                        <a href="{{ url_for('dashboard.home') }}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-home me-2"></i>Ir al Dashboard
                         </a>
+                        {% else %}
+                        <form action="{{ url_for('register.home') }}" method="get">
+                            <div class="input-group">
+                                <div class="form-floating">
+                                    <input type="email" name="email" class="form-control" placeholder="nombre@example.com">
+                                    <label for="floatingInput">Introduce tu correo electrónico</label>
+                                </div>
+                                <button class="btn btn-outline-primary" type="submit">
+                                    <i class="fas fa-user-plus me-2"></i>Registrarse
+                                </button>
+                            </div>
+                        </form>
+                        <p class="mt-2 mb-0">
+                            ¿Ya tienes cuenta? <a href="{{ url_for('login.home') }}">Inicia sesión</a>
+                        </p>
+                        {% endif %}
                     </div>
                 </div>
             </div>
