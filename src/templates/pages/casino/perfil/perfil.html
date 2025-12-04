@@ -1,5 +1,5 @@
 {% extends "pages/casino/base.html" %}
-
+{% import "partials/doom.html" as parcial_doom without context %}
 {% block title %}
 Perfil
 {% endblock %}
@@ -10,7 +10,7 @@ Perfil
         <div class="d-flex flex-sm-row flex-column gap-4 align-items-center justify-content-between">
             <div>
                 <h3>Tu usuario:</h3>
-                <h1 class="text-white fw-bold mb-2"><i class="fas fa-user-astronaut text-white me-3"></i>{{ user.username }}</h1>
+                <h1 class="text-white fw-bold mb-2"><a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"><i class="fas fa-user-astronaut text-white me-3"></i></a>{{ user.username }}</a></h1>
                 <p class="text-cyan mb-0">
                     Miembro desde {{ user.created_at.strftime('%d/%m/%Y') }}
                 </p>
@@ -136,6 +136,26 @@ Perfil
             </div>
         </div>
     </div>
+{% if mostrar_doom %}
+    <div class="col-12">
+        <div class="card animated-translateY">
+            <div class="card-header">
+                <i class="fas fa-gamepad me-2"></i>
+                🎮 ¡Bonus especial! Disfruta de DOOM
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info mb-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Nota:</strong> No puedes cambiar tu nombre a "Doom", pero puedes disfrutar del juego clásico.
+                    Tu nombre sigue siendo <strong>{{ user.username }}</strong>.
+                </div>
+                {{ parcial_doom.content() }}
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+    <!-- Opciones de Superusuario -->
 
 {% if is_admin() %}
 <hr class="mt-5 mb-5 w-50 mx-auto">
@@ -174,6 +194,10 @@ Perfil
 {% endblock %}
 
 {% block scripts %}
+{% if mostrar_doom %}
+{{ parcial_doom.scripts() }}
+{% endif %}
+
 <style>
 .text-cyan { color: var(--neon-cyan); }
 .text-pink { color: var(--neon-pink); }
