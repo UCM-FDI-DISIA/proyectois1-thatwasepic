@@ -5,6 +5,7 @@ Ruleta Europea
 {% endblock %}
 
 {% block content %}
+<div class="ruleta-legacy">
 <div class="ruleta-breakout">
 <div class="ruleta-page">
   <div class="ruleta-header">
@@ -102,6 +103,7 @@ Ruleta Europea
   <p class="ruleta-note text-center text-muted small mb-0 mt-4">
     Demo educativa. Mínimo por casilla: 20¢.
   </p>
+</div>
 </div>
 </div>
 {% endblock %}
@@ -562,8 +564,18 @@ document.getElementById('spinBtn').onclick = async () => {
   try{
     bank = spinResp.balance; updateTotals();
     if (spinResp.stats) renderStats(spinResp.stats);
-    if (spinResp.mensaje) log(spinResp.mensaje);
-    else log(`<b>Sale ${resultNumber}</b>`);
+    const apuestaTotalCents = placedBetsSnapshot.reduce((sum, bet) => sum + bet.amount, 0);
+    const payout = typeof spinResp.payout === 'number' ? spinResp.payout : null;
+    const net = typeof spinResp.net === 'number' ? spinResp.net : null;
+    const totalApuesta = apuestaTotalCents / 100;
+    if (payout !== null && net !== null) {
+      const label = net >= 0 ? 'beneficio' : 'pérdida';
+      log(`🎯 Sale ${resultNumber}. Cobras ${payout.toFixed(2)}€ (${label} ${net.toFixed(2)}€) — Apuesta ${totalApuesta.toFixed(2)}€`);
+    } else if (spinResp.mensaje) {
+      log(spinResp.mensaje);
+    } else {
+      log(`<b>Sale ${resultNumber}</b>`);
+    }
   }catch(e){ /* no-fatal */ }
 
   // Sistema de mensajes motivacionales - determinar si ganó o perdió
@@ -688,6 +700,66 @@ document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) refresh
 </script>
 
 <style>
+:root{
+  --felt:#1a2240; --felt-dark:#151b34; --gold:#e0b14a; --cream:#f3efe2; --shadow:0 6px 18px rgba(0,0,0,.22);
+  --tile:#202a55; --tile-outer:#1e264c; --text:#e8ecff; --badge-bg:rgba(255,255,255,.92); --badge-fg:#10121f;
+}
+*{box-sizing:border-box}
+.ruleta-legacy{
+  background: radial-gradient(900px 600px at 60% 30%, #0f1330, var(--felt-dark));
+  color:var(--text);
+  padding-bottom:16px;
+}
+.ruleta-legacy .pill{background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15); padding:6px 10px; border-radius:999px}
+.ruleta-legacy .panel{background:linear-gradient(180deg, var(--felt), var(--felt-dark)); border:2px solid rgba(255,255,255,.12); border-radius:18px; padding:14px; box-shadow:var(--shadow)}
+.ruleta-legacy .controls{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; align-items:center; justify-content:center}
+.ruleta-legacy .btn,
+.ruleta-legacy button[type="button"],
+.ruleta-legacy button[type="submit"],
+.ruleta-legacy button[type="reset"],
+.ruleta-legacy input[type="button"],
+.ruleta-legacy input[type="submit"],
+.ruleta-legacy input[type="reset"]{
+  appearance:none;
+  border:none !important;
+  padding:10px 14px;
+  border-radius:12px;
+  background:var(--gradient-cyber) !important;
+  color:#050511 !important;
+  font-weight:800;
+  letter-spacing:0.5px;
+  transition:all 0.12s ease;
+  box-shadow:var(--glow-cyan-button, 0 0 10px rgba(0,243,255,0.35));
+}
+.ruleta-legacy .btn:disabled,
+.ruleta-legacy button:disabled,
+.ruleta-legacy .btn.disabled,
+.ruleta-legacy button.disabled,
+.ruleta-legacy input[type="button"]:disabled,
+.ruleta-legacy input[type="submit"]:disabled,
+.ruleta-legacy input[type="reset"]:disabled{
+  opacity:0.65;
+  cursor: not-allowed;
+  background:var(--gradient-cyber) !important;
+  color:#050511 !important;
+  box-shadow:none;
+}
+.ruleta-legacy .btn:hover,
+.ruleta-legacy button:hover,
+.ruleta-legacy input[type="button"]:hover,
+.ruleta-legacy input[type="submit"]:hover,
+.ruleta-legacy input[type="reset"]:hover{
+  transform:translateY(-1px);
+  box-shadow:0 8px 20px rgba(0,0,0,0.35);
+}
+.ruleta-legacy .btn:active,
+.ruleta-legacy button:active,
+.ruleta-legacy input[type="button"]:active,
+.ruleta-legacy input[type="submit"]:active,
+.ruleta-legacy input[type="reset"]:active{
+  transform:translateY(0px);
+  box-shadow:inset 0 2px 6px rgba(0,0,0,0.35);
+}
 /* Reaprovechar botones neon en páginas legacy */
 .btn-neon {
   background: var(--gradient-cyber);

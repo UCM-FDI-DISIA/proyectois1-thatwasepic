@@ -177,6 +177,8 @@ def spin_ruleta():
 
         db.session.commit()
 
+        net_euros = total_payout_euros - total_bet_euros
+
         return jsonify({
             'ok': True,
             'balance': int(current_user.balance * 100),
@@ -187,7 +189,10 @@ def spin_ruleta():
                 'apuesta_total': stats.apuesta_total
             },
             'result': result_number,
-            'mensaje': f'¡Sale el número {result_number}! Ganancia: {total_win_euros:.2f}€'
+            'mensaje': f'¡Sale el número {result_number}! Cobras {total_payout_euros:.2f}€ ({"beneficio" if net_euros >= 0 else "pérdida"} {net_euros:+.2f}€) sobre apuesta {total_bet_euros:.2f}€',
+            'payout': total_payout_euros,
+            'net': net_euros,
+            'bet': total_bet_euros
         })
     except Exception as e:
         db.session.rollback()
