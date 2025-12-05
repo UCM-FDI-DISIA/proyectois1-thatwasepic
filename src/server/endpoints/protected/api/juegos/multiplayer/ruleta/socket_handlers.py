@@ -256,6 +256,7 @@ def register_ruleta_handlers(socketio, app):
             if 'color_map' in st and current_user.id in st['color_map']:
                 del st['color_map'][current_user.id]
             emit('estado_sala_actualizado', {'sala_id': sala_id, 'jugadores': st['jugadores'], 'apuestas_count': len(st['apuestas']), 'estado': st['estado']}, room=room_name)
+            emit('user_left_ruleta', {'user_id': current_user.id, 'username': current_user.username}, room=room_name)
 
     @socketio.on('ruleta_place_bet')
     def handle_place(data):
@@ -444,7 +445,16 @@ def register_ruleta_handlers(socketio, app):
     def handle_chat(data):
         sala_id = data.get('sala_id')
         msg = data.get('message')
+        payload = {
+            'user_id': current_user.id,
+            'username': current_user.username,
+            'message': msg,
+            'timestamp': datetime.utcnow().isoformat(),
+            'tipo': 'chat'
+        }
         room_name = f'ruleta_sala_{sala_id}'
-        emit('new_ruleta_message', {'user_id': current_user.id, 'username': current_user.username, 'message': msg, 'timestamp': datetime.utcnow().isoformat()}, room=room_name)
+        emit('new_ruleta_message', payload, room=room_name)
+        # Replica en el canal general de sala (como en CoinFlip) para reutilizar el chat común
+        socketio.emit('new_message', payload, room=f'sala_{sala_id}')
 
     print("✅ Todos los handlers de Ruleta registrados correctamente")

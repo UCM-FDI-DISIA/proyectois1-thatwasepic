@@ -11,7 +11,7 @@ bp = Blueprint('api_multijugador_ruleta', __name__)
 def home():
     """Página principal de la ruleta multijugador"""
     # Render the multijugador template and pass current user so JS receives the balance
-    return render_template('pages/casino/juegos/multiplayer/ruleta.html', user=current_user)
+    return render_template('pages/casino/juegos/multiplayer/ruleta.html', user=current_user, multijugador=True, realtime_required=True)
 
 
 @bp.route('/ruleta/sala/<int:sala_id>')
@@ -36,7 +36,7 @@ def sala_ruleta(sala_id):
         from flask import redirect, url_for
         return redirect(url_for('salas_espera.lobby'))
 
-    return render_template('pages/casino/juegos/multiplayer/ruleta.html', sala=sala, user=current_user)
+    return render_template('pages/casino/juegos/multiplayer/ruleta.html', sala=sala, user=current_user, multijugador=True, realtime_required=True)
 
 # Registrar handlers de Socket.IO cuando el blueprint se registre (patrón igual a coinflip)
 from .socket_handlers import register_ruleta_handlers
