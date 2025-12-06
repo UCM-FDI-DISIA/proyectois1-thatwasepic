@@ -10,6 +10,11 @@
 </div>
 {% endmacro %}
 
+{% macro content_chat_notifications () %}
+<div id="chatNotificationContainer" class="toast-container position-fixed bottom-0 end-0 p-3">
+</div>
+{% endmacro %}
+
 {% macro content_lista_usuarios() %}
 <div id="jugadores-container">
     <!-- Se actualizará dinámicamente -->
@@ -22,6 +27,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const salaId = {{ sala.id }};
     const esCreador = {{ 'true' if sala.creador_id == current_user.id else 'false' }};
     const socket = window.socket;
+
+    const maxNotifications = 3; // Set maximum number of active toasts
+
+    window.showNotifications = window.showNotifications || false;
 
     function actualizarListaJugadores() {
         fetch(`/api/multijugador/estado-sala/${salaId}`)
@@ -92,6 +101,48 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         chat.appendChild(mensajeDiv);
         chat.scrollTop = chat.scrollHeight;
+
+        // Mostrar también notificación.
+        agregarNotificacionChat(usuario, mensaje, tipo);
+    }
+
+    function agregarNotificacionChat(usuario, mensaje, tipo) {
+        // Mostrar notificaciones solo si están activadas.
+        if (!window.showNotifications) {
+            return;
+        }
+
+        const notificationsContainer = document.getElementById('chatNotificationContainer');
+
+        const notificationDiv = document.createElement('div');
+        notificationDiv.className = `toast`;
+        notificationDiv.role = 'alert';
+        notificationDiv.ariaLive = 'assertive';
+        notificationDiv.ariaAtomic = 'true';
+        notificationDiv.innerHTML = `
+            <div class="toast-header">
+                <strong class="me-auto">
+                    <i class="fas fa-comments me-2"></i>Chat de sala
+                </strong>
+                <small>${new Date().toLocaleTimeString()}</small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body notification-message ${tipo}">
+                <strong>${usuario}:</strong> ${mensaje}
+            </div>
+        `;
+        notificationsContainer.appendChild(notificationDiv);
+
+        // Mostrar notificación.
+        const notificationDivBootstrap = bootstrap.Toast.getOrCreateInstance(notificationDiv);
+        notificationDivBootstrap.show();
+
+        // Check if the number of toasts exceeds the maximum
+        if (notificationsContainer.children.length > maxNotifications) {
+            // Borrar notificación más antigua si hay demasiadas.
+            const notificacionMasAntigua = notificationsContainer.children[0];
+            notificacionMasAntigua.remove();
+        }
     }
 
     // Permitir enviar mensaje con Enter
@@ -105,6 +156,16 @@ document.addEventListener('DOMContentLoaded', function() {
     setInterval(actualizarListaJugadores, 3000);
     actualizarListaJugadores();
 });
+
+// Función de API para limpiar todas las notificaciones.
+function limpiarNotificaciones() {
+    const notificationsContainer = document.getElementById('chatNotificationContainer');
+
+    const toasts = notificationsContainer.querySelectorAll('.toast');
+    toasts.forEach(toast => {
+        toast.remove();
+    });
+}
 </script>
 
 <style>
@@ -114,12 +175,16 @@ document.addEventListener('DOMContentLoaded', function() {
     border-radius: 8px;
 }
 
-.chat-message.user {
+.notification-message {
+    padding: 8px;
+}
+
+.chat-message.user, .notification-message.user {
     background: rgba(0, 243, 255, 0.1);
     border-left: 3px solid var(--neon-cyan);
 }
 
-.chat-message.system {
+.chat-message.system, .notification-message.system {
     background: rgba(255, 0, 255, 0.1);
     border-left: 3px solid var(--neon-pink);
     font-style: italic;

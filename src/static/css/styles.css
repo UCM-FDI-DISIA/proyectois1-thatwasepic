@@ -308,6 +308,12 @@ a.navbar-brand:hover {
   border-radius: var(--border-radius-button);
 }
 
+/* === TOASTS *** */
+.toast {
+  position: relative;
+  overflow: hidden;
+}
+
 /* === BOTONES === */
 
 /* Animación ripple para botones */

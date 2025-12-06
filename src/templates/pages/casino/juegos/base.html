@@ -13,7 +13,7 @@ LogBait Casa de Apuestas Online
 
 {% block navbar %}
 <div class="d-sm-flex w-100 flex-sm-row align-items-center justify-content-between gap-3">
-    <div class="d-flex flex-row align-items-center gap-3">
+    <div class="flex-fill d-flex flex-row align-items-center gap-3">
         <a class="btn btn-outline-primary mr-4" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Volver al Dashboard" href="{{ url_for('dashboard.home') }}">
             <i class="fas fa-arrow-left"></i>
         </a>
@@ -32,14 +32,14 @@ LogBait Casa de Apuestas Online
         </button>
         <div class="ms-auto d-block d-sm-none">
             {% if multijugador %}
-            <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#gameSidebar" aria-expanded="false" aria-controls="gameSidebar">
+            <button class="sidebar-toggle btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#gameSidebar" aria-expanded="false" aria-controls="gameSidebar">
                 <i class="fas fa-users"></i>
             </button>
             {% endif %}
         </div>
     </div>
 
-    <div id="navbarStats" class="collapse show navbar-collapse ms-sm-auto">
+    <div id="navbarStats" class="collapse show navbar-collapse">
         <div class="d-flex flex-column gap-2 align-items-center">
             {% if has_navbar_stats %}
             <div class="card translucent-card mx-auto">
@@ -56,24 +56,23 @@ LogBait Casa de Apuestas Online
     </div>
 
     <div class="d-none d-sm-flex flex-row align-items-center gap-3">
-        <span class="navbar-text">
+        <span class="navbar-text text-nowrap">
             <i class="fas fa-bolt me-1"></i>
             $<span id="balance">{{ "%.2f"|format(current_user.balance) }}</span>
         </span>
         {% if multijugador %}
-        <div class="d-inline" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Mostrar panel multijugador">
-            <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#gameSidebar" aria-expanded="false" aria-controls="gameSidebar">
-                <i class="fas fa-users"></i>
-            </button>
-        </div>
+        <input type="checkbox" class="sidebar-toggle btn-check" id="sidebarToggleCheck" autocomplete="off" data-bs-toggle="collapse" data-bs-target="#gameSidebar" aria-expanded="false" aria-controls="gameSidebar">
+        <label class="btn btn-outline-primary" for="sidebarToggleCheck" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Mostrar panel multijugador">
+            <i class="fas fa-users"></i>
+        </label>
         {% endif %}
     </div>
 </div>
 {% endblock %}
 
 {% block base_content %}
-<div class="flex-fill my-4">
-    <div class="row flex-nowrap g-0">
+<div class="flex-fill">
+    <div class="row flex-nowrap g-0 my-4">
         <!-- CONTENIDO PRINCIPAL -->
         <main class="collapse show collapse-horizontal col">
             <div class="container-fluid">
@@ -92,7 +91,7 @@ LogBait Casa de Apuestas Online
                 <div class="h-100 flex-fill">
                     <div id="gameSidebarExit">
                         <div class="pt-3 container d-flex justify-content-end">
-                            <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#gameSidebar" aria-expanded="false" aria-controls="gameSidebar">
+                            <button class="sidebar-toggle btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#gameSidebar" aria-expanded="false" aria-controls="gameSidebar">
                                 <i class="fas fa-xmark"></i>
                             </button>
                         </div>
@@ -139,7 +138,15 @@ LogBait Casa de Apuestas Online
         </div>
         {% endif %}
     </div>
+    <div class="container sticky-bottom z-2">
+        {% block actions %}{% endblock %}
+    </div>
 </div>
+
+{% if multijugador %}
+{{ parcial_sala.content_chat_notifications() }}
+{% endif %}
+
 {% endblock %}
 
 {% block base_scripts %}
@@ -173,17 +180,39 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 {% if multijugador %}
-    {{ parcial_sala.scripts() }}
+{{ parcial_sala.scripts() }}
 
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const salaId = {{ sala.id }};
-        const socket = window.socket;
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const salaId = {{ sala.id }};
+    const socket = window.socket;
 
-        // Unirse a la sala
-        socket.emit('join_room', { sala_id: salaId });
-    })
-    </script>
+    // Unirse a la sala
+    socket.emit('join_room', { sala_id: salaId });
+
+    // Enable notifications.
+    window.showNotifications = true;
+
+    // Update notification viisbility when opening/closing sidebar
+    const sidebarToggles = document.querySelectorAll('.sidebar-toggle');
+    
+    for (const btn of sidebarToggles) {
+        btn.addEventListener('click', function() {
+            // Only show notifications if the sidebar isn't visible.
+            const isSidebarVisible = this.getAttribute('aria-expanded') === 'true';
+            window.showNotifications = !isSidebarVisible;
+
+            if (!window.showNotifications) {
+                limpiarNotificaciones(); // función proporcionada por la parcial sala_contents.html
+            }
+
+            // Set status of the sidebar toggle.
+            const checkbox = document.getElementById('sidebarToggleCheck');
+            checkbox.checked = isSidebarVisible;
+        });
+    }
+})
+</script>
 {% endif %}
 
 <style>
