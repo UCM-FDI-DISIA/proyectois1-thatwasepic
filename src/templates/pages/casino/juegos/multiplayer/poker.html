@@ -30,7 +30,7 @@ Póker
     <div class="d-flex justify-content-between align-items-center gap-2">
       <div class="text-center">
         <div class="small text-uppercase text-nowrap">
-          <i class="fas fa-trophy me-1"></i>Última ganancia
+          <i class="fas fa-cash-register me-1"></i>En mesa
         </div>
         <div class="h5 mb-0 stat-number text-nowrap text-truncate" id="hud-table-amount">
           $0.00
@@ -97,14 +97,14 @@ Póker
           </div>
         </div>
         <label for="buyin-input" class="buyin-label">Cantidad a llevar</label>
-        <input id="buyin-input" type="number" min="0" step="0.01" class="buyin-input" />
+        <input id="buyin-input" class="form-control" type="number" min="0" step="0.01" />
         <div id="buyin-error" class="buyin-error"></div>
       </div>
       <div class="modal-footer">
         <button id="buyin-apply" class="btn btn-success" type="button">Meter a la mesa</button>
-        <button id="buyin-withdraw" class="btn btn-warning btn-sm" type="button">Retirar cantidad</button>
-        <button id="buyin-max" class="btn btn-primary btn-sm" type="button">Meter todo</button>
-        <button id="buyin-clear" class="btn ghost btn-sm" type="button">Retirar todo</button>
+        <button id="buyin-withdraw" class="btn btn-warning" type="button">Retirar cantidad</button>
+        <button id="buyin-max" class="btn btn-outline-primary btn-sm" type="button">Meter todo</button>
+        <button id="buyin-clear" class="btn btn-outline-primary btn-sm" type="button">Retirar todo</button>
       </div>
     </div>
   </div>
@@ -115,26 +115,28 @@ Póker
   <div class="col-12 mt-4">
     <div class="card">
       <div class="card-body">
-        <div class="action-field">
-          <label for="input-apuesta">Apuesta actual</label>
-          <input id="input-apuesta" type="number" min="0" step="10" value="10">
-        </div>
-        <div class="action-buttons">
-          <button id="btn-iniciar" class="btn btn-success">
-            <i class="fas fa-play me-1"></i> Empezar mano
-          </button>
-          <button id="btn-call" class="btn btn-primary">
-            <i class="fas fa-coins me-1"></i> Call
-          </button>
-          <button id="btn-check" class="btn ghost">
-            <i class="fas fa-hand-paper me-1"></i> Check
-          </button>
-          <button id="btn-raise" class="btn btn-warning">
-            <i class="fas fa-level-up-alt me-1"></i> Raise
-          </button>
-          <button id="btn-fold" class="btn btn-danger">
-            <i class="fas fa-flag-checkered me-1"></i> Fold
-          </button>
+        <div class="d-flex flex-column flex-lg-row gap-3 align-items-center">
+          <div class="flex-fill d-flex flex-column">
+            <label for="input-apuesta" class="form-label fw-bold">Apuesta actual</label>
+            <input id="input-apuesta" class="form-control" type="number" min="0" step="10" value="10">
+          </div>
+          <div class="btn-group" role="group" aria-label="Basic example">
+            <button id="btn-iniciar" class="btn btn-success">
+              <i class="fas fa-play me-1"></i> Empezar mano
+            </button>
+            <button id="btn-call" class="btn btn-outline-primary">
+              <i class="fas fa-coins me-1"></i> Call
+            </button>
+            <button id="btn-check" class="btn btn-outline-primary">
+              <i class="fas fa-hand-paper me-1"></i> Check
+            </button>
+            <button id="btn-raise" class="btn btn-outline-primary">
+              <i class="fas fa-level-up-alt me-1"></i> Raise
+            </button>
+            <button id="btn-fold" class="btn btn-outline-primary">
+              <i class="fas fa-flag-checkered me-1"></i> Fold
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -314,7 +316,7 @@ function syncBuyinLabels(){
   elMesa.buyinBankLabel.textContent = formatCents(buyinState.bankCents);
   elMesa.buyinTableLabel.textContent = formatCents(buyinState.tableCents);
   const headerBalanceCents = Math.max(0, buyinState.bankCents);
-  if (elMesa.hudTable) elMesa.hudTable.textContent = formatCents(buyinState.bankCents);
+  if (elMesa.hudTable) elMesa.hudTable.textContent = formatCents(buyinState.tableCents);
   setGlobalBalance(headerBalanceCents / 100);
   if (elMesa.buyinInput && !buyinEditing){
     const suggested = Math.max(minBuyinCents, 0);
@@ -1028,42 +1030,6 @@ setInterval(getEstado, 3000);
   flex-wrap: wrap;
   gap: 1rem;
   align-items: flex-end;
-}
-.action-field {
-  flex: 1;
-  min-width: 200px;
-}
-.action-field label {
-  display: block;
-  font-size: 0.85rem;
-  color: rgba(255,255,255,0.7);
-  margin-bottom: 0.35rem;
-}
-.action-field input {
-  width: 100%;
-  padding: 0.65rem;
-  border-radius: 12px;
-  background: rgba(0,0,0,0.35);
-  border: 1px solid rgba(255,255,255,0.1);
-  color: #fff;
-}
-.action-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  justify-content: flex-end;
-}
-.poker-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-.poker-panel {
-  background: rgba(6, 8, 29, 0.85);
-  border-radius: 18px;
-  border: 1px solid rgba(255,255,255,0.08);
-  padding: 1.25rem;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
 }
 .poker-player-list {
   display: flex;
