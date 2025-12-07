@@ -663,13 +663,14 @@ def _finalizar_con_ganador(estado: dict, ganador: dict | None, sala_id: int | No
             datos['ultima_ganancia'] = 0.0
         stats = (
             Estadistica.query
-            .filter_by(user_id=datos['user_id'], juego='poker_multijugador')
+            .filter_by(user_id=datos['user_id'], juego='poker')
             .first()
         )
         if not stats:
             stats = Estadistica(
                 user_id=datos['user_id'],
-                juego='poker_multijugador',
+                juego='poker',
+                tipo_juego='multiplayer',
                 partidas_jugadas=0,
                 partidas_ganadas=0,
                 ganancia_total=0.0,
@@ -694,7 +695,8 @@ def _finalizar_con_ganador(estado: dict, ganador: dict | None, sala_id: int | No
                 resultado = 'empate'
             apuesta = Apuesta(
                 user_id=datos['user_id'],
-                juego='poker_multijugador',
+                juego='poker',
+                tipo_juego='multiplayer',
                 cantidad=apuesta_total,
                 ganancia=ganancia_total,
                 resultado=resultado

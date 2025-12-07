@@ -14,6 +14,24 @@
   {%- endif -%}
 {%- endmacro %}
 
+{% macro tipo_badge(tipo) -%}
+  {%- if tipo == 'multiplayer' or tipo == 'multijugador' or tipo == 'multi' -%}
+    <span class="badge bg-info">👥 Multi</span>
+  {%- else -%}
+    <span class="badge bg-secondary">🎮 Single</span>
+  {%- endif -%}
+{%- endmacro %}
+
+{% macro get_tipo_juego(stat) -%}
+  {%- if stat.tipo_juego in ['multiplayer', 'multijugador', 'multi'] -%}
+    multijugador
+  {%- elif 'multi' in stat.juego|lower or '_multijugador' in stat.juego -%}
+    multijugador
+  {%- else -%}
+    singleplayer
+  {%- endif -%}
+{%- endmacro %}
+
 {% macro game_label(game) -%}
   {%- if game == 'poker_multijugador' -%}Póker Multijugador
   {%- elif game == 'poker' -%}Póker
@@ -86,14 +104,18 @@
 <div class="row">
     {% for stat in stats %}
     {% set neto_juego = (stat.ganancia_total - stat.apuesta_total) %}
+    {% set tipo = stat.tipo_juego if stat.tipo_juego else get_tipo_juego(stat.juego) %}
     <div class="col-md-6 col-lg-4 mt-4">
         <div class="card animated-rotate h-100">
             <div class="card-body">
                 <div class="text-center d-flex flex-column align-items-center mb-3">
                     <h4>{{ game_emoji(stat.juego) }} {{ game_label(stat.juego) }}</h4>
-                    <span class="badge {% if neto_juego >= 0 %}bg-success{% else %}bg-danger{% endif %}">
-                        ${{ "%.2f"|format(neto_juego) }}
-                    </span>
+                    <div class="mt-1">
+                        {{ tipo_badge(tipo) }}
+                        <span class="badge {% if neto_juego >= 0 %}bg-success{% else %}bg-danger{% endif %}">
+                            ${{ "%.2f"|format(neto_juego) }}
+                        </span>
+                    </div>
                 </div>
                 <div class="row text-center">
                     <div class="col-6">
@@ -107,7 +129,7 @@
                 </div>
                 
                 <div class="progress mb-2" style="height: 8px;">
-                    <div class="progress-bar {% if stat.partidas_jugadas > 0 %}bg-success{% endif %}" 
+                    <div class="progress-bar {% if stat.partidas_jugadas > 0 %}{% if tipo == 'multijugador' %}bg-info{% else %}bg-success{% endif %}{% endif %}" 
                          style="width: {% if stat.partidas_jugadas > 0 %}{{ (stat.partidas_ganadas / stat.partidas_jugadas) * 100 }}%{% else %}0%{% endif %}">
                     </div>
                 </div>
@@ -121,6 +143,10 @@
                 </small>
                 
                 <div class="mt-3">
+                    <div class="d-flex justify-content-between small">
+                        <span>Tipo:</span>
+                        <span class="fw-bold">{{ tipo|title }}</span>
+                    </div>
                     <div class="d-flex justify-content-between small">
                         <span>Apuesta Total:</span>
                         <span class="fw-bold">${{ "%.2f"|format(stat.apuesta_total) }}</span>
@@ -149,11 +175,15 @@
                 <div class="row">
                     {% if stats %}
                     {% for stat in stats %}
+                    {% set tipo = stat.tipo_juego if stat.tipo_juego else get_tipo_juego(stat.juego) %}
                     <div class="col-md-2 col-6 mb-3">
                         <div class="text-center">
                             <div class="mb-2" style="font-size: 2em;">{{ game_emoji(stat.juego) }}</div>
                             <h6>{{ stat.partidas_jugadas }}</h6>
                             <small class="text-muted">{{ game_label(stat.juego) }}</small>
+                            <div class="mt-1">
+                                {{ tipo_badge(tipo) }}
+                            </div>
                         </div>
                     </div>
                     {% endfor %}
@@ -252,6 +282,7 @@
                         <thead>
                             <tr>
                                 <th>Juego</th>
+                                <th>Tipo</th>
                                 <th>Apostado</th>
                                 <th>Resultado</th>
                                 <th>Neto</th>
@@ -261,10 +292,19 @@
                         <tbody>
                             {% for ap in apuestas %}
                             {% set neto_row = (ap.ganancia - ap.cantidad) %}
+                            {% set tipo = ap.tipo_juego if ap.tipo_juego else 
+                                ('multijugador' if 'multi' in ap.juego|lower or ap.juego == 'poker_multijugador' else 'singleplayer') %}
                             <tr>
                                 <td>
                                     <span class="me-2">{{ game_emoji(ap.juego) }}</span>
                                     {{ game_label(ap.juego) }}
+                                </td>
+                                <td>
+                                    {% if tipo == 'multiplayer' or tipo == 'multijugador' %}
+                                        <span class="badge bg-info">👥 Multi</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">🎮 Single</span>
+                                    {% endif %}
                                 </td>
                                 <td class="fw-bold">${{ "%.2f"|format(ap.cantidad) }}</td>
                                 <td>

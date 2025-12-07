@@ -15,6 +15,7 @@ def get_state():
             stats = Estadistica(
                 user_id=current_user.id,
                 juego="ruleta",
+                tipo_juego='singleplayer',
                 partidas_jugadas=0,
                 partidas_ganadas=0,
                 ganancia_total=0.0,
@@ -64,6 +65,7 @@ def place_bets():
         apuesta = Apuesta(
             user_id=current_user.id,
             juego='ruleta',
+            tipo_juego='singleplayer',
             cantidad=total_bet_euros,
             ganancia=0,
             resultado='PENDIENTE'

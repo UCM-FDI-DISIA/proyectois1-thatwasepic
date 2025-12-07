@@ -223,7 +223,8 @@ def register_coinflip_handlers(socketio, app):
                         # Registrar apuesta en base de datos
                         apuesta_db = Apuesta(
                             user_id=usuario.id,
-                            juego='coinflip_multijugador',
+                            juego='coinflip',
+                            tipo_juego='multiplayer',
                             cantidad=apuesta['cantidad'],
                             ganancia=ganancia,
                             resultado='ganada' if gano else 'perdida'
@@ -236,6 +237,7 @@ def register_coinflip_handlers(socketio, app):
                             stats = Estadistica(
                                 user_id=usuario.id, 
                                 juego='coinflip',
+                                tipo_juego='multiplayer',
                                 partidas_jugadas=0,
                                 partidas_ganadas=0,
                                 ganancia_total=0.0,

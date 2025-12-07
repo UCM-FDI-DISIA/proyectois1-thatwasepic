@@ -2,7 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
-
+from enum import Enum
 db = SQLAlchemy()
 
 class User(UserMixin, db.Model):
@@ -33,6 +33,7 @@ class Apuesta(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     juego = db.Column(db.String(50), nullable=False)
+    tipo_juego = db.Column(db.String(20), default='singleplayer')  # 'singleplayer' o 'multijugador'
     cantidad = db.Column(db.Float, nullable=False)
     resultado = db.Column(db.String(20), nullable=False)
     ganancia = db.Column(db.Float, default=0.0)
@@ -54,11 +55,14 @@ class Estadistica(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     juego = db.Column(db.String(50), nullable=False)
+    tipo_juego = db.Column(db.String(20), default='singleplayer')  # 'singleplayer' o 'multijugador'
     partidas_jugadas = db.Column(db.Integer, default=0, nullable=False)
     partidas_ganadas = db.Column(db.Integer, default=0, nullable=False)  
     ganancia_total = db.Column(db.Float, default=0.0, nullable=False) 
     apuesta_total = db.Column(db.Float, default=0.0, nullable=False)
-
+class TipoJuego(Enum):
+    SINGLEPLAYER = 'singleplayer'
+    MULTIJUGADOR = 'multijugador'
 class SalaMultijugador(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False)

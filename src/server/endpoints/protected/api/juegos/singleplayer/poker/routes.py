@@ -23,6 +23,7 @@ def apostar():
     apuesta = Apuesta(
         user_id=current_user.id,
         juego='poker',
+        tipo_juego='singleplayer',
         cantidad=cantidad,
         resultado=resultado,
         ganancia=ganancia
@@ -30,9 +31,9 @@ def apostar():
     db.session.add(apuesta)
     
     # Actualizar estadísticas
-    stats = Estadistica.query.filter_by(user_id=current_user.id, juego='poker').first()
+    stats = Estadistica.query.filter_by(user_id=current_user.id, juego='poker', tipo_juego='singleplayer').first()
     if not stats:
-        stats = Estadistica(user_id=current_user.id, juego='poker')
+        stats = Estadistica(user_id=current_user.id, juego='poker', tipo_juego='singleplayer')
         db.session.add(stats)
     
     stats.partidas_jugadas += 1

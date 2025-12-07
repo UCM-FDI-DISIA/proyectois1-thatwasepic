@@ -1,7 +1,7 @@
 from flask import request
 from flask_login import current_user
 from flask_socketio import join_room, emit, rooms
-from models import db, User, Apuesta, SalaMultijugador
+from models import db, User, Apuesta, SalaMultijugador, Estadistica
 import random
 import threading
 import time
@@ -96,6 +96,7 @@ def register_caballos_handlers(socketio, app):
             if not user:
                 print(f"⚠️  Usuario {uid} no encontrado")
                 continue
+                
             if apuesta['caballo'] == ganador:
                 mult = {1: 1.5, 2: 2.0, 3: 3.0, 4: 6.0}.get(apuesta['caballo'], 1)
                 ganancia = apuesta['cantidad'] * mult
@@ -106,10 +107,52 @@ def register_caballos_handlers(socketio, app):
                 ganancia = 0
                 resultado = 'perdida'
                 print(f"❌ Usuario {uid} ({user.username}) perdió (caballo {apuesta['caballo']})")
-            db.session.add(Apuesta(user_id=uid, juego='caballos', cantidad=apuesta['cantidad'], resultado=resultado, ganancia=ganancia))
-            db.session.commit()
-            resultados[uid] = {'has_ganado': apuesta['caballo'] == ganador, 'nuevo_balance': user.balance}
+            
+            # Registrar apuesta
+            apuesta_db = Apuesta(
+                user_id=uid, 
+                juego='caballos', 
+                tipo_juego='multiplayer',  # ← Esto ya lo tienes bien
+                cantidad=apuesta['cantidad'], 
+                resultado=resultado, 
+                ganancia=ganancia
+            )
+            db.session.add(apuesta_db)
+            
+            # ⚠️ FALTA: Actualizar estadísticas
+            stats = Estadistica.query.filter_by(
+                user_id=uid, 
+                juego='caballos',
+                tipo_juego='multiplayer' 
+            ).first()
+            
+            if not stats:
+                stats = Estadistica(
+                    user_id=uid,
+                    juego='caballos',
+                    tipo_juego='multiplayer',  
+                    partidas_jugadas=0,
+                    partidas_ganadas=0,
+                    ganancia_total=0.0,
+                    apuesta_total=0.0
+                )
+                db.session.add(stats)
+            
+            # Actualizar estadísticas
+            stats.partidas_jugadas += 1
+            stats.apuesta_total += apuesta['cantidad']
+            stats.ganancia_total += ganancia
+            if resultado == 'ganada':
+                stats.partidas_ganadas += 1
+            
+            resultados[uid] = {
+                'has_ganado': apuesta['caballo'] == ganador, 
+                'nuevo_balance': user.balance,
+                'caballo_apostado': apuesta['caballo'],
+                'ganancia': ganancia
+            }
 
+        db.session.commit()  # Guardar todos los cambios de una vez
         st['estado'] = 'finalizada'
 
         # Emitir inicio de carrera con duración (ms) para sincronizar animación en clientes
@@ -129,13 +172,13 @@ def register_caballos_handlers(socketio, app):
             print(f"⏳ Esperando {_duracion_ms}ms antes de emitir race_result...")
             _socketio.sleep(_duracion_ms / 1000.0)
             print(f"✅ A punto de emitir race_result a room {_room_name}")
-            print(f"   Datos: ganador={_ganador}, resultados={_resultados}")
-            # Usar socketio.server para emitir sin contexto de cliente
+            
             try:
-                _socketio.server.emit('race_result', 
-                                      {'ganador': _ganador, 'resultados': _resultados}, 
-                                      room=_room_name,
-                                      namespace='/')
+                _socketio.emit('race_result', {
+                    'ganador': _ganador, 
+                    'resultados': _resultados,
+                    'sala_id': sala_id
+                }, room=_room_name)
                 print(f"✅ race_result emitido exitosamente al room {_room_name}")
             except Exception as e:
                 print(f"❌ Error al emitir race_result: {e}")
@@ -143,4 +186,3 @@ def register_caballos_handlers(socketio, app):
                 traceback.print_exc()
 
         _socketio.start_background_task(delayed_emit)
-

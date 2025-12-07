@@ -137,7 +137,8 @@ def refrescar_estadisticas_jugadores(st):
         func.count(Apuesta.id)
     ).filter(
         Apuesta.user_id.in_(uids),
-        Apuesta.juego.in_(["blackjack", "blackjack_multijugador"])
+        Apuesta.juego.in_(["blackjack", "blackjack_multijugador"]),
+        Apuesta.tipo_juego == 'multiplayer'
     ).group_by(Apuesta.user_id, Apuesta.resultado).all()
 
     for uid, res, count in rows:
@@ -151,7 +152,9 @@ def refrescar_estadisticas_jugadores(st):
 
     stats_db = Estadistica.query.filter(
         Estadistica.user_id.in_(uids),
-        Estadistica.juego == "blackjack"
+        Estadistica.juego == "blackjack",
+        Estadistica.tipo_juego == 'multiplayer'
+
     ).all()
     stats_map = {s.user_id: s for s in stats_db}
 
@@ -283,17 +286,19 @@ def ejecutar_crupier_y_resolver(sala_id):
             apuesta_db = Apuesta(
                 user_id=uid,
                 juego="blackjack_multijugador",
+                tipo_juego='multiplayer',
                 cantidad=apuesta_monto,
                 resultado=resultado,
                 ganancia=pago_total
             )
             db.session.add(apuesta_db)
 
-            stats = Estadistica.query.filter_by(user_id=uid, juego="blackjack").first()
+            stats = Estadistica.query.filter_by(user_id=uid, juego="blackjack", tipo_juego='multiplayer').first()
             if not stats:
                 stats = Estadistica(
                     user_id=uid,
                     juego="blackjack",
+                    tipo_juego='multiplayer',
                     partidas_jugadas=0,
                     partidas_ganadas=0,
                     ganancia_total=0.0,

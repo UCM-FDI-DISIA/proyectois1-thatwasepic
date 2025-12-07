@@ -100,6 +100,7 @@ def apostar():
         apuesta = Apuesta(
             user_id=current_user.id,
             juego='caballos',
+            tipo_juego='singleplayer',
             cantidad=cantidad,
             resultado=resultado,
             ganancia=ganancia
@@ -132,6 +133,7 @@ def apostar():
             stats = Estadistica(
                 user_id=current_user.id, 
                 juego='caballos',
+                tipo_juego='singleplayer',
                 partidas_jugadas=1,
                 partidas_ganadas=1 if resultado == 'ganada' else 0,
                 # ✅ CORRECCIÓN: ganancia_total debe ser la ganancia bruta

@@ -53,6 +53,7 @@ def apostar():
     apuesta = Apuesta(
         user_id=current_user.id,  # Cambiado de usuario_id a user_id
         juego='coinflip',
+        tipo_juego='singleplayer',
         cantidad=cantidad,
         ganancia=ganancia,
         resultado='ganada' if gano else 'perdida'
@@ -66,6 +67,7 @@ def apostar():
         stats = Estadistica(
             user_id=current_user.id, 
             juego='coinflip',
+            tipo_juego='singleplayer',
             partidas_jugadas=0,
             partidas_ganadas=0,
             ganancia_total=0.0,

@@ -197,7 +197,7 @@ def place_secret_bet():
     _save_partida(partida, partida_data)
 
     # crear registro Apuesta pendiente
-    apuesta = Apuesta(user_id=current_user.id, juego='ruleta', cantidad=total_euros, ganancia=0, resultado='PENDIENTE')
+    apuesta = Apuesta(user_id=current_user.id, juego='ruleta', tipo_juego='multiplayer', cantidad=total_euros, ganancia=0, resultado='PENDIENTE')
     db.session.add(apuesta)
     db.session.commit()
 
@@ -298,14 +298,14 @@ def spin_room():
             user.balance += total_payout_euros
 
         # actualizar Apuesta pendiente
-        apuesta = Apuesta.query.filter_by(user_id=int(uid), juego='ruleta', resultado='PENDIENTE').order_by(Apuesta.id.desc()).first()
+        apuesta = Apuesta.query.filter_by(user_id=int(uid), juego='ruleta', tipo_juego='multiplayer', resultado='PENDIENTE').order_by(Apuesta.id.desc()).first()
         if apuesta:
             apuesta.ganancia = total_win_euros
             apuesta.resultado = f'Número {result_number} - Ganancia: {total_win_euros:.2f}€'
 
-        stats = Estadistica.query.filter_by(user_id=int(uid), juego='ruleta').first()
+        stats = Estadistica.query.filter_by(user_id=int(uid), juego='ruleta', tipo_juego='multiplayer').first()
         if not stats:
-            stats = Estadistica(user_id=int(uid), juego='ruleta', partidas_jugadas=0, partidas_ganadas=0, ganancia_total=0.0, apuesta_total=0.0)
+            stats = Estadistica(user_id=int(uid), juego='ruleta', tipo_juego='multiplayer', partidas_jugadas=0, partidas_ganadas=0, ganancia_total=0.0, apuesta_total=0.0)
             db.session.add(stats)
         stats.partidas_jugadas += 1
         stats.apuesta_total += total_bet_euros
