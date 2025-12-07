@@ -5,6 +5,7 @@ from models import db, SalaMultijugador, UsuarioSala
 from datetime import datetime
 import json
 from endpoints.protected.api.juegos.multiplayer.caballos.socket_handlers import register_caballos_handlers
+from models import BloqueoChat
 
 def contar_jugadores_conectados(sala_id):
     """Contar solo jugadores realmente conectados a la sala"""
@@ -286,13 +287,25 @@ def register_socketio_handlers(socketio):
         sala_id = data.get('sala_id')
         message = data.get('message')
         
-        print(f"💬 Chat sala {sala_id}: {current_user.username}: {message}")
+        # Consultar usuarios bloqueados para este remitente
+        bloqueos = BloqueoChat.query.filter_by(
+            sala_id=sala_id,
+            usuario_bloqueado_id=current_user.id
+        ).all()
         
+        # Crear set de usuarios que han bloqueado al remitente
+        usuarios_que_bloquearon = {bloqueo.usuario_id for bloqueo in bloqueos}
+        
+        print(f"💬 Chat sala {sala_id}: {current_user.username}: {message}")
+        print(f"🚫 Bloqueado por: {usuarios_que_bloquearon}")
+        
+        # Enviar mensaje a la sala
         emit('new_message', {
             'user_id': current_user.id,
             'username': current_user.username,
             'message': message,
-            'timestamp': datetime.utcnow().isoformat()
+            'timestamp': datetime.utcnow().isoformat(),
+            'esta_bloqueado_para': list(usuarios_que_bloquearon)  # Para debugging
         }, room=f'sala_{sala_id}')
     
     # Registrar handlers específicos de Caballos multijugador

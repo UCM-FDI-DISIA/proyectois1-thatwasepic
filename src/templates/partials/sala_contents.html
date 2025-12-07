@@ -21,42 +21,316 @@
 </div>
 {% endmacro %}
 
+<!-- NUEVO MACRO PARA MODALES DE BLOQUEO -->
+{% macro content_modales() %}
+<div class="modal fade" id="modalBloquearUsuario" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-light">
+            <div class="modal-header border-neon">
+                <h5 class="modal-title">Bloquear Usuario</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro que deseas bloquear a <span id="nombreUsuarioBloquear"></span>?</p>
+                <p class="text-warning"><small>No verás sus mensajes en el chat.</small></p>
+            </div>
+            <div class="modal-footer border-neon">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmarBloquear">Bloquear</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endmacro %}
+
 {% macro scripts() %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const salaId = {{ sala.id }};
     const esCreador = {{ 'true' if sala.creador_id == current_user.id else 'false' }};
     const socket = window.socket;
+    const maxNotifications = 3;
+    
+    // Lista de usuarios bloqueados (inicialmente vacía)
+    let usuariosBloqueados = new Set();
+    
+    // Cargar usuarios bloqueados al iniciar
+    cargarUsuariosBloqueados();
 
-    const maxNotifications = 3; // Set maximum number of active toasts
-
-    window.showNotifications = window.showNotifications || false;
+    async function cargarUsuariosBloqueados() {
+        try {
+            const response = await fetch(`/api/multijugador/usuarios-bloqueados/${salaId}`);
+            if (response.ok) {
+                const data = await response.json();
+                usuariosBloqueados = new Set(data.usuarios_bloqueados || []);
+                console.log('Usuarios bloqueados cargados:', Array.from(usuariosBloqueados));
+            }
+        } catch (error) {
+            console.error('Error cargando usuarios bloqueados:', error);
+        }
+    }
 
     function actualizarListaJugadores() {
         fetch(`/api/multijugador/estado-sala/${salaId}`)
             .then(response => response.json())
             .then(data => {                
-                // Actualizar lista de jugadores
                 const container = document.getElementById('jugadores-container');
-                container.innerHTML = data.jugadores.map(jugador => `
-                    <div class="col-md-6">
-                        <div class="card translucent-card ${jugador.es_creador ? 'border-primary' : ''}">
-                            <div class="card-body py-2">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-user${jugador.es_creador ? '-crown' : ''} me-2" 
-                                       style="color: ${jugador.es_creador ? 'var(--neon-cyan)' : 'var(--text-light)'};"></i>
-                                    <span class="flex-grow-1">${jugador.username}</span>
-                                    ${jugador.es_creador ? '<span class="badge bg-primary">Creador</span>' : ''}
+                container.innerHTML = data.jugadores.map(jugador => {
+                    const esUsuarioActual = jugador.id === {{ current_user.id }};
+                    const estaBloqueado = usuariosBloqueados.has(jugador.id);
+                    
+                    // Escape del username para JavaScript
+                    const usernameEscaped = jugador.username.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                    
+                    return `
+                    <div class="col-md-6 mb-3">
+                        <div class="card translucent-card ${jugador.es_creador ? 'border-primary' : ''} ${estaBloqueado ? 'border-danger opacity-75' : ''}">
+                            <div class="card-body py-2 px-3">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <!-- LADO IZQUIERDO: Icono + Nombre -->
+                                    <div class="d-flex align-items-center" style="min-width: 0;">
+                                        <i class="fas fa-user${jugador.es_creador ? '-crown' : estaBloqueado ? '-slash' : ''} me-2" 
+                                           style="color: ${jugador.es_creador ? 'var(--neon-cyan)' : estaBloqueado ? 'var(--neon-red)' : 'var(--text-light)'};"></i>
+                                        <span class="text-truncate fw-bold">${jugador.username}</span>
+                                    </div>
+                                    
+                                    <!-- LADO DERECHO: Etiquetas + Botones -->
+                                    <div class="d-flex align-items-center gap-2">
+                                        <!-- Etiqueta Creador (AHORA A LA DERECHA) -->
+                                        ${jugador.es_creador ? '<span class="badge bg-primary">Creador</span>' : ''}
+                                        
+                                        <!-- Etiqueta Bloqueado -->
+                                        ${estaBloqueado ? '<span class="badge bg-danger">Bloqueado</span>' : ''}
+                                        
+                                        <!-- Botones de acción -->
+                                        ${!esUsuarioActual && !jugador.es_creador && esCreador ? 
+                                            `<div class="btn-group btn-group-sm">
+                                                ${!estaBloqueado ? 
+                                                    `<button class="btn btn-outline-warning px-3 py-1" 
+                                                            onclick="mostrarModalBloquear(${jugador.id}, '${usernameEscaped}')"
+                                                            title="Bloquear usuario"
+                                                            data-bs-toggle="tooltip">
+                                                        <i class="fas fa-ban"></i>
+                                                    </button>` :
+                                                    `<button class="btn btn-outline-success px-3 py-1" 
+                                                            onclick="desbloquearUsuario(${jugador.id})"
+                                                            title="Desbloquear usuario"
+                                                            data-bs-toggle="tooltip">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>`
+                                                }
+                                            </div>` : ''
+                                        }
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                `).join('');
+                    `;
+                }).join('');
+                
+                // Inicializar tooltips de Bootstrap
+                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
+                });
             })
             .catch(error => console.error('Error:', error));
     }
 
-    // Chat
+    // Función global para mostrar modal de bloqueo (CON DEPURACIÓN)
+    window.mostrarModalBloquear = function(usuarioId, username) {
+        console.log('🔄 Mostrando modal para usuario:', usuarioId, username);
+        
+        // DESTRUIR TODOS LOS TOOLTIPS ANTES DE MOSTRAR EL MODAL
+        const tooltips = document.querySelectorAll('.tooltip');
+        tooltips.forEach(tooltip => {
+            try {
+                const bsTooltip = bootstrap.Tooltip.getInstance(tooltip);
+                if (bsTooltip) {
+                    bsTooltip.dispose();
+                }
+                tooltip.remove();
+            } catch (e) {
+                console.log('Error limpiando tooltip:', e);
+            }
+        });
+        
+        // También destruir tooltips de Bootstrap
+        const tooltipInstances = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltipInstances.forEach(el => {
+            const instance = bootstrap.Tooltip.getInstance(el);
+            if (instance) {
+                instance.dispose();
+            }
+        });
+        
+        // Verificar que el modal existe
+        const modalElement = document.getElementById('modalBloquearUsuario');
+        const nombreElement = document.getElementById('nombreUsuarioBloquear');
+        
+        if (!modalElement) {
+            console.error('❌ No se encontró el modal con id "modalBloquearUsuario"');
+            alert('Error: No se puede cargar el modal de bloqueo. Recarga la página.');
+            return;
+        }
+        
+        if (!nombreElement) {
+            console.error('❌ No se encontró el elemento "nombreUsuarioBloquear"');
+            alert('Error: Elemento del nombre no encontrado.');
+            return;
+        }
+        
+        // Configurar el nombre
+        nombreElement.textContent = username;
+        console.log('✅ Nombre establecido en modal:', username);
+        
+        // Mostrar modal
+        const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+        
+        // Limpiar tooltips cuando se cierre el modal
+        modalElement.addEventListener('hidden.bs.modal', function() {
+            limpiarTooltips();
+        });
+        
+        modal.show();
+        console.log('✅ Modal mostrado');
+        
+        // Configurar el botón de confirmar
+        const confirmarBtn = document.getElementById('confirmarBloquear');
+        if (confirmarBtn) {
+            // Remover eventos anteriores
+            confirmarBtn.onclick = null;
+            
+            // Asignar nuevo evento
+            confirmarBtn.onclick = function() {
+                console.log('✅ Confirmando bloqueo para usuario:', usuarioId);
+                bloquearUsuario(usuarioId);
+                modal.hide();
+                // Limpiar tooltips después de la acción
+                setTimeout(limpiarTooltips, 100);
+            };
+            console.log('✅ Botón de confirmar configurado');
+        }
+    };
+    // Función para limpiar tooltips
+    function limpiarTooltips() {
+        // Destruir instancias de Bootstrap
+        const tooltipElements = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltipElements.forEach(el => {
+            const instance = bootstrap.Tooltip.getInstance(el);
+            if (instance) {
+                instance.dispose();
+            }
+        });
+        
+        // Eliminar elementos .tooltip del DOM
+        const tooltips = document.querySelectorAll('.tooltip');
+        tooltips.forEach(tooltip => {
+            if (tooltip.parentNode) {
+                tooltip.parentNode.removeChild(tooltip);
+            }
+        });
+        
+        // También limpiar elementos .tooltip-inner
+        const tooltipInners = document.querySelectorAll('.tooltip-inner');
+        tooltipInners.forEach(tooltip => {
+            if (tooltip.parentNode) {
+                tooltip.parentNode.removeChild(tooltip);
+            }
+        });
+        
+        console.log('🧹 Tooltips limpiados');
+    }
+
+    // Añadir esta función a window para poder llamarla desde cualquier lugar
+    window.limpiarTooltips = limpiarTooltips;
+
+    window.desbloquearUsuario = async function(usuarioId) {
+        console.log('🔓 EJECUTANDO DESBLOQUEO para usuario:', usuarioId);
+        
+        try {
+            const url = `/api/multijugador/desbloquear-usuario/${salaId}/${usuarioId}`;
+            console.log('📤 Enviando POST a:', url);
+            
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'same-origin'
+            });
+            
+            console.log('📥 Respuesta recibida - Status:', response.status);
+            console.log('📥 Respuesta recibida - OK?', response.ok);
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log('✅ Datos respuesta:', data);
+                
+                usuariosBloqueados.delete(usuarioId);
+                actualizarListaJugadores();
+                mostrarNotificacion('Usuario desbloqueado exitosamente', 'success');
+                
+                setTimeout(limpiarTooltips, 100);
+            } else {
+                const error = await response.json();
+                console.error('❌ Error del servidor:', error);
+                mostrarNotificacion(error.error || 'Error al desbloquear usuario', 'error');
+            }
+        } catch (error) {
+            console.error('❌ Error de conexión:', error);
+            mostrarNotificacion('Error de conexión', 'error');
+        }
+    };
+
+    async function bloquearUsuario(usuarioId) {
+        console.log('🔒 EJECUTANDO BLOQUEO para usuario:', usuarioId);
+        
+        try {
+            const url = `/api/multijugador/bloquear-usuario/${salaId}/${usuarioId}`;
+            console.log('📤 Enviando POST a:', url);
+            
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'same-origin'
+            });
+            
+            console.log('📥 Respuesta recibida - Status:', response.status);
+            console.log('📥 Respuesta recibida - OK?', response.ok);
+            
+            const data = await response.json();
+            console.log('📊 Datos de respuesta:', data);
+            
+            if (response.ok) {
+                console.log('✅ Bloqueo exitoso, actualizando lista...');
+                usuariosBloqueados.add(usuarioId);
+                actualizarListaJugadores();
+                mostrarNotificacion('Usuario bloqueado exitosamente', 'success');
+            } else {
+                console.error('❌ Error del servidor:', data);
+                mostrarNotificacion(data.error || 'Error al bloquear usuario', 'error');
+            }
+        } catch (error) {
+            console.error('❌ Error de conexión:', error);
+            mostrarNotificacion('Error de conexión: ' + error.message, 'error');
+        }
+    }
+
+    function eliminarMensajesUsuario(usuarioId) {
+        const mensajes = document.querySelectorAll('.chat-message[data-user-id]');
+        mensajes.forEach(mensaje => {
+            const userId = parseInt(mensaje.dataset.userId);
+            if (userId === usuarioId) {
+                mensaje.remove();
+            }
+        });
+    }
+
+    // CHAT FUNCTIONS
     function enviarMensaje() {
         const input = document.getElementById('chat-input');
         const message = input.value.trim();
@@ -76,8 +350,15 @@ document.addEventListener('DOMContentLoaded', function() {
         enviarMensaje();
     });
 
+    // MODIFICAR EL HANDLER DE MENSAJES PARA FILTRAR BLOQUEADOS
     socket.on('new_message', (data) => {
-        agregarMensajeChat(data.username, data.message, 'user');
+        // Verificar si el usuario está bloqueado
+        if (usuariosBloqueados.has(data.user_id)) {
+            console.log(`🚫 Mensaje bloqueado de usuario ID ${data.user_id} (${data.username})`);
+            return; // No mostrar el mensaje
+        }
+        
+        agregarMensajeChat(data.username, data.message, 'user', data.user_id);
     });
 
     // Eventos de SocketIO
@@ -91,10 +372,13 @@ document.addEventListener('DOMContentLoaded', function() {
         agregarMensajeChat('Sistema', `${data.username} salió de la sala`, 'system');
     });
 
-    function agregarMensajeChat(usuario, mensaje, tipo) {
+    function agregarMensajeChat(usuario, mensaje, tipo, userId = null) {
         const chat = document.getElementById('chat-messages');
         const mensajeDiv = document.createElement('div');
         mensajeDiv.className = `chat-message ${tipo}`;
+        if (userId) {
+            mensajeDiv.dataset.userId = userId;
+        }
         mensajeDiv.innerHTML = `
             <strong>${usuario}:</strong> ${mensaje}
             <small class="text-muted">${new Date().toLocaleTimeString()}</small>
@@ -102,12 +386,13 @@ document.addEventListener('DOMContentLoaded', function() {
         chat.appendChild(mensajeDiv);
         chat.scrollTop = chat.scrollHeight;
 
-        // Mostrar también notificación.
-        agregarNotificacionChat(usuario, mensaje, tipo);
+        // Mostrar también notificación si está habilitada
+        if (window.showNotifications) {
+            agregarNotificacionChat(usuario, mensaje, tipo);
+        }
     }
 
     function agregarNotificacionChat(usuario, mensaje, tipo) {
-        // Mostrar notificaciones solo si están activadas.
         if (!window.showNotifications) {
             return;
         }
@@ -133,13 +418,10 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         notificationsContainer.appendChild(notificationDiv);
 
-        // Mostrar notificación.
         const notificationDivBootstrap = bootstrap.Toast.getOrCreateInstance(notificationDiv);
         notificationDivBootstrap.show();
 
-        // Check if the number of toasts exceeds the maximum
         if (notificationsContainer.children.length > maxNotifications) {
-            // Borrar notificación más antigua si hay demasiadas.
             const notificacionMasAntigua = notificationsContainer.children[0];
             notificacionMasAntigua.remove();
         }
@@ -152,6 +434,33 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Función para mostrar notificaciones
+    function mostrarNotificacion(mensaje, tipo) {
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-bg-${tipo === 'success' ? 'success' : 'danger'} border-0`;
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-${tipo === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+                    ${mensaje}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+        
+        const container = document.getElementById('chatNotificationContainer');
+        container.appendChild(toast);
+        
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+        
+        setTimeout(() => {
+            if (toast.parentNode === container) {
+                toast.remove();
+            }
+        }, 5000);
+    }
+
     // Actualizar cada 3 segundos (como fallback)
     setInterval(actualizarListaJugadores, 3000);
     actualizarListaJugadores();
@@ -160,7 +469,6 @@ document.addEventListener('DOMContentLoaded', function() {
 // Función de API para limpiar todas las notificaciones.
 function limpiarNotificaciones() {
     const notificationsContainer = document.getElementById('chatNotificationContainer');
-
     const toasts = notificationsContainer.querySelectorAll('.toast');
     toasts.forEach(toast => {
         toast.remove();
@@ -192,6 +500,71 @@ function limpiarNotificaciones() {
 
 .border-primary {
     border: 2px solid var(--neon-cyan) !important;
+}
+
+/* Nuevos estilos para bloqueo */
+.border-danger {
+    border: 2px solid var(--neon-red) !important;
+}
+
+.opacity-75 {
+    opacity: 0.75;
+}
+
+/* Estilos para botones de bloqueo */
+.btn-outline-warning {
+    color: #ffc107;
+    border-color: #ffc107;
+}
+
+.btn-outline-warning:hover {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.btn-outline-success {
+    color: #198754;
+    border-color: #198754;
+}
+
+.btn-outline-success:hover {
+    background-color: #198754;
+    color: #fff;
+}
+
+/* Mejorar visualización de tarjetas */
+.translucent-card {
+    background: rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.translucent-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Asegurar que los botones sean visibles */
+.btn-sm {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.875rem !important;
+}
+
+/* Tooltip personalizado */
+.tooltip {
+    z-index: 9999 !important;
+}
+
+/* Espaciado entre elementos */
+.gap-2 {
+    gap: 0.5rem;
+}
+
+/* Mejorar visualización de badges */
+.badge {
+    font-size: 0.75em;
+    padding: 0.35em 0.65em;
+    font-weight: 600;
 }
 </style>
 {% endmacro %}

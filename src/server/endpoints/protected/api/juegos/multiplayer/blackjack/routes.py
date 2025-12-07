@@ -15,14 +15,11 @@ def on_register(state):
 @bp.route("/api/multijugador/blackjack/sala/<int:sala_id>")
 @login_required
 def vista_sala_blackjack(sala_id):
-    """P��gina principal del Blackjack multijugador"""
+    """Página principal del Blackjack multijugador"""
     sala = SalaMultijugador.query.get_or_404(sala_id)
 
-    # Verificar que el usuario est�� en la sala
-    usuario_en_sala = UsuarioSala.query.filter_by(
-        usuario_id=current_user.id,
-        sala_id=sala_id
-    ).first()
+    # Verificar que el usuario está en la sala
+    usuario_en_sala = UsuarioSala.query.filter_by(usuario_id=current_user.id,sala_id=sala_id).first()
 
     if not usuario_en_sala:
         return redirect(url_for('salas_espera.lobby'))
@@ -34,10 +31,5 @@ def vista_sala_blackjack(sala_id):
         return redirect(url_for('salas_espera.lobby'))
 
     return render_template(
-        "pages/casino/juegos/multiplayer/blackjack.html",
-        sala=sala,
-        user=current_user,
-        multijugador=True,
-        realtime_required=True,
-    )
+        "pages/casino/juegos/multiplayer/blackjack.html",sala=sala,user=current_user,multijugador=True,realtime_required=True,)
 

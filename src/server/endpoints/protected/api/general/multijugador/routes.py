@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 from models import db, SalaMultijugador, UsuarioSala, User
+from models import BloqueoChat  
 
 bp = Blueprint('api_multijugador', __name__)
 
@@ -144,4 +145,91 @@ def terminar_partida(sala_id):
     return jsonify({
         'success': True,
         'mensaje': 'Partida terminada y sala marcada para eliminación'
+    })
+
+@bp.route('/api/multijugador/bloquear-usuario/<int:sala_id>/<int:usuario_id>', methods=['POST'])
+@login_required
+def bloquear_usuario(sala_id, usuario_id):
+    """Bloquear a un usuario en el chat de la sala"""
+    # Verificaciones
+    sala = SalaMultijugador.query.get_or_404(sala_id)
+    
+    # Verificar que ambos usuarios están en la sala
+    usuario_en_sala = UsuarioSala.query.filter_by(
+        usuario_id=current_user.id,
+        sala_id=sala_id
+    ).first()
+    
+    usuario_a_bloquear_en_sala = UsuarioSala.query.filter_by(
+        usuario_id=usuario_id,
+        sala_id=sala_id
+    ).first()
+    
+    if not usuario_en_sala or not usuario_a_bloquear_en_sala:
+        return jsonify({'error': 'Uno de los usuarios no está en la sala'}), 404
+    
+    if usuario_id == current_user.id:
+        return jsonify({'error': 'No puedes bloquearte a ti mismo'}), 400
+    
+    # Verificar si ya existe el bloqueo
+    bloqueo_existente = BloqueoChat.query.filter_by(
+        usuario_id=current_user.id,
+        usuario_bloqueado_id=usuario_id,
+        sala_id=sala_id
+    ).first()
+    
+    if bloqueo_existente:
+        return jsonify({'error': 'Ya has bloqueado a este usuario'}), 400
+    
+    # Crear nuevo bloqueo
+    nuevo_bloqueo = BloqueoChat(
+        usuario_id=current_user.id,
+        usuario_bloqueado_id=usuario_id,
+        sala_id=sala_id
+    )
+    
+    db.session.add(nuevo_bloqueo)
+    db.session.commit()
+    
+    return jsonify({
+        'success': True,
+        'mensaje': 'Usuario bloqueado exitosamente',
+        'usuario_bloqueado_id': usuario_id
+    })
+
+@bp.route('/api/multijugador/desbloquear-usuario/<int:sala_id>/<int:usuario_id>', methods=['POST'])
+@login_required
+def desbloquear_usuario(sala_id, usuario_id):
+    """Desbloquear a un usuario en el chat de la sala"""
+    # Buscar y eliminar bloqueo
+    bloqueo = BloqueoChat.query.filter_by(
+        usuario_id=current_user.id,
+        usuario_bloqueado_id=usuario_id,
+        sala_id=sala_id
+    ).first()
+    
+    if not bloqueo:
+        return jsonify({'error': 'No has bloqueado a este usuario'}), 404
+    
+    db.session.delete(bloqueo)
+    db.session.commit()
+    
+    return jsonify({
+        'success': True,
+        'mensaje': 'Usuario desbloqueado exitosamente'
+    })
+
+@bp.route('/api/multijugador/usuarios-bloqueados/<int:sala_id>', methods=['GET'])
+@login_required
+def obtener_usuarios_bloqueados(sala_id):
+    """Obtener lista de usuarios bloqueados por el usuario actual en esta sala"""
+    bloqueos = BloqueoChat.query.filter_by(
+        usuario_id=current_user.id,
+        sala_id=sala_id
+    ).all()
+    
+    usuarios_bloqueados = [bloqueo.usuario_bloqueado_id for bloqueo in bloqueos]
+    
+    return jsonify({
+        'usuarios_bloqueados': usuarios_bloqueados
     })

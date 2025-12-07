@@ -75,9 +75,11 @@ Sala: {{ sala.nombre }}
         </div>
     </div>
 </div>
+{{ parcial_sala.content_modales() }}
 {% endblock %}
 
 {% block scripts %}
+{{ parcial_sala.content_chat_notifications() }}  <!-- Notificaciones de chat y bloqueo -->
 {{ parcial_sala.scripts() }}
 
 <script>

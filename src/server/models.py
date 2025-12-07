@@ -85,7 +85,27 @@ class UsuarioSala(db.Model):
     
     # 'jugador' está definido en User.salas_unidas
     # 'sala_juego' está definido en SalaMultijugador.jugadores
-
+class BloqueoChat(db.Model):
+    """Tabla para almacenar bloqueos de chat entre usuarios"""
+    __tablename__ = 'bloqueos_chat'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # 'user.id'
+    usuario_bloqueado_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    sala_id = db.Column(db.Integer, db.ForeignKey('sala_multijugador.id'), nullable=False)
+    fecha_bloqueo = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relaciones
+    usuario = db.relationship('User', foreign_keys=[usuario_id])
+    usuario_bloqueado = db.relationship('User', foreign_keys=[usuario_bloqueado_id])
+    sala = db.relationship('SalaMultijugador')
+    
+    # Restricción única para evitar duplicados
+    __table_args__ = (
+        db.UniqueConstraint('usuario_id', 'usuario_bloqueado_id', 'sala_id', 
+                          name='unique_bloqueo_usuario_sala'),
+    )
+    
 class PartidaMultijugador(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     sala_id = db.Column(db.Integer, db.ForeignKey('sala_multijugador.id'))
