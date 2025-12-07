@@ -16,27 +16,39 @@
 {% endmacro %}
 
 {% macro content_lista_usuarios() %}
-<div id="jugadores-container">
+<div id="jugadores-container" class="row g-2">
     <!-- Se actualizará dinámicamente -->
 </div>
 {% endmacro %}
 
 <!-- NUEVO MACRO PARA MODALES DE BLOQUEO -->
 {% macro content_modales() %}
-<div class="modal fade" id="modalBloquearUsuario" tabindex="-1">
-    <div class="modal-dialog">
+<div class="modal fade" id="modalBloquearUsuario" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content bg-dark text-light">
-            <div class="modal-header border-neon">
-                <h5 class="modal-title">Bloquear Usuario</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
             <div class="modal-body">
-                <p>¿Estás seguro que deseas bloquear a <span id="nombreUsuarioBloquear"></span>?</p>
-                <p class="text-warning"><small>No verás sus mensajes en el chat.</small></p>
+                <div class="text-center mb-4">
+                    <div class="fs-1">🛑</div>
+                    <h4 class="modal-title mt-2 mb-2">Bloquear usuario</h4>
+                    <p>
+                        ¿Estás seguro que deseas bloquear a <span id="nombreUsuarioBloquear" class="font-monospace"></span>?
+                        <br>
+                        No verás sus mensajes en el chat.
+                    </p>
+                </div>
+                <div class="alert alert-info mt-3 mb-0">
+                    <small>
+                        <i class="fa-solid fa-circle-info me-1"></i>Puedes deshacer esta acción en cualquier momento a lo largo de esta partida o en cualquier otra sala multijugador no creada por este usuario.
+                    </small>
+                </div>
             </div>
             <div class="modal-footer border-neon">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-danger" id="confirmarBloquear">Bloquear</button>
+                <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-ban me-1"></i>Cancelar
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmarBloquear">
+                    <i class="fa-solid fa-circle-stop me-1"></i>Bloquear
+                </button>
             </div>
         </div>
     </div>
@@ -83,8 +95,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     const usernameEscaped = jugador.username.replace(/'/g, "\\'").replace(/"/g, '&quot;');
                     
                     return `
-                    <div class="col-md-6 mb-3">
-                        <div class="card translucent-card ${jugador.es_creador ? 'border-primary' : ''} ${estaBloqueado ? 'border-danger opacity-75' : ''}">
+                    <div class="col-md-6">
+                        <div class="card translucent-card ${jugador.es_creador ? 'border-primary' : ''}">
                             <div class="card-body py-2 px-3">
                                 <div class="d-flex align-items-center justify-content-between">
                                     <!-- LADO IZQUIERDO: Icono + Nombre -->
@@ -99,23 +111,22 @@ document.addEventListener('DOMContentLoaded', function() {
                                         <!-- Etiqueta Creador (AHORA A LA DERECHA) -->
                                         ${jugador.es_creador ? '<span class="badge bg-primary">Creador</span>' : ''}
                                         
-                                        <!-- Etiqueta Bloqueado -->
-                                        ${estaBloqueado ? '<span class="badge bg-danger">Bloqueado</span>' : ''}
-                                        
                                         <!-- Botones de acción -->
                                         ${!esUsuarioActual && !jugador.es_creador && esCreador ? 
                                             `<div class="btn-group btn-group-sm">
                                                 ${!estaBloqueado ? 
-                                                    `<button class="btn btn-outline-warning px-3 py-1" 
+                                                    `<button class="btn btn-sm btn-outline-warning" 
                                                             onclick="mostrarModalBloquear(${jugador.id}, '${usernameEscaped}')"
-                                                            title="Bloquear usuario"
-                                                            data-bs-toggle="tooltip">
-                                                        <i class="fas fa-ban"></i>
+                                                            data-bs-toggle="tooltip"
+                                                            data-bs-placement="left"
+                                                            data-bs-title="Bloquear usuario">
+                                                        <i class="fas fa-circle-stop"></i>
                                                     </button>` :
-                                                    `<button class="btn btn-outline-success px-3 py-1" 
+                                                    `<button class="btn btn-sm btn-outline-success" 
                                                             onclick="desbloquearUsuario(${jugador.id})"
-                                                            title="Desbloquear usuario"
-                                                            data-bs-toggle="tooltip">
+                                                            data-bs-toggle="tooltip"
+                                                            data-bs-placement="left"
+                                                            data-bs-title="Desbloquear usuario">
                                                         <i class="fas fa-check"></i>
                                                     </button>`
                                                 }
@@ -530,41 +541,6 @@ function limpiarNotificaciones() {
 .btn-outline-success:hover {
     background-color: #198754;
     color: #fff;
-}
-
-/* Mejorar visualización de tarjetas */
-.translucent-card {
-    background: rgba(255, 255, 255, 0.05) !important;
-    backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
-}
-
-.translucent-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-}
-
-/* Asegurar que los botones sean visibles */
-.btn-sm {
-    padding: 0.25rem 0.5rem !important;
-    font-size: 0.875rem !important;
-}
-
-/* Tooltip personalizado */
-.tooltip {
-    z-index: 9999 !important;
-}
-
-/* Espaciado entre elementos */
-.gap-2 {
-    gap: 0.5rem;
-}
-
-/* Mejorar visualización de badges */
-.badge {
-    font-size: 0.75em;
-    padding: 0.35em 0.65em;
-    font-weight: 600;
 }
 </style>
 {% endmacro %}
