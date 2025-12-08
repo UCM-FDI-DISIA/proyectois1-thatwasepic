@@ -227,7 +227,40 @@ Blackjack
 <script>
   const salaId = Number('{{ sala.id }}');
   const myId   = Number('{{ user.id }}');
-  const socket = window.socket;
+  let socket;
+
+  // Garantiza que Socket.IO esté disponible aunque falte realtime_required o falle la carga inicial
+  function ensureSocketIo(callback){
+    const existing = document.querySelector('script[data-socketio]');
+    if (typeof io === 'function') {
+      callback();
+      return;
+    }
+    if (existing) {
+      existing.addEventListener('load', callback, { once:true });
+      existing.addEventListener('error', ()=>alert('No se pudo cargar Socket.IO (CDN). Recarga la página.'), { once:true });
+      return;
+    }
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js';
+    s.async = true;
+    s.dataset.socketio = '1';
+    s.onload = callback;
+    s.onerror = ()=>alert('No se pudo cargar Socket.IO (CDN). Recarga la página.');
+    document.head.appendChild(s);
+  }
+
+  function initSockets(){
+    // Instanciar socket si no existe
+    if (!window.socket && typeof io === 'function') {
+      window.socket = io();
+    }
+    socket = window.socket;
+    if (!socket) {
+      console.error('SocketIO no está disponible; no se puede iniciar blackjack multijugador.');
+      alert('No se pudo inicializar la conexión en tiempo real. Reabre la sala o revisa la conexión.');
+      return;
+    }
 
   let lastState = null, timerHandle = null;
   const statsCache = {};
@@ -508,64 +541,71 @@ Blackjack
     timerHandle = setInterval(tick, 250);
   }
 
-  // ====== SocketIO ======
-  socket.on('connect', () => {
-    socket.emit('join_sala_blackjack', { sala_id: salaId });
-  });
+  function wireSockets(){
+    // ====== SocketIO ======
+    socket.on('connect', () => {
+      socket.emit('join_sala_blackjack', { sala_id: salaId });
+    });
 
-  socket.on('error_blackjack', (e) => {
-    const msg = e && e.msg ? e.msg : 'Error';
-    alert(msg);
-    if (e && Array.isArray(e.faltan_apostar)){
-      const aviso = document.getElementById('aviso-apuestas');
-      if (aviso){
-        aviso.style.display = 'block';
-        aviso.textContent = msg;
+    socket.on('error_blackjack', (e) => {
+      const msg = e && e.msg ? e.msg : 'Error';
+      alert(msg);
+      if (e && Array.isArray(e.faltan_apostar)){
+        const aviso = document.getElementById('aviso-apuestas');
+        if (aviso){
+          aviso.style.display = 'block';
+          aviso.textContent = msg;
+        }
       }
-    }
-  });
+    });
 
-  socket.on('estado_blackjack', (st) => {
-    lastState = st;
-    render(st);
-    startCountdown(st);
+    socket.on('estado_blackjack', (st) => {
+      lastState = st;
+      render(st);
+      startCountdown(st);
 
-    const meId = "{{ user.id }}";
-    if (st.jugadores && st.jugadores[meId] && typeof window.updateHeaderBalance === 'function') {
-      window.updateHeaderBalance(st.jugadores[meId].balance);
-    }
-  });
+      const meId = "{{ user.id }}";
+      if (st.jugadores && st.jugadores[meId] && typeof window.updateHeaderBalance === 'function') {
+        window.updateHeaderBalance(st.jugadores[meId].balance);
+      }
+    });
 
-  socket.on('balance_update', (data) => {
-    if (data && typeof data.balance !== 'undefined' && typeof window.updateHeaderBalance === 'function') {
-      window.updateHeaderBalance(data.balance);
-    }
-  });
+    socket.on('balance_update', (data) => {
+      if (data && typeof data.balance !== 'undefined' && typeof window.updateHeaderBalance === 'function') {
+        window.updateHeaderBalance(data.balance);
+      }
+    });
 
-  socket.on('blackjack_redirect_dashboard', () => {
-    window.location.href = "{{ url_for('dashboard.home') }}";
-  });
+    socket.on('blackjack_redirect_dashboard', () => {
+      window.location.href = "{{ url_for('dashboard.home') }}";
+    });
 
-  // ====== Botones ======
-  document.getElementById('btnApostar').onclick = () => {
-    const cantidad = parseFloat(document.getElementById('apuesta').value || '0');
-    socket.emit('apostar_blackjack', { sala_id: salaId, cantidad });
-  };
-  document.getElementById('btnIniciar').onclick = () => {
-    socket.emit('iniciar_ronda_blackjack', { sala_id: salaId });
-  };
-  document.getElementById('btnHit').onclick = () => {
-    socket.emit('hit_blackjack', { sala_id: salaId });
-  };
-  document.getElementById('btnStand').onclick = () => {
-    socket.emit('stand_blackjack', { sala_id: salaId });
-  };
-  document.getElementById('btnRevanchaYes').onclick = () => {
-    socket.emit('voto_revancha', { sala_id: salaId });
-  };
-  document.getElementById('btnRevanchaNo').onclick = () => {
-    socket.emit('rechazar_revancha', { sala_id: salaId });
-  };
+    // ====== Botones ======
+    document.getElementById('btnApostar').onclick = () => {
+      const cantidad = parseFloat(document.getElementById('apuesta').value || '0');
+      socket.emit('apostar_blackjack', { sala_id: salaId, cantidad });
+    };
+    document.getElementById('btnIniciar').onclick = () => {
+      socket.emit('iniciar_ronda_blackjack', { sala_id: salaId });
+    };
+    document.getElementById('btnHit').onclick = () => {
+      socket.emit('hit_blackjack', { sala_id: salaId });
+    };
+    document.getElementById('btnStand').onclick = () => {
+      socket.emit('stand_blackjack', { sala_id: salaId });
+    };
+    document.getElementById('btnRevanchaYes').onclick = () => {
+      socket.emit('voto_revancha', { sala_id: salaId });
+    };
+    document.getElementById('btnRevanchaNo').onclick = () => {
+      socket.emit('rechazar_revancha', { sala_id: salaId });
+    };
+  }
+
+    wireSockets();
+  }
+
+  ensureSocketIo(initSockets);
 </script>
 
 <script>
