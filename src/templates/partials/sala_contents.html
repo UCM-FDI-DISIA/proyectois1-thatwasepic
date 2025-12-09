@@ -1,5 +1,5 @@
 {% macro content_chat() %}
-<div id="chat-messages" style="height: 200px; overflow-y: auto; border: 1px solid var(--neon-cyan); border-radius: 8px; padding: 10px; margin-bottom: 10px; background: rgba(0,0,0,0.3);">
+<div id="chat-messages" class="pt-2">
     <!-- Mensajes del chat -->
 </div>
 <div class="input-group">
@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     
                                     <!-- LADO DERECHO: Etiquetas + Botones -->
                                     <div class="d-flex align-items-center gap-2">
-                                        <!-- Etiqueta Creador (AHORA A LA DERECHA) -->
+                                        <!-- Etiqueta Creador -->
                                         ${jugador.es_creador ? '<span class="badge bg-primary">Creador</span>' : ''}
                                         
                                         <!-- Botones de acción -->
@@ -338,13 +338,15 @@ document.addEventListener('DOMContentLoaded', function() {
     function agregarMensajeChat(usuario, mensaje, tipo, userId = null) {
         const chat = document.getElementById('chat-messages');
         const mensajeDiv = document.createElement('div');
-        mensajeDiv.className = `chat-message ${tipo}`;
+        mensajeDiv.className = `chat-entry`;
         if (userId) {
             mensajeDiv.dataset.userId = userId;
         }
         mensajeDiv.innerHTML = `
-            <strong>${usuario}:</strong> ${mensaje}
-            <small class="text-muted">${new Date().toLocaleTimeString()}</small>
+            <div class="chat-message ${tipo}">
+                <strong>${usuario}:</strong> ${mensaje}
+                <small class="text-muted">${new Date().toLocaleTimeString()}</small>
+            </div>
         `;
         chat.appendChild(mensajeDiv);
         chat.scrollTop = chat.scrollHeight;
@@ -375,8 +377,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 <small>${new Date().toLocaleTimeString()}</small>
                 <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
-            <div class="toast-body notification-message ${tipo}">
-                <strong>${usuario}:</strong> ${mensaje}
+            <div class="toast-body p-0">
+                <div class="notification-message ${tipo}">
+                    <strong>${usuario}:</strong> ${mensaje}
+                </div>
             </div>
         `;
         notificationsContainer.appendChild(notificationDiv);
@@ -440,24 +444,43 @@ function limpiarNotificaciones() {
 </script>
 
 <style>
+#chat-messages {
+    --height: 250px;
+    --fade-out-length: 25px;
+
+    overflow-y: auto;
+    height: var(--height);
+    padding-bottom: var(--fade-out-length);
+    mask-image: linear-gradient(rgb(0,0,0) calc(var(--height) - var(--fade-out-length)), rgba(0,0,0,0.0) 100%);
+}
+
+.chat-entry {
+    border-radius: var(--border-radius-button);
+    background-color: var(--deep-space);
+}
+
 .chat-message {
-    margin-bottom: 8px;
-    padding: 8px;
-    border-radius: 8px;
+    border-radius: var(--border-radius-button);
+    border-style: solid;
+    border-width: 0 0 0 4px;
+    margin-top: 8px;
+    padding: 6px 8px 6px 8px;
 }
 
 .notification-message {
     padding: 8px;
+    border-style: solid;
+    border-width: 1px 0 0 0;
 }
 
 .chat-message.user, .notification-message.user {
-    background: rgba(0, 243, 255, 0.1);
-    border-left: 3px solid var(--neon-cyan);
+    background: rgba(0, 243, 255, 0.12);
+    border-color: var(--neon-cyan);
 }
 
 .chat-message.system, .notification-message.system {
-    background: rgba(255, 0, 255, 0.1);
-    border-left: 3px solid var(--neon-pink);
+    background: rgba(255, 0, 255, 0.12);
+    border-color: var(--neon-pink);
     font-style: italic;
 }
 

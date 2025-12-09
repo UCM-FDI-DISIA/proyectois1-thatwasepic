@@ -74,7 +74,7 @@ LogBait Casa de Apuestas Online
 <div class="flex-fill">
     <div class="row flex-nowrap g-0 my-4">
         <!-- CONTENIDO PRINCIPAL -->
-        <main class="collapse show collapse-horizontal col">
+        <main class="col">
             <div class="container-fluid">
                 {% block content_fluid %}{% endblock %}
             </div>
@@ -85,8 +85,8 @@ LogBait Casa de Apuestas Online
 
         {% if multijugador %}
         <!-- SIDEBAR (pantallas grandes) -->
-        <div class="collapse collapse-horizontal" id="gameSidebar">
-            <div class="d-flex flex-row h-100 sticky-xl-top z-1" id="gameSidebarContainer">
+        <div class="collapse collapse-horizontal" style="overflow: inherit;" id="gameSidebar">
+            <div class="d-flex flex-row h-100" id="gameSidebarContainer">
                 <div class="vr h-100 mx-2" id="gameSidebarSeparator"></div>
                 <div class="h-100 flex-fill">
                     <div id="gameSidebarExit">
@@ -96,7 +96,7 @@ LogBait Casa de Apuestas Online
                             </button>
                         </div>
                     </div>
-                    <div class="pb-3 container {# sticky-top z-1" style="top: 6.5rem; #}">
+                    <div class="pb-3 pb-xl-0 container sticky-xl-top z-1" style="top: 6.5rem;">
                         <!-- Nombre de Sala -->
                         <div class="text-center mb-2">
                             <p class="mb-0 text-muted">Sala actual:</p>
@@ -124,11 +124,11 @@ LogBait Casa de Apuestas Online
                         </div>
 
                         <!-- Chat de Sala -->
-                        <div class="card mb-4">
+                        <div class="card cyber-grid">
                             <div class="card-header">
                                 <i class="fas fa-comments me-2"></i>Chat de Sala
                             </div>
-                            <div class="card-body">
+                            <div class="card-body pt-0">
                                 {{ parcial_sala.content_chat() }}
                             </div>
                         </div>
@@ -250,7 +250,7 @@ document.addEventListener('DOMContentLoaded', function() {
         height: 100vh;
         max-height: 100vh;
         background: var(--deep-space);
-        box-shadow: -2px 0 30px rgba(0, 0, 0, 0.5);
+        box-shadow: -1px 0 0 rgba(0, 243, 255, 0.25), -2px 0 30px rgba(0, 0, 0, 0.5);
     }
 
     #gameSidebarContainer {
