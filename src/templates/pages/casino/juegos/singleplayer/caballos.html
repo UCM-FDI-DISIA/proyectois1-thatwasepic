@@ -261,9 +261,9 @@ function iniciarCarrera() {
     const cantidad = parseFloat(document.getElementById('cantidad').value);
     const balance = parseFloat('{{ current_user.balance }}');
     
-    if (!caballoSeleccionado) return mostrarAlerta('Selecciona un caballo primero');
-    if (!cantidad || cantidad <= 0) return mostrarAlerta('Ingresa una cantidad válida');
-    if (cantidad > balance) return mostrarAlerta('Fondos insuficientes');
+    if (!caballoSeleccionado) return mostrarAlertaJuego('Selecciona un caballo primero');
+    if (!cantidad || cantidad <= 0) return mostrarAlertaJuego('Ingresa una cantidad válida');
+    if (cantidad > balance) return mostrarAlertaJuego('Fondos insuficientes');
     if (carreraEnCurso) return;
     
     carreraEnCurso = true;
@@ -285,7 +285,7 @@ function iniciarCarrera() {
     correrCarrera(velocidades, cantidad);
 }
 
-function mostrarAlerta(mensaje) {
+function mostrarAlertaJuego(mensaje) {
     const alerta = `<div class="alert alert-warning alert-dismissible fade show text-center">
         ${mensaje}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -392,7 +392,7 @@ function enviarResultadoCaballos(resultado, cantidad, ganancia, caballoApostado,
         console.log('📦 Datos de respuesta:', data);
         if (data.error) {
             console.error('❌ Error en respuesta:', data.error);
-            mostrarAlerta('Error: ' + data.error);
+            mostrarAlertaJuego('Error: ' + data.error);
             return;
         }
         // Actualizar balance en UI
@@ -404,7 +404,7 @@ function enviarResultadoCaballos(resultado, cantidad, ganancia, caballoApostado,
     })
     .catch(err => {
         console.error('❌ Error al procesar la apuesta:', err);
-        mostrarAlerta('Error al procesar la apuesta: ' + err.message);
+        mostrarAlertaJuego('Error al procesar la apuesta: ' + err.message);
     });
 }
 

@@ -486,6 +486,15 @@
 // Crear instancia de actualizador de contenedor de la lista de transacciones.
 const ingresosContainerUpd = new ContainerUpdater('#ingresosContent');
 
+// Crear contenedor de notificaciones.
+const contenedor_notificacion_estadisticas = document.createElement('div');
+contenedor_notificacion_estadisticas.style.cssText = `
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    min-width: 300px;
+`;
+
 // Añadir actualización sin recarga con el paginador.
 addPaginationUpdate(ingresosContainerUpd);
 
@@ -496,33 +505,8 @@ function actualizarUIdespuesDeIngreso(response) {
         ingresosContainerUpd.updateContainer();
         
         // Mostrar notificación
-        mostrarNotificacion(response.mensaje, 'success');
+        mostrarAlerta(response.mensaje, 'success', contenedor_notificacion_estadisticas);
     }
-}
-
-// Función de notificación
-function mostrarNotificacion(mensaje, tipo) {
-    const notificacion = document.createElement('div');
-    notificacion.className = `alert alert-${tipo} alert-dismissible fade show position-fixed`;
-    notificacion.style.cssText = `
-        top: 20px;
-        right: 20px;
-        z-index: 9999;
-        min-width: 300px;
-    `;
-    notificacion.innerHTML = `
-        <i class="fas fa-${tipo === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
-        ${mensaje}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    
-    document.body.appendChild(notificacion);
-    
-    setTimeout(() => {
-        if (notificacion.parentNode) {
-            notificacion.remove();
-        }
-    }, 5000);
 }
 
 // Escuchar eventos de fondos agregados

@@ -69,11 +69,13 @@
 
 {% macro scripts() %}
 <script>
+const contenedor_notificacion_fondos = document.getElementById('resultado_fondos');
+
 function agregarFondos() {
     const cantidad = parseFloat(document.getElementById('cantidad_fondos').value);
     
     if (!cantidad || cantidad <= 0) {
-        mostrarNotificacion('Ingresa una cantidad válida', 'error');
+        mostrarAlerta('Ingresa una cantidad válida', 'error', contenedor_notificacion_fondos);
         return;
     }
     
@@ -105,7 +107,7 @@ function realizarTransaccion(cantidad) {
     .then(response => response.json())
     .then(data => {
         if (data.error) {
-            mostrarNotificacion(data.error, 'error');
+            mostrarAlerta(data.error, 'error', contenedor_notificacion_fondos);
             return;
         }
         
@@ -114,7 +116,7 @@ function realizarTransaccion(cantidad) {
         document.querySelector('.display-4').textContent = '$' + data.nuevo_balance.toFixed(2);
         
         // Mostrar notificación de éxito
-        mostrarNotificacion(data.mensaje, 'success');
+        mostrarAlerta(data.mensaje, 'success', contenedor_notificacion_fondos);
         
         // Efecto visual
         document.querySelector('.display-4').classList.add('neon-pulse');
@@ -131,34 +133,12 @@ function realizarTransaccion(cantidad) {
     })
     .catch(error => {
         console.error('Error:', error);
-        mostrarNotificacion('Error de conexión', 'error');
+        mostrarAlerta('Error de conexión', 'error', contenedor_notificacion_fondos);
     })
     .finally(() => {
         btn.innerHTML = originalText;
         btn.disabled = false;
     });
-}
-
-function mostrarNotificacion(mensaje, tipo) {
-    const alertClass = tipo === 'success' ? 'alert-success' : 'alert-danger';
-    const icon = tipo === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle';
-    
-    const notificacion = document.createElement('div');
-    notificacion.className = `alert ${alertClass} alert-dismissible fade show`;
-    notificacion.innerHTML = `
-        <i class="fas ${icon} me-2"></i>${mensaje}
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
-    `;
-    
-    document.getElementById('resultado_fondos').innerHTML = '';
-    document.getElementById('resultado_fondos').appendChild(notificacion);
-    
-    // Auto-eliminar después de 5 segundos
-    setTimeout(() => {
-        if (notificacion.parentElement) {
-            notificacion.remove();
-        }
-    }, 5000);
 }
 </script>
 {% endmacro %}
