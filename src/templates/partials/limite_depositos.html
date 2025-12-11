@@ -1,0 +1,140 @@
+{% macro content() %}
+<div>
+    <div class="card translucent-card">
+        <div class="card-body">
+            <div id="limite_actual" class="text-center"></div>
+        </div>
+    </div>
+
+    <div class="row g-2 mt-3">
+        <div class="col-md-6">
+            <label class="form-label mb-1 fw-bold">Límite máximo ($)</label>
+            <input type="number" min="20" step="10" id="limite_monto" class="form-control" placeholder="Ej: 2000">
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label mb-1 fw-bold">Periodo (días)</label>
+            <input type="number" min="1" step="1" id="limite_dias" class="form-control" placeholder="Ej: 30">
+        </div>
+    </div>
+
+    <div id="resultado-limite" class="mt-3"></div>
+
+    <div class="d-flex justify-content-between mt-3">
+        <button class="btn btn-primary" onclick="guardarLimiteDepositos()">
+            <i class="fas fa-save me-2"></i>Establecer
+        </button>
+
+        <button class="btn btn-outline-danger" id="btnEliminarLimite">
+            <i class="fas fa-trash me-2"></i>Eliminar límite
+        </button>
+    </div>
+</div>
+
+<!-- Contenido del popover de confirmación -->
+<div id="popoverEliminarLimite" class="d-none">
+    <div class="text-center">
+        <p class="mb-3">
+            ¿Seguro que deseas eliminar tu límite de depósitos?  
+            <strong>Esto permitirá agregar fondos sin restricciones.</strong>
+        </p>
+        <div class="d-flex flex-row gap-2 align-items-center justify-content-center">
+            <button class="btn btn-danger btn-sm" onclick="eliminarLimiteDepositos()">Eliminar</button>
+            <button class="btn btn-outline-primary btn-sm" onclick="cerrarPopover()">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+{% endmacro %}
+
+{% macro scripts() %}
+<script>
+const contenedor_notificacion_limite = document.getElementById('resultado-limite');
+
+let popoverEliminar = null;
+
+// Carga inicial del estado
+document.addEventListener("DOMContentLoaded", () => {
+    // Inicializar popover
+    const contenido = document.getElementById("popoverEliminarLimite").innerHTML;
+
+    popoverEliminar = new bootstrap.Popover(
+        document.getElementById("btnEliminarLimite"),
+        {
+            trigger: "click",
+            html: true,       // permite HTML real
+            sanitize: false,
+            content: contenido  // <- viene del DOM, Bootstrap NO lo sanitiza
+        }
+    );title: "Confirmación"
+
+    cargarLimiteDepositos();
+});
+
+// Cerrar popover
+function cerrarPopover() {
+    if (popoverEliminar) popoverEliminar.hide();
+}
+
+function cargarLimiteDepositos() {
+    fetch('/api/limite_depositos')
+    .then(r => r.json())
+    .then(data => {
+        const div = document.getElementById('limite_actual');
+        if (!data.activo) {
+            div.innerHTML = `
+                <h5 class="mb-0">No hay límite activo</h5>
+            `;
+            document.getElementById('btnEliminarLimite').disabled = true;
+        } else {
+            div.innerHTML = `
+                <h5 class="mb-0">Límite activo</h5>
+                <p class="balance-neutral fs-1 mb-0">$${data.limite_monto}</p>
+                <p class="mb-0">
+                    Durante ${data.periodo_dias} días
+                    <small class="text-muted">(desde: ${data.fecha_establecido})</small>
+                </p>
+
+                <div class="alert alert-info small mt-3 mb-0">
+                    El límite se reiniciará pasados ${data.periodo_dias} días desde la fecha indicada.
+                </div>
+            `;
+            document.getElementById('btnEliminarLimite').disabled = false;
+        }
+    });
+}
+
+function guardarLimiteDepositos() {
+    const monto = parseFloat(document.getElementById('limite_monto').value);
+    const dias = parseInt(document.getElementById('limite_dias').value);
+
+    fetch('/api/limite_depositos', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({monto, dias})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.error) return mostrarAlerta(data.error, 'error');
+        mostrarAlerta(data.mensaje, 'success', contenedor_notificacion_limite);
+        cargarLimiteDepositos();
+    });
+}
+
+// Eliminar límite de depósitos
+function eliminarLimiteDepositos() {
+
+    fetch('/api/limite_depositos', {method: 'DELETE'})
+    .then(r => r.json())
+    .then(data => {
+        if (data.error) return mostrarAlerta(data.error, 'error', contenedor_notificacion_limite);
+
+        mostrarAlerta(data.mensaje, 'success', contenedor_notificacion_limite);
+        cargarLimiteDepositos();
+    });
+
+    cerrarPopover();
+}
+
+</script>
+{% endmacro %}

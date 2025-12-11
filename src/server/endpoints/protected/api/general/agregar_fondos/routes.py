@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, Blueprint, render_template
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from models import db, Apuesta, Estadistica, IngresoFondos
-from datetime import datetime
+from models import db, Apuesta, Estadistica, IngresoFondos, DepositoLimite
+from datetime import datetime, timedelta
 from endpoints.protected.ui.general.estadisticas.routes import obtener_pagina_transacciones
 
 bp = Blueprint('agregar_fondos', __name__, url_prefix='/api')
@@ -21,6 +21,36 @@ def agregar_fondos():
             return jsonify({'error': 'La cantidad debe ser mayor a 0'}), 400
         elif cantidad > 5000:
             return jsonify({'error': 'La cantidad no puede superar $5000.00'}), 400
+
+        # Validación del límite de depósitos
+        limite = DepositoLimite.query.filter_by(user_id=current_user.id).first()
+
+        if limite:
+
+            ahora = datetime.utcnow()
+            periodo = timedelta(days=limite.periodo_dias)
+
+            # Mover T0 hacia adelante si los ciclos ya vencieron
+            while ahora >= limite.fecha_establecido + periodo:
+                limite.fecha_establecido += periodo
+
+            db.session.commit()
+
+            # Recalcular periodo activo
+            inicio_periodo = limite.fecha_establecido
+
+            total_periodo = (
+                db.session.query(db.func.sum(IngresoFondos.cantidad))
+                .filter(IngresoFondos.user_id == current_user.id)
+                .filter(IngresoFondos.fecha >= inicio_periodo)
+                .scalar() or 0
+            )
+
+            if total_periodo + cantidad > limite.limite_monto:
+                disponible = limite.limite_monto - total_periodo
+                return jsonify({
+                    'error': f"Límite alcanzado. Puedes agregar hasta ${max(disponible,0):.2f} en este periodo."
+                }), 403
         
         # Registrar el ingreso
         nuevo_ingreso = IngresoFondos(

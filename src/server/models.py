@@ -19,6 +19,7 @@ class User(UserMixin, db.Model):
     salas_creadas = db.relationship('SalaMultijugador', backref='owner', lazy=True)
     salas_unidas = db.relationship('UsuarioSala', backref='player', lazy=True)
     ingresos_fondos = db.relationship('IngresoFondos', backref='user', lazy=True)
+    deposito_limite = db.relationship('DepositoLimite', backref='user', uselist=False, lazy=True)
     
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -119,3 +120,15 @@ class PartidaMultijugador(db.Model):
     fecha_fin = db.Column(db.DateTime)
     
     # 'partida_sala' está definido en SalaMultijugador.partidas
+
+class DepositoLimite(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, unique=True)
+
+    limite_monto = db.Column(db.Float, nullable=False)        # ej.: 3000
+    periodo_dias = db.Column(db.Integer, nullable=False)      # ej.: 30 días
+
+    fecha_establecido = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<DepositoLimite {self.limite_monto} cada {self.periodo_dias} días>'

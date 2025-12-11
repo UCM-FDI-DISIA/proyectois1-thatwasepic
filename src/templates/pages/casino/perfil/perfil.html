@@ -1,6 +1,7 @@
 {% extends "pages/casino/base.html" %}
 
 {% import "partials/agregar_fondos.html" as parcial_agregar_fondos with context %}
+{% import "partials/limite_depositos.html" as parcial_limite_depositos with context %}
 {% import "partials/doom.html" as parcial_doom without context %}
 
 {% block title %}
@@ -81,8 +82,15 @@ Perfil
     <div class="col-lg-6">
         <div class="card animated-translateY h-100">
             <div class="card-header">
-                <i class="fas fa-coins me-2"></i>
-                Gestión de Fondos
+                <div class="d-flex flex-row gap-2 align-items-center justify-content-between">
+                    <div>
+                        <i class="fas fa-coins me-2"></i>
+                        Gestión de Fondos
+                    </div>
+                    <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#modalLimiteDepositos">
+                        <i class="fas fa-gear me-1"></i>Configurar límite
+                    </button>
+                </div>
             </div>
             <div class="card-body p-sm-5 p-4">
                 {{ parcial_agregar_fondos.content() }}
@@ -157,8 +165,24 @@ Perfil
         </div>
     </div>
 {% endif %}
+</div>
 
-    <!-- Opciones de Superusuario -->
+<!-- Modal para configurar límite de depósito -->
+<div class="modal fade" id="modalLimiteDepositos" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Límite de depósitos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                {{ parcial_limite_depositos.content() }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Opciones de Superusuario -->
 
 {% if is_admin() %}
 <hr class="mt-5 mb-5 w-50 mx-auto">
@@ -198,6 +222,7 @@ Perfil
 
 {% block scripts %}
 {{ parcial_agregar_fondos.scripts() }}
+{{ parcial_limite_depositos.scripts() }}
 
 {% if mostrar_doom %}
 {{ parcial_doom.scripts() }}
