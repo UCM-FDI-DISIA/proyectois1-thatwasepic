@@ -78,7 +78,7 @@ def agregar_fondos():
         
         return jsonify({
             'nuevo_balance': current_user.balance,
-            'mensaje': f'Se agregaron ${cantidad:.2f} a tu cuenta',
+            'mensaje': f'Se agregaron ${cantidad:.2f} a tu cuenta.{f" Puedes agregar hasta {(limite.limite_monto - total_periodo - cantidad):.2f} más en este periodo, por tu configuración del límite de depósito." if limite else ""}',
             'actualizar_ui': True,
             'html_tabla': html_tabla,
             'datos_actualizados': {
