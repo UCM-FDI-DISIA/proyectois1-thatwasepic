@@ -3,6 +3,7 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from enum import Enum
+
 db = SQLAlchemy()
 
 class User(UserMixin, db.Model):
@@ -12,6 +13,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(200), nullable=False)
     balance = db.Column(db.Float, default=1000.0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    notifications_enabled = db.Column(db.Boolean, default=True, nullable=False)
     
     # Relaciones
     apuestas = db.relationship('Apuesta', backref='user', lazy=True)

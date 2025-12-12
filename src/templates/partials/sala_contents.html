@@ -10,8 +10,20 @@
 </div>
 {% endmacro %}
 
-{% macro content_chat_notifications () %}
+{% macro content_chat_notifications() %}
 <div id="chatNotificationContainer" class="toast-container position-fixed bottom-0 end-0 p-3">
+</div>
+{% endmacro %}
+
+{% macro content_chat_notifications_config() %}
+<!-- Contenido del popover de configuración de notificaciones -->
+<div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" id="notificacionesToggle">
+    <label class="form-check-label" for="notificacionesToggle">
+        Activar notificaciones
+        <br>
+        <small class="text-muted">Mostrar notificaciones del chat cuando este no sea visible.</small>
+    </label>
 </div>
 {% endmacro %}
 
@@ -57,6 +69,11 @@
 
 {% macro scripts() %}
 <script>
+// Función de API (sobreescribible) para ver si se deberían mostrar notificaciones.
+window.shouldShowNotifications = function() {
+    return window.notificationsEnabled;
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     const salaId = {{ sala.id }};
     const esCreador = {{ 'true' if sala.creador_id == current_user.id else 'false' }};
@@ -352,13 +369,13 @@ document.addEventListener('DOMContentLoaded', function() {
         chat.scrollTop = chat.scrollHeight;
 
         // Mostrar también notificación si está habilitada
-        if (window.showNotifications) {
+        if (window.shouldShowNotifications()) {
             agregarNotificacionChat(usuario, mensaje, tipo);
         }
     }
 
     function agregarNotificacionChat(usuario, mensaje, tipo) {
-        if (!window.showNotifications) {
+        if (!window.shouldShowNotifications()) {
             return;
         }
 
@@ -518,4 +535,43 @@ function limpiarNotificaciones() {
     color: #fff;
 }
 </style>
+{% endmacro %}
+
+{% macro scripts_notification_config() %}
+<script>
+// Carga inicial del estado
+document.addEventListener("DOMContentLoaded", () => {
+    const notificacionesToggle = document.getElementById('notificacionesToggle');
+
+    // Cargar estado de las notificaciones.
+    fetch('/api/notificaciones/estado')
+        .then(r => r.json())
+        .then(data => {
+            notificacionesToggle.checked = data.notifications_enabled;
+
+            // Guardar estado global
+            window.notificationsEnabled = data.notifications_enabled;
+        });
+
+    // Actualizar estado de las notificaciones cuando el usuario las activa/desactiva.
+    notificacionesToggle.addEventListener('change', function() {
+        const enabled = this.checked;
+
+        // Actualizar variable global
+        window.notificationsEnabled = enabled;
+
+        fetch('/api/notificaciones/actualizar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ notifications_enabled: enabled })
+        })
+        .then(r => r.json())
+        .then(data => {
+            console.log(data.message);
+        });
+    });
+});
+</script>
 {% endmacro %}

@@ -126,9 +126,21 @@ LogBait Casa de Apuestas Online
                         <!-- Chat de Sala -->
                         <div class="card cyber-grid">
                             <div class="card-header">
-                                <i class="fas fa-comments me-2"></i>Chat de Sala
+                                <div class="d-flex flex-row gap-2 align-items-center justify-content-between">
+                                    <span>
+                                        <i class="fas fa-comments me-2"></i>Chat de Sala
+                                    </span>
+                                    <button class="btn btn-sm btn-warning" type="button" data-bs-toggle="collapse" data-bs-target="#notificationSettings" aria-expanded="false" aria-controls="notificationSettings">
+                                        <i class="fas fa-gear"></i>
+                                    </button>
+                                </div>
                             </div>
                             <div class="card-body pt-0">
+                                <div class="collapse" id="notificationSettings">
+                                    <div class="card card-body p-3 mt-3">
+                                        {{ parcial_sala.content_chat_notifications_config() }}
+                                    </div>
+                                </div>
                                 {{ parcial_sala.content_chat() }}
                             </div>
                         </div>
@@ -144,8 +156,9 @@ LogBait Casa de Apuestas Online
 </div>
 
 {% if multijugador %}
+<!-- Notificaciones de chat y modales -->
 {{ parcial_sala.content_chat_notifications() }}
-{{ parcial_sala.content_modales() }}  <!-- Notificaciones de chat y modales -->
+{{ parcial_sala.content_modales() }}
 {% endif %}
 
 {% endblock %}
@@ -183,6 +196,9 @@ document.addEventListener('DOMContentLoaded', () => {
 {% if multijugador %}
 {{ parcial_sala.scripts() }}
 
+<!-- Inicializar popover de configuración de notificaciones y asignarlo al botón correspondiente -->
+{{ parcial_sala.scripts_notification_config() }}
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const salaId = {{ sala.id }};
@@ -191,8 +207,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Unirse a la sala
     socket.emit('join_room', { sala_id: salaId });
 
-    // Enable notifications.
-    window.showNotifications = true;
+    // Notificaciones permitidas por sidebar (empieza cerrada = permitir)
+    window.sidebarAllowsNotifications = true;
+
+    // Lógica final para mostrar notificaciones
+    window.shouldShowNotifications = function() {
+        return window.notificationsEnabled && window.sidebarAllowsNotifications;
+    };
 
     // Update notification viisbility when opening/closing sidebar
     const sidebarToggles = document.querySelectorAll('.sidebar-toggle');
@@ -201,9 +222,9 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.addEventListener('click', function() {
             // Only show notifications if the sidebar isn't visible.
             const isSidebarVisible = this.getAttribute('aria-expanded') === 'true';
-            window.showNotifications = !isSidebarVisible;
+            window.sidebarAllowsNotifications = !isSidebarVisible;
 
-            if (!window.showNotifications) {
+            if (!window.sidebarAllowsNotifications) {
                 limpiarNotificaciones(); // función proporcionada por la parcial sala_contents.html
             }
 
