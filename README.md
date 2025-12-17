@@ -57,7 +57,9 @@ El desarrollo de LogBait ocurre en Sprints que tienen como objetivo la implement
 ### 👤 Gestión de usuarios
 - Registro e inicio de sesión seguros.
 - **Perfil editable** con información básica del usuario.
-- **Panel de administración** para los administradores de la instancia.
+- **Panel de administración** accesible por los administradores de la instancia[^1].
+
+[^1]: Los nombres de usuario `admin`, `administrador` y `logbait` están reservados para administradores. Estos usuarios no existen por defecto: es necesario registrarse con uno de los nombres mencionados para hacer uso de tal usuario. **Se recomienda registrar los tres usuarios** con una contraseña robusta antes de hacer pública una instancia de LogBait, para evitar accesos en modo administrador no autorizados.
 
 ### 💰 Gestión de saldo
 - Depósito y retirada de **saldo virtual**.  
